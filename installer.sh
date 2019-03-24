@@ -252,8 +252,10 @@ EOM
 # Install Locales
 cat >> /mnt/chrootinit.sh <<- EOM
 apt-get install -y locales
+sed -i '/de_DE.UTF-8/s/^#//' /etc/locale.gen
 sed -i '/en_US.UTF-8/s/^#//' /etc/locale.gen
-locale-gen en_US.UTF-8
+locale-gen
+echo -e 'LANG="en_US.UTF-8"\nLANGUAGE="en_US.UTF-8"\nLC_ALL="en_US.UTF-8"\n' > /etc/default/locale
 EOM
 
 # Set Root Password
