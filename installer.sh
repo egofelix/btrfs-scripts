@@ -230,6 +230,7 @@ mount ${DEV_ROOT}1 /mnt/boot/efi
 sync
 
 # Mount TMP
+mkdir /mnt/tmp
 mount -t tmpfs tmpfs /mnt/tmp
 
 # Generate a key file
