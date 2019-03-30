@@ -12,6 +12,7 @@ DEV_USR=""
 DEV_VAR=""
 FILESYS="btrfs"
 VERBOSE=""
+TARGET_HOSTNAME=""
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -25,6 +26,7 @@ while [ "$#" -gt 0 ]; do
       --opt) export DEV_OPT="$2"; shift 2;;
       --etc) export DEV_ETC="$2"; shift 2;;
       --crypt) export CRYPTED="true"; shift 1;;
+      --hostname) export TARGET_HOSTNAME="$2"; shift 2;;
 
       -*) echo "unknown option: $1" >&2; exit 1;;
        *) echo "unknown option: $1" >&2; exit 1;;
@@ -153,6 +155,11 @@ if [[ "${TARGET_SYSTEM^^}" != "DEBIAN" ]]; then
   exit 1
 fi;
 
+if [[ -z "${TARGET_HOSTNAME}" ]]; then
+  echo "Please specify a hostname with --hostname HOSTNAME"
+  exit 1
+fi;
+
 installPackage debootstrap "" debootstrap;
 installPackage parted "" parted;
 
@@ -240,6 +247,9 @@ Name=ens192
 [Network]
 DHCP=yes
 EOM
+
+# Setup Hostname
+echo "${TARGET_HOSTNAME}" > /mnt/etc/hostname
 
 # Script Header
 cat > /mnt/chrootinit.sh <<- EOM
