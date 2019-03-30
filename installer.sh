@@ -251,7 +251,7 @@ EOM
 
 # Install Locales
 cat >> /mnt/chrootinit.sh <<- EOM
-apt-get install -y locales
+DEBIAN_FRONTEND=noninteractive apt-get install -y -qq locales console-data
 sed -i '/de_DE.UTF-8/s/^#//' /etc/locale.gen
 sed -i '/en_US.UTF-8/s/^#//' /etc/locale.gen
 locale-gen
