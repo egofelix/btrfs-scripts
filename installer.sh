@@ -323,7 +323,8 @@ EOM
 # Install sshd
 cat >> /mnt/chrootinit.sh <<- EOM
 DEBIAN_FRONTEND=noninteractive apt-get install -y -qq openssh-server
-sed -i 's/^#?PermitRootLogin \(no\|yes\|prohibit-password\)/PermitRootLogin yes/' /etc/ssh/sshd_config
+sed -i 's/^#PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config
+sed -i 's/^PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config
 EOM
 
 # Call chrootinit.sh in chroot
