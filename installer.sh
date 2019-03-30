@@ -3,13 +3,28 @@
 # Parse arguments
 CRYPTED=""
 TARGET_SYSTEM="debian"
+
 DEV_ROOT="/dev/sda"
+DEV_ROOT_FS="ext4"
+
 DEV_ETC=""
+DEV_ETC_FS="ext4"
+
 DEV_HOME=""
+DEV_HOME_FS="ext4"
+
 DEV_OPT=""
+DEV_OPT_FS="ext4"
+
 DEV_SRV=""
+DEV_SRV_FS="ext4"
+
 DEV_USR=""
+DEV_USR_FS="ext4"
+
 DEV_VAR=""
+DEV_VAR_FS="ext4"
+
 FILESYS="btrfs"
 VERBOSE=""
 TARGET_HOSTNAME=""
@@ -18,13 +33,28 @@ while [ "$#" -gt 0 ]; do
   case "$1" in
       --verbose) export VERBOSE=" --verbose"; shift 1;;
       --system) export TARGET_SYSTEM="$2"; shift 2;;
+
       --root) export DEV_ROOT="$2"; shift 2;;
-      --var) export DEV_VAR="$2"; shift 2;;
-      --usr) export DEV_USR="$2"; shift 2;;
-      --home) export DEV_HOME="$2"; shift 2;;
-      --srv) export DEV_SRV="$2"; shift 2;;
-      --opt) export DEV_OPT="$2"; shift 2;;
+      --root-fs) export DEV_ROOT_FS="$2"; shift 2;;
+
       --etc) export DEV_ETC="$2"; shift 2;;
+      --etc-fs) export DEV_ETC_FS="$2"; shift 2;;
+
+      --home) export DEV_HOME="$2"; shift 2;;
+      --home-fs) export DEV_HOME_FS="$2"; shift 2;;
+
+      --opt) export DEV_OPT="$2"; shift 2;;
+      --opt-fs) export DEV_OPT_FS="$2"; shift 2;;
+
+      --srv) export DEV_SRV="$2"; shift 2;;
+      --srv-fs) export DEV_SRV_FS="$2"; shift 2;;
+
+      --usr) export DEV_USR="$2"; shift 2;;
+      --usr-fs) export DEV_USR_FS="$2"; shift 2;;
+
+      --var) export DEV_VAR="$2"; shift 2;;
+      --var-fs) export DEV_VAR_FS="$2"; shift 2;;
+
       --crypt) export CRYPTED="true"; shift 1;;
       --hostname) export TARGET_HOSTNAME="$2"; shift 2;;
 
@@ -182,7 +212,7 @@ sync
 mkfs.vfat -F32 ${DEV_ROOT}1
 fatlabel ${DEV_ROOT} EFI
 mkfs.ext2 -F -L boot ${DEV_ROOT}2
-formatPartition ${DEV_ROOT}3 root ${FILESYS} ${CRYPTED}
+formatPartition ${DEV_ROOT}3 root ${DEV_ROOT_FS} ${CRYPTED}
 sync
 
 # Mount Root
@@ -209,12 +239,12 @@ if [[ "${CRYPTED^^}" = "TRUE" ]]; then
 fi;
 
 # Format Additional Partitions?
-if [[ ! -z "${DEV_ETC}" ]];  then formatDrive ${DEV_ETC} etc ${FILESYS} ${CRYPTED}; fi;
-if [[ ! -z "${DEV_HOME}" ]]; then formatDrive ${DEV_HOME} home ${FILESYS} ${CRYPTED}; fi;
-if [[ ! -z "${DEV_OPT}" ]];  then formatDrive ${DEV_OPT} opt ${FILESYS} ${CRYPTED}; fi;
-if [[ ! -z "${DEV_SRV}" ]];  then formatDrive ${DEV_SRV} srv ${FILESYS} ${CRYPTED}; fi;
-if [[ ! -z "${DEV_USR}" ]];  then formatDrive ${DEV_USR} usr ${FILESYS} ${CRYPTED}; fi;
-if [[ ! -z "${DEV_VAR}" ]];  then formatDrive ${DEV_VAR} var ${FILESYS} ${CRYPTED}; fi;
+if [[ ! -z "${DEV_ETC}" ]];  then formatDrive ${DEV_ETC} etc ${DEV_ETC_FS} ${CRYPTED}; fi;
+if [[ ! -z "${DEV_HOME}" ]]; then formatDrive ${DEV_HOME} home ${DEV_HOME_FS} ${CRYPTED}; fi;
+if [[ ! -z "${DEV_OPT}" ]];  then formatDrive ${DEV_OPT} opt ${DEV_OPT_FS} ${CRYPTED}; fi;
+if [[ ! -z "${DEV_SRV}" ]];  then formatDrive ${DEV_SRV} srv ${DEV_SRV_FS} ${CRYPTED}; fi;
+if [[ ! -z "${DEV_USR}" ]];  then formatDrive ${DEV_USR} usr ${DEV_USR_FS} ${CRYPTED}; fi;
+if [[ ! -z "${DEV_VAR}" ]];  then formatDrive ${DEV_VAR} var ${DEV_VAR_FS} ${CRYPTED}; fi;
 
 # Install Base to /mnt
 echo "Installing Base System..."
@@ -281,7 +311,7 @@ cat >> /mnt/chrootinit.sh <<- EOM
 DEBIAN_FRONTEND=noninteractive apt-get install -y -qq linux-image-amd64
 EOM
 
-if [[ "${FILESYS^^}" = "BTRFS" ]]; then
+if [[ "${DEV_ROOT_FS^^}${DEV_ETC_FS^^}${DEV_HOME_FS^^}${DEV_OPT_FS^^}${DEV_SRV_FS^^}${DEV_USR_FS^^}${DEV_VAR_FS^^}" == *"BTRFS"* ]]; then
 cat >> /mnt/chrootinit.sh <<- EOM
 DEBIAN_FRONTEND=noninteractive apt-get install -y -qq btrfs-progs
 EOM
@@ -312,7 +342,7 @@ EOM
   if [[ ! -z "${DEV_VAR}" ]];  then echo "echo cryptvar ${DEV_VAR}1 /crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
 
   # Setup btrfs module for initramfs
-  if [[ "${FILESYS^^}" = "BTRFS" ]]; then
+  if [[ "${DEV_ROOT_FS^^}${DEV_ETC_FS^^}${DEV_HOME_FS^^}${DEV_OPT_FS^^}${DEV_SRV_FS^^}${DEV_USR_FS^^}${DEV_VAR_FS^^}" == *"BTRFS"* ]]; then
     cat >> /mnt/chrootinit.sh <<- EOM
 echo "btrfs" >> /etc/initramfs-tools/modules
 EOM
