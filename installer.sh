@@ -192,6 +192,9 @@ mkdir /mnt/boot/efi
 mount ${DEV_ROOT}1 /mnt/boot/efi
 sync
 
+# Mount TMP
+mount -t tmpfs tmpfs /mnt/tmp
+
 # Generate a key file
 if [[ "${CRYPTED^^}" = "TRUE" ]]; then
   dd if=/dev/urandom of=/mnt/crypt.key bs=1024 count=1
