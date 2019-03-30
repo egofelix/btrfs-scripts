@@ -241,7 +241,7 @@ if [[ ! -z "${DEV_HOME}" ]]; then formatDrive ${DEV_HOME} home ${DEV_HOME_FS} ${
 if [[ ! -z "${DEV_OPT}" ]];  then formatDrive ${DEV_OPT} opt ${DEV_OPT_FS} ${CRYPTED}; fi;
 if [[ ! -z "${DEV_SRV}" ]];  then formatDrive ${DEV_SRV} srv ${DEV_SRV_FS} ${CRYPTED}; fi;
 if [[ ! -z "${DEV_USR}" ]];  then formatDrive ${DEV_USR} usr ${DEV_USR_FS} ${CRYPTED}; fi;
-;if [[ ! -z "${DEV_VAR}" ]];  then formatDrive ${DEV_VAR} var ${DEV_VAR_FS} ${CRYPTED}; fi;
+if [[ ! -z "${DEV_VAR}" ]];  then formatDrive ${DEV_VAR} var ${DEV_VAR_FS} ${CRYPTED}; fi;
 
 # Install Base to /mnt
 echo "Installing Base System..."
