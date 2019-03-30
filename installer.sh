@@ -229,10 +229,6 @@ mkdir /mnt/boot/efi
 mount ${DEV_ROOT}1 /mnt/boot/efi
 sync
 
-# Mount TMP
-mkdir /mnt/tmp
-mount -t tmpfs tmpfs /mnt/tmp
-
 # Generate a key file
 if [[ "${CRYPTED^^}" = "TRUE" ]]; then
   dd if=/dev/urandom of=/mnt/crypt.key bs=1024 count=1
@@ -245,7 +241,7 @@ if [[ ! -z "${DEV_HOME}" ]]; then formatDrive ${DEV_HOME} home ${DEV_HOME_FS} ${
 if [[ ! -z "${DEV_OPT}" ]];  then formatDrive ${DEV_OPT} opt ${DEV_OPT_FS} ${CRYPTED}; fi;
 if [[ ! -z "${DEV_SRV}" ]];  then formatDrive ${DEV_SRV} srv ${DEV_SRV_FS} ${CRYPTED}; fi;
 if [[ ! -z "${DEV_USR}" ]];  then formatDrive ${DEV_USR} usr ${DEV_USR_FS} ${CRYPTED}; fi;
-if [[ ! -z "${DEV_VAR}" ]];  then formatDrive ${DEV_VAR} var ${DEV_VAR_FS} ${CRYPTED}; fi;
+;if [[ ! -z "${DEV_VAR}" ]];  then formatDrive ${DEV_VAR} var ${DEV_VAR_FS} ${CRYPTED}; fi;
 
 # Install Base to /mnt
 echo "Installing Base System..."
@@ -258,9 +254,6 @@ else
   exit 1
 fi;
 
-# Generate fstab
-genfstab -pL /mnt >> /mnt/etc/fstab
-
 # Additional Mounts for chroot
 echo "Mountint additional Mounts";
 mount -t proc proc /mnt/proc/
@@ -268,6 +261,13 @@ mount -t sysfs sys /mnt/sys/
 mount -t devtmpfs dev /mnt/dev/
 mount -t devpts devpts /mnt/dev/pts
 mount -t efivarfs efivarfs /mnt/sys/firmware/efi/efivars
+
+# Mount TMP
+mkdir /mnt/tmp
+mount -t tmpfs tmpfs /mnt/tmp
+
+# Generate fstab
+genfstab -pL /mnt >> /mnt/etc/fstab
 
 # Setup Network
 # Setup Systemd-Networkd interface
