@@ -1,0 +1,8 @@
+common_linux_python_path: /usr/bin/python
+common_linux_dhcpcd_config: /etc/dhcpcd.conf
+common_linux_sudo_config: /etc/sudoers
+common_linux_sshd_config: /etc/ssh/sshd_config
+common_linux_shell: /bin/bash
+common_linux_systemd_resolvd_link: /usr/lib/systemd/resolv.conf
+common_packages: []
+
