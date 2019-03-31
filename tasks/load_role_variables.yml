@@ -1,0 +1,19 @@
+
+- include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+      - default.yml
+      skip: true
+
+- include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+      - "{{ ansible_os_family | lower }}.yml"
+      skip: true
+
+- include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+      - "{{ ansible_distribution | lower }}.yml"
+      skip: true
+
