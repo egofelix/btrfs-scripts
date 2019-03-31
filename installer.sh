@@ -299,7 +299,7 @@ EOM
 
 # Install Locales
 cat >> /mnt/chrootinit.sh <<- EOM
-DEBIAN_FRONTEND=noninteractive apt-get install -y -qq locales console-data
+DEBIAN_FRONTEND=noninteractive apt-get install -y -qq locales console-data dirmngr
 sed -i '/de_DE.UTF-8/s/^#//' /etc/locale.gen
 sed -i '/en_US.UTF-8/s/^#//' /etc/locale.gen
 locale-gen
@@ -381,7 +381,13 @@ if [[ ! -z "${ANSIBLE_PULL_REPO}" ]]; then
   cat > /mnt/chrootinit.sh <<- EOM
 #!/bin/bash
 . /etc/profile
+
+echo "deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main" > /etc/apt/sources.list.d/ansible.list
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
+DEBIAN_FRONTEND=noninteractive apt-get update
+
 DEBIAN_FRONTEND=noninteractive apt-get install -y -qq git ansible
+
 ansible-pull -U ${ANSIBLE_PULL_REPO} installer.yml
 EOM
 
