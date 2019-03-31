@@ -29,6 +29,8 @@ FILESYS="btrfs"
 VERBOSE=""
 TARGET_HOSTNAME=""
 
+ANSIBLE_PULL_REPO=""
+
 while [ "$#" -gt 0 ]; do
   case "$1" in
       --verbose) export VERBOSE=" --verbose"; shift 1;;
@@ -57,6 +59,8 @@ while [ "$#" -gt 0 ]; do
 
       --crypt) export CRYPTED="true"; shift 1;;
       --hostname) export TARGET_HOSTNAME="$2"; shift 2;;
+
+      --pullrepo) export ANSIBLE_PULL_REPO="$2"; shift 2;;
 
       -*) echo "unknown option: $1" >&2; exit 1;;
        *) echo "unknown option: $1" >&2; exit 1;;
@@ -372,8 +376,22 @@ EOM
 chmod +x /mnt/chrootinit.sh
 chroot /mnt /chrootinit.sh;
 
+# Ansible Pull?
+if [[ ! -z "${ANSIBLE_PULL_REPO}" ]]; then
+  cat > /mnt/chrootinit.sh <<- EOM
+#!/bin/bash
+. /etc/profile
+DEBIAN_FRONTEND=noninteractive apt-get install -y -qq git ansible
+ansible-pull -U ${ANSIBLE_PULL_REPO} installer.yml
+EOM
+
+  # Run Pull
+  chroot /mnt /chrootinit.sh;
+fi;
+
 # Cleanup
 rm /mnt/chrootinit.sh
 sync
+
 umount -R /mnt
 reboot now
