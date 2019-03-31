@@ -1,4 +1,4 @@
 - name: Test
-  hosts: all
+  hosts: localhost
   roles:
     - role: common
