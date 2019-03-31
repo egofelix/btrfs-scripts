@@ -1,0 +1,4 @@
+- name: Test
+  hosts: all
+  roles:
+    - role: common
