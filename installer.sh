@@ -274,8 +274,16 @@ mount -t tmpfs tmpfs /mnt/tmp
 genfstab -pL /mnt >> /mnt/etc/fstab
 
 # Setup Network
+# Disable old interfaces
+rm -f /mnt/etc/network/interfaces
+rm -f /mnt/etc/network/interfaces.d/*
+
+# Enable Systemd-Networkd resolv.conf
+rm -f /mnt/etc/resolv.conf
+ln -s /run/systemd/resolve/resolv.conf /mnt/etc/resolv.conf
+
 # Setup Systemd-Networkd interface
-cat > /mnt/etc/systemd/network/*.network <<- EOM
+cat > /mnt/etc/systemd/network/ens192.network <<- EOM
 [Match]
 Name=ens192
 
