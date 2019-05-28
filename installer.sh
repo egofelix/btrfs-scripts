@@ -283,6 +283,22 @@ rm -f /mnt/etc/resolv.conf
 ln -s /run/systemd/resolve/resolv.conf /mnt/etc/resolv.conf
 
 # Setup Systemd-Networkd interface
+cat > /mnt/etc/systemd/network/en.network <<- EOM
+[Match]
+Name=en*
+
+[Network]
+DHCP=yes
+EOM
+
+cat > /mnt/etc/systemd/network/eth0.network <<- EOM
+[Match]
+Name=eth0
+
+[Network]
+DHCP=yes
+EOM
+
 cat > /mnt/etc/systemd/network/ens192.network <<- EOM
 [Match]
 Name=ens192
