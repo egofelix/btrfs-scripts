@@ -387,6 +387,7 @@ fi;
 # Enable Systemd-Networkd
 cat >> /mnt/chrootinit.sh <<- EOM
 systemctl enable systemd-networkd
+systemctl enable systemd-resolved
 EOM
 
 # Install sshd
