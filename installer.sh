@@ -280,7 +280,7 @@ rm -f /mnt/etc/network/interfaces.d/*
 
 # Enable Systemd-Networkd resolv.conf
 rm -f /mnt/etc/resolv.conf
-ln -s /run/systemd/resolve/resolv.conf /mnt/etc/resolv.conf
+cp /etc/resolv.conf /mnt/etc/resolv.conf
 
 # Setup Systemd-Networkd interface
 cat > /mnt/etc/systemd/network/en.network <<- EOM
@@ -419,6 +419,14 @@ EOM
   # Run Pull
   chroot /mnt /chrootinit.sh;
 fi;
+
+# Fix systemd-resolvd
+cat > /mnt/chrootinit.sh <<- EOM
+#!/bin/bash
+. /etc/profile
+ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+EOM
+chroot /mnt /chrootinit.sh;
 
 # Cleanup
 rm /mnt/chrootinit.sh
