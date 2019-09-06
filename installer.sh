@@ -252,7 +252,7 @@ echo "Installing Base System..."
 
 # Install Strap
 if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
-  debootstrap stretch /mnt http://ftp.de.debian.org/debian/;
+  debootstrap stable /mnt http://ftp.de.debian.org/debian/;
 else
   echo "Could not install system"
   exit 1
