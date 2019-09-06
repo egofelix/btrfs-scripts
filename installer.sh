@@ -424,5 +424,5 @@ fi;
 rm /mnt/chrootinit.sh
 sync
 
-umount -R /mnt
-reboot now
+#umount -R /mnt
+#reboot now
