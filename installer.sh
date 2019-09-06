@@ -417,6 +417,7 @@ ansible-pull -U ${ANSIBLE_PULL_REPO} installer.yml
 EOM
 
   # Run Pull
+  chmod +x /mnt/chrootinit.sh
   chroot /mnt /chrootinit.sh;
 fi;
 
@@ -427,11 +428,12 @@ cat > /mnt/chrootinit.sh <<- EOM
 rm -f /etc/resolv.conf
 ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
 EOM
+chmod +x /mnt/chrootinit.sh
 chroot /mnt /chrootinit.sh;
 
 # Cleanup
 rm /mnt/chrootinit.sh
 sync
 
-#umount -R /mnt
-#reboot now
+umount -R /mnt
+reboot now
