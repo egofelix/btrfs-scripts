@@ -424,6 +424,7 @@ fi;
 cat > /mnt/chrootinit.sh <<- EOM
 #!/bin/bash
 . /etc/profile
+rm -f /etc/resolv.conf
 ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
 EOM
 chroot /mnt /chrootinit.sh;
