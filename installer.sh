@@ -35,6 +35,8 @@ while [ "$#" -gt 0 ]; do
   case "$1" in
       --verbose) export VERBOSE=" --verbose"; shift 1;;
       --system) export TARGET_SYSTEM="$2"; shift 2;;
+      
+      --fs) export DEV_ROOT_FS="$2"; export DEV_ETC_FS="$2"; export DEV_HOME_FS="$2"; export DEV_OPT_FS="$2"; export DEV_SRV_FS="$2"; export DEV_USR_FS="$2"; export DEV_VAR_FS="$2"; shift 2;;
 
       --root) export DEV_ROOT="$2"; shift 2;;
       --root-fs) export DEV_ROOT_FS="$2"; shift 2;;
