@@ -13,7 +13,7 @@ wget https://raw.githubusercontent.com/egofelix/installer/master/installer.sh &&
 
 or with full
 
-wget https://raw.githubusercontent.com/egofelix/installer/master/installer.sh && chmod +x installer.sh && ./installer.sh --crypt --fs btrfs --hostname newhost --home /dev/sdb --opt /dev/sdc --srv /dev/sdd --usr /dev/sde --var /dev/sdf --etc /dev/sdg
+wget https://raw.githubusercontent.com/egofelix/installer/master/installer.sh && chmod +x installer.sh && ./installer.sh --crypt --fs btrfs --hostname newhost --home /dev/sdb --opt /dev/sdc --srv /dev/sdd --usr /dev/sde --var /dev/sdf
 
 
 
