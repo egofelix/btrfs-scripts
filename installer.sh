@@ -504,4 +504,6 @@ rm /mnt/chrootinit.sh
 sync
 
 umount -R /mnt
+sync
+
 reboot now
