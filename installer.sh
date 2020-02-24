@@ -413,16 +413,16 @@ mv /crypt.key /etc/crypt.key
 chown root:root /etc/crypt.key
 chmod 600 /etc/crypt.key
 DEBIAN_FRONTEND=noninteractive apt-get install -y -qq cryptsetup #dropbear-initramfs
-echo cryptroot /dev/sda3 none luks,allow-discards > /etc/crypttab
+echo cryptroot /dev/sda3 none luks > /etc/crypttab
 EOM
 
   # Additional Drives?
-  if [[ ! -z "${DEV_HOME}" ]]; then echo "echo crypthome ${DEV_HOME}1 /etc/crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
-  if [[ ! -z "${DEV_OPT}" ]];  then echo "echo cryptopt ${DEV_OPT}1 /etc/crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
-  if [[ ! -z "${DEV_SRV}" ]];  then echo "echo cryptsrv ${DEV_SRV}1 /etc/crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
-  if [[ ! -z "${DEV_USR}" ]];  then echo "echo cryptusr ${DEV_USR}1 /etc/crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
-  if [[ ! -z "${DEV_VAR}" ]];  then echo "echo cryptvar ${DEV_VAR}1 /etc/crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
-  if [[ ! -z "${DEV_BACKUP}" ]];  then echo "echo cryptbackup ${DEV_BACKUP}1 /etc/crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
+  if [[ ! -z "${DEV_HOME}" ]]; then echo "echo crypthome ${DEV_HOME}1 /etc/crypt.key luks >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
+  if [[ ! -z "${DEV_OPT}" ]];  then echo "echo cryptopt ${DEV_OPT}1 /etc/crypt.key luks >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
+  if [[ ! -z "${DEV_SRV}" ]];  then echo "echo cryptsrv ${DEV_SRV}1 /etc/crypt.key luks >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
+  if [[ ! -z "${DEV_USR}" ]];  then echo "echo cryptusr ${DEV_USR}1 /etc/crypt.key luks >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
+  if [[ ! -z "${DEV_VAR}" ]];  then echo "echo cryptvar ${DEV_VAR}1 /etc/crypt.key luks >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
+  if [[ ! -z "${DEV_BACKUP}" ]];  then echo "echo cryptbackup ${DEV_BACKUP}1 /etc/crypt.key luks >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
 
   # Setup btrfs module for initramfs
   if [[ "${DEV_ROOT_FS^^}${DEV_HOME_FS^^}${DEV_OPT_FS^^}${DEV_SRV_FS^^}${DEV_USR_FS^^}${DEV_VAR_FS^^}" == *"BTRFS"* ]]; then
@@ -446,7 +446,7 @@ EOM
 
   cat >> /mnt/etc/cron.daily/btrbk <<- EOM
 #!/bin/sh
-exec /usr/sbin/btrbk -q -c /etc/btrbk/btrbk-mylaptop.conf run
+exec /usr/sbin/btrbk -q run
 EOM
 
   chown root:root /mnt/etc/cron.daily/btrbk
