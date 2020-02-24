@@ -164,7 +164,7 @@ EOM
 
   # Create Filesystem
   if [[ "${4^^}" = "TRUE" ]]; then
-    formatPartition ${1}1 ${2} ${3} ${4} /mnt/etc/crypt.key
+    formatPartition ${1}1 ${2} ${3} ${4} /mnt/crypt.key
   else
     formatPartition ${1}1 ${2} ${3} ${4}
   fi;
@@ -245,8 +245,8 @@ sync
 
 # Generate a key file
 if [[ "${CRYPTED^^}" = "TRUE" ]]; then
-  dd if=/dev/urandom of=/mnt/etc/crypt.key bs=1024 count=1
-  echo test1234 | cryptsetup --batch-mode luksAddKey ${DEV_ROOT}3 /mnt/etc/crypt.key
+  dd if=/dev/urandom of=/mnt/crypt.key bs=1024 count=1
+  echo test1234 | cryptsetup --batch-mode luksAddKey ${DEV_ROOT}3 /mnt/crypt.key
 fi;
 
 # Format Additional Partitions?
@@ -409,6 +409,7 @@ EOM
 if [[ "${CRYPTED^^}" = "TRUE" ]]; then
   # Install cryptsetup and dropbear
   cat >> /mnt/chrootinit.sh <<- EOM
+mv /crypt.key /etc/crypt.key
 chown root:root /etc/crypt.key
 chmod 600 /etc/crypt.key
 DEBIAN_FRONTEND=noninteractive apt-get install -y -qq cryptsetup #dropbear-initramfs
