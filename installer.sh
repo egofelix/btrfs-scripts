@@ -416,11 +416,12 @@ echo cryptroot /dev/sda3 none luks,allow-discards > /etc/crypttab
 EOM
 
   # Additional Drives?
-    if [[ ! -z "${DEV_HOME}" ]]; then echo "echo crypthome ${DEV_HOME}1 /crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
+  if [[ ! -z "${DEV_HOME}" ]]; then echo "echo crypthome ${DEV_HOME}1 /crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
   if [[ ! -z "${DEV_OPT}" ]];  then echo "echo cryptopt ${DEV_OPT}1 /crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
   if [[ ! -z "${DEV_SRV}" ]];  then echo "echo cryptsrv ${DEV_SRV}1 /crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
   if [[ ! -z "${DEV_USR}" ]];  then echo "echo cryptusr ${DEV_USR}1 /crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
   if [[ ! -z "${DEV_VAR}" ]];  then echo "echo cryptvar ${DEV_VAR}1 /crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
+  if [[ ! -z "${DEV_BACKUP}" ]];  then echo "echo cryptbackup ${DEV_BACKUP}1 /crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
 
   # Setup btrfs module for initramfs
   if [[ "${DEV_ROOT_FS^^}${DEV_HOME_FS^^}${DEV_OPT_FS^^}${DEV_SRV_FS^^}${DEV_USR_FS^^}${DEV_VAR_FS^^}" == *"BTRFS"* ]]; then
@@ -433,6 +434,13 @@ EOM
   cat >> /mnt/chrootinit.sh <<- EOM
 update-initramfs -k all -u
 grub-mkconfig -o /boot/grub/grub.cfg
+EOM
+fi;
+
+# Install btrbk/
+if [[ ! -z "${DEV_BACKUP}" ]];  then
+  cat >> /mnt/chrootinit.sh <<- EOM
+DEBIAN_FRONTEND=noninteractive apt-get install -y -qq btrbk
 EOM
 fi;
 
