@@ -164,7 +164,7 @@ EOM
 
   # Create Filesystem
   if [[ "${4^^}" = "TRUE" ]]; then
-    formatPartition ${1}1 ${2} ${3} ${4} /mnt/crypt.key
+    formatPartition ${1}1 ${2} ${3} ${4} /mnt/etc/crypt.key
   else
     formatPartition ${1}1 ${2} ${3} ${4}
   fi;
@@ -245,8 +245,8 @@ sync
 
 # Generate a key file
 if [[ "${CRYPTED^^}" = "TRUE" ]]; then
-  dd if=/dev/urandom of=/mnt/crypt.key bs=1024 count=1
-  echo test1234 | cryptsetup --batch-mode luksAddKey ${DEV_ROOT}3 /mnt/crypt.key
+  dd if=/dev/urandom of=/mnt/etc/crypt.key bs=1024 count=1
+  echo test1234 | cryptsetup --batch-mode luksAddKey ${DEV_ROOT}3 /mnt/etc/crypt.key
 fi;
 
 # Format Additional Partitions?
@@ -291,7 +291,7 @@ function createBackupMountPoint {
 	fi;
 	
 	btrfs subvolume create /mnt/mnt/disks/${4}/snapshots
-	cat > /mnt/etc/btrbk/btrbk.conf <<- EOM
+	cat >> /mnt/etc/btrbk/btrbk.conf <<- EOM
 volume /mnt/disks/${4}
         target raw /backup
         subvolume data
@@ -409,19 +409,19 @@ EOM
 if [[ "${CRYPTED^^}" = "TRUE" ]]; then
   # Install cryptsetup and dropbear
   cat >> /mnt/chrootinit.sh <<- EOM
-chown root:root /crypt.key
-chmod 600 /crypt.key
+chown root:root /etc/crypt.key
+chmod 600 /etc/crypt.key
 DEBIAN_FRONTEND=noninteractive apt-get install -y -qq cryptsetup #dropbear-initramfs
 echo cryptroot /dev/sda3 none luks,allow-discards > /etc/crypttab
 EOM
 
   # Additional Drives?
-  if [[ ! -z "${DEV_HOME}" ]]; then echo "echo crypthome ${DEV_HOME}1 /crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
-  if [[ ! -z "${DEV_OPT}" ]];  then echo "echo cryptopt ${DEV_OPT}1 /crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
-  if [[ ! -z "${DEV_SRV}" ]];  then echo "echo cryptsrv ${DEV_SRV}1 /crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
-  if [[ ! -z "${DEV_USR}" ]];  then echo "echo cryptusr ${DEV_USR}1 /crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
-  if [[ ! -z "${DEV_VAR}" ]];  then echo "echo cryptvar ${DEV_VAR}1 /crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
-  if [[ ! -z "${DEV_BACKUP}" ]];  then echo "echo cryptbackup ${DEV_BACKUP}1 /crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
+  if [[ ! -z "${DEV_HOME}" ]]; then echo "echo crypthome ${DEV_HOME}1 /etc/crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
+  if [[ ! -z "${DEV_OPT}" ]];  then echo "echo cryptopt ${DEV_OPT}1 /etc/crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
+  if [[ ! -z "${DEV_SRV}" ]];  then echo "echo cryptsrv ${DEV_SRV}1 /etc/crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
+  if [[ ! -z "${DEV_USR}" ]];  then echo "echo cryptusr ${DEV_USR}1 /etc/crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
+  if [[ ! -z "${DEV_VAR}" ]];  then echo "echo cryptvar ${DEV_VAR}1 /etc/crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
+  if [[ ! -z "${DEV_BACKUP}" ]];  then echo "echo cryptbackup ${DEV_BACKUP}1 /etc/crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
 
   # Setup btrfs module for initramfs
   if [[ "${DEV_ROOT_FS^^}${DEV_HOME_FS^^}${DEV_OPT_FS^^}${DEV_SRV_FS^^}${DEV_USR_FS^^}${DEV_VAR_FS^^}" == *"BTRFS"* ]]; then
