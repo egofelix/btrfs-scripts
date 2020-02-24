@@ -7,9 +7,6 @@ TARGET_SYSTEM="debian"
 DEV_ROOT="/dev/sda"
 DEV_ROOT_FS="ext4"
 
-DEV_ETC=""
-DEV_ETC_FS="ext4"
-
 DEV_HOME=""
 DEV_HOME_FS="ext4"
 
@@ -36,13 +33,10 @@ while [ "$#" -gt 0 ]; do
       --verbose) export VERBOSE=" --verbose"; shift 1;;
       --system) export TARGET_SYSTEM="$2"; shift 2;;
       
-      --fs) export DEV_ROOT_FS="$2"; export DEV_ETC_FS="$2"; export DEV_HOME_FS="$2"; export DEV_OPT_FS="$2"; export DEV_SRV_FS="$2"; export DEV_USR_FS="$2"; export DEV_VAR_FS="$2"; shift 2;;
+      --fs) export DEV_ROOT_FS="$2"; export export DEV_HOME_FS="$2"; export DEV_OPT_FS="$2"; export DEV_SRV_FS="$2"; export DEV_USR_FS="$2"; export DEV_VAR_FS="$2"; shift 2;;
 
       --root) export DEV_ROOT="$2"; shift 2;;
       --root-fs) export DEV_ROOT_FS="$2"; shift 2;;
-
-      --etc) export DEV_ETC="$2"; shift 2;;
-      --etc-fs) export DEV_ETC_FS="$2"; shift 2;;
 
       --home) export DEV_HOME="$2"; shift 2;;
       --home-fs) export DEV_HOME_FS="$2"; shift 2;;
@@ -143,7 +137,7 @@ function formatPartition {
       mount ${1} /tmp/btrfs/${2}
     fi;
     btrfs subvol create /tmp/btrfs/${2}/data
-    btrfs subvol set-default `btrfs subvol list /tmp/btrfs/${2} | grep data | cut -d' ' -f2` /tmp/btrfs/${2}
+    #btrfs subvol set-default `btrfs subvol list /tmp/btrfs/${2} | grep data | cut -d' ' -f2` /tmp/btrfs/${2}
     sync
     umount /tmp/btrfs/${2}
     sync
@@ -172,10 +166,19 @@ EOM
 
   # Mount
   mkdir /mnt/${2}
+  
   if [[ "${4^^}" = "TRUE" ]]; then
-    mount /dev/mapper/crypt${2} /mnt/${2}
+	if [[ "${3^^}" = "BTRFS" ]]; then
+		mount -o subvol=data /dev/mapper/crypt${2} /mnt/${2}
+	else
+		mount /dev/mapper/crypt${2} /mnt/${2}
+	fi;
   else
-    mount ${1}1 /mnt/${2}
+	if [[ "${3^^}" = "BTRFS" ]]; then
+		mount -o subvol=data ${1}1 /mnt/${2}
+	else
+		mount ${1}1 /mnt/${2}
+	fi;
   fi;
 
   sync
@@ -242,7 +245,6 @@ if [[ "${CRYPTED^^}" = "TRUE" ]]; then
 fi;
 
 # Format Additional Partitions?
-if [[ ! -z "${DEV_ETC}" ]];  then formatDrive ${DEV_ETC} etc ${DEV_ETC_FS} ${CRYPTED}; fi;
 if [[ ! -z "${DEV_HOME}" ]]; then formatDrive ${DEV_HOME} home ${DEV_HOME_FS} ${CRYPTED}; fi;
 if [[ ! -z "${DEV_OPT}" ]];  then formatDrive ${DEV_OPT} opt ${DEV_OPT_FS} ${CRYPTED}; fi;
 if [[ ! -z "${DEV_SRV}" ]];  then formatDrive ${DEV_SRV} srv ${DEV_SRV_FS} ${CRYPTED}; fi;
@@ -342,7 +344,7 @@ cat >> /mnt/chrootinit.sh <<- EOM
 DEBIAN_FRONTEND=noninteractive apt-get install -y -qq linux-image-amd64
 EOM
 
-if [[ "${DEV_ROOT_FS^^}${DEV_ETC_FS^^}${DEV_HOME_FS^^}${DEV_OPT_FS^^}${DEV_SRV_FS^^}${DEV_USR_FS^^}${DEV_VAR_FS^^}" == *"BTRFS"* ]]; then
+if [[ "${DEV_ROOT_FS^^}${DEV_HOME_FS^^}${DEV_OPT_FS^^}${DEV_SRV_FS^^}${DEV_USR_FS^^}${DEV_VAR_FS^^}" == *"BTRFS"* ]]; then
 cat >> /mnt/chrootinit.sh <<- EOM
 DEBIAN_FRONTEND=noninteractive apt-get install -y -qq btrfs-progs
 EOM
@@ -365,15 +367,14 @@ echo cryptroot /dev/sda3 none luks,allow-discards > /etc/crypttab
 EOM
 
   # Additional Drives?
-  if [[ ! -z "${DEV_ETC}" ]];  then echo "echo cryptetc ${DEV_ETC}1 /crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
-  if [[ ! -z "${DEV_HOME}" ]];  then echo "echo crypthome ${DEV_HOME}1 /crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
+    if [[ ! -z "${DEV_HOME}" ]]; then echo "echo crypthome ${DEV_HOME}1 /crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
   if [[ ! -z "${DEV_OPT}" ]];  then echo "echo cryptopt ${DEV_OPT}1 /crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
   if [[ ! -z "${DEV_SRV}" ]];  then echo "echo cryptsrv ${DEV_SRV}1 /crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
   if [[ ! -z "${DEV_USR}" ]];  then echo "echo cryptusr ${DEV_USR}1 /crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
   if [[ ! -z "${DEV_VAR}" ]];  then echo "echo cryptvar ${DEV_VAR}1 /crypt.key luks,allow-discards >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
 
   # Setup btrfs module for initramfs
-  if [[ "${DEV_ROOT_FS^^}${DEV_ETC_FS^^}${DEV_HOME_FS^^}${DEV_OPT_FS^^}${DEV_SRV_FS^^}${DEV_USR_FS^^}${DEV_VAR_FS^^}" == *"BTRFS"* ]]; then
+  if [[ "${DEV_ROOT_FS^^}${DEV_HOME_FS^^}${DEV_OPT_FS^^}${DEV_SRV_FS^^}${DEV_USR_FS^^}${DEV_VAR_FS^^}" == *"BTRFS"* ]]; then
     cat >> /mnt/chrootinit.sh <<- EOM
 echo "btrfs" >> /etc/initramfs-tools/modules
 EOM
