@@ -444,10 +444,11 @@ if [[ ! -z "${DEV_BACKUP}" ]];  then
 DEBIAN_FRONTEND=noninteractive apt-get install -y -qq btrbk
 EOM
 
-  cat >> /mnt/etc/cron.daily/btrbk
+  cat >> /mnt/etc/cron.daily/btrbk <<- EOM
 #!/bin/sh
 exec /usr/sbin/btrbk -q -c /etc/btrbk/btrbk-mylaptop.conf run
 EOM
+
   chown root:root /mnt/etc/cron.daily/btrbk
   chmod 755 /mnt/etc/cron.daily/btrbk
 fi;
