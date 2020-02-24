@@ -22,6 +22,9 @@ DEV_USR_FS="ext4"
 DEV_VAR=""
 DEV_VAR_FS="ext4"
 
+DEV_BACKUP=""
+DEV_BACKUP_FS="btrfs"
+
 FILESYS="btrfs"
 VERBOSE=""
 TARGET_HOSTNAME=""
@@ -52,6 +55,8 @@ while [ "$#" -gt 0 ]; do
 
       --var) export DEV_VAR="$2"; shift 2;;
       --var-fs) export DEV_VAR_FS="$2"; shift 2;;
+	  
+	  --backup) export DEV_BACKUP="$2"; shift 2;;
 
       --crypt) export CRYPTED="true"; shift 1;;
       --hostname) export TARGET_HOSTNAME="$2"; shift 2;;
@@ -245,11 +250,12 @@ if [[ "${CRYPTED^^}" = "TRUE" ]]; then
 fi;
 
 # Format Additional Partitions?
-if [[ ! -z "${DEV_HOME}" ]]; then formatDrive ${DEV_HOME} home ${DEV_HOME_FS} ${CRYPTED}; fi;
-if [[ ! -z "${DEV_OPT}" ]];  then formatDrive ${DEV_OPT} opt ${DEV_OPT_FS} ${CRYPTED}; fi;
-if [[ ! -z "${DEV_SRV}" ]];  then formatDrive ${DEV_SRV} srv ${DEV_SRV_FS} ${CRYPTED}; fi;
-if [[ ! -z "${DEV_USR}" ]];  then formatDrive ${DEV_USR} usr ${DEV_USR_FS} ${CRYPTED}; fi;
-if [[ ! -z "${DEV_VAR}" ]];  then formatDrive ${DEV_VAR} var ${DEV_VAR_FS} ${CRYPTED}; fi;
+if [[ ! -z "${DEV_HOME}" ]];    then formatDrive ${DEV_HOME} home ${DEV_HOME_FS} ${CRYPTED}; fi;
+if [[ ! -z "${DEV_OPT}" ]];     then formatDrive ${DEV_OPT} opt ${DEV_OPT_FS} ${CRYPTED}; fi;
+if [[ ! -z "${DEV_SRV}" ]];     then formatDrive ${DEV_SRV} srv ${DEV_SRV_FS} ${CRYPTED}; fi;
+if [[ ! -z "${DEV_USR}" ]];     then formatDrive ${DEV_USR} usr ${DEV_USR_FS} ${CRYPTED}; fi;
+if [[ ! -z "${DEV_VAR}" ]];     then formatDrive ${DEV_VAR} var ${DEV_VAR_FS} ${CRYPTED}; fi;
+if [[ ! -z "${DEV_BACKUP}" ]];  then formatDrive ${DEV_BACKUP} backup ${DEV_BACKUP_FS} ${CRYPTED}; fi;
 
 # Install Base to /mnt
 echo "Installing Base System..."
@@ -273,6 +279,49 @@ mount -t efivarfs efivarfs /mnt/sys/firmware/efi/efivars
 # Mount TMP
 mkdir /mnt/tmp
 mount -t tmpfs tmpfs /mnt/tmp
+
+function createBackupMountPoint {
+  if [[ ! -z "${1}" && "${2^^}" = "BTRFS" ]]; then
+	mkdir /mnt/mnt/disks/${4}
+	
+	if [[ "${5^^}" = "TRUE" ]]; then
+	    mount -o subvolid=5 /dev/mapper/crypt${4} /mnt/mnt/disks/${4}
+	else
+		mount -o subvolid=5 ${1}${3} /mnt/mnt/disks/${4}
+	fi;
+	
+	btrfs subvolume create /mnt/mnt/disks/${4}/snapshots
+	cat > /mnt/etc/btrbk/btrbk.conf <<- EOM
+volume /mnt/disks/${4}
+        target raw /backup
+        subvolume data
+                snapshot_name ${4}
+
+EOM
+  fi;
+}
+if [[ ! -z "${DEV_BACKUP}" ]];  then
+  mkdir /mnt/mnt/disks
+  
+  mkdir /mnt/etc/btrbk/
+  cat > /mnt/etc/btrbk/btrbk.conf <<- EOM
+snapshot_dir snapshots
+
+snapshot_preserve_min latest
+snapshot_preserve 0h
+
+raw_target_compress   xz
+
+EOM
+  
+  # Mount root for backups
+  createBackupMountPoint ${DEV_ROOT} ${DEV_ROOT_FS} 3 root ${CRYPTED}
+  createBackupMountPoint ${DEV_HOME} ${DEV_HOME_FS} 1 home ${CRYPTED}
+  createBackupMountPoint ${DEV_OPT} ${DEV_OPT_FS} 1 opt ${CRYPTED}
+  createBackupMountPoint ${DEV_SRV} ${DEV_SRV_FS} 1 srv ${CRYPTED}
+  createBackupMountPoint ${DEV_USR} ${DEV_USR_FS} 1 usr ${CRYPTED}
+  createBackupMountPoint ${DEV_VAR} ${DEV_VAR_FS} 1 var ${CRYPTED}
+fi;
 
 # Generate fstab
 genfstab -pL /mnt >> /mnt/etc/fstab
