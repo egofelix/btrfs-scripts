@@ -293,7 +293,6 @@ function createBackupMountPoint {
 	btrfs subvolume create /mnt/mnt/disks/${4}/snapshots
 	cat >> /mnt/etc/btrbk/btrbk.conf <<- EOM
 volume /mnt/disks/${4}
-        target raw /backup
         subvolume data
                 snapshot_name ${4}
 
@@ -311,6 +310,12 @@ snapshot_preserve_min latest
 snapshot_preserve 0h
 
 raw_target_compress   xz
+#raw_target_encrypt    gpg
+
+#gpg_keyring           /etc/btrbk/gpg/pubring.gpg
+#gpg_recipient         btrbk@mydomain.com
+
+target raw /backup
 
 EOM
   
