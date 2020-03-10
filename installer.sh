@@ -2,7 +2,7 @@
 
 # Parse arguments
 CRYPTED=""
-TARGET_SYSTEM="debian"
+TARGET_SYSTEM="DEBIAN"
 
 DEV_ROOT="/dev/sda"
 DEV_ROOT_FS="ext4"
@@ -57,6 +57,8 @@ while [ "$#" -gt 0 ]; do
       --var-fs) export DEV_VAR_FS="$2"; shift 2;;
 	  
 	  --backup) export DEV_BACKUP="$2"; shift 2;;
+	  
+	  --os) export TARGET_SYSTEM="$2"; shift 2;;
 
       --crypt) export CRYPTED="true"; shift 1;;
       --hostname) export TARGET_HOSTNAME="$2"; shift 2;;
@@ -195,8 +197,10 @@ if [[ ! -d "/sys/firmware/efi" ]]; then
 fi;
 
 if [[ "${TARGET_SYSTEM^^}" != "DEBIAN" ]]; then
-  echo "Only supported target system is debian atm"
-  exit 1
+  if [[ "${TARGET_SYSTEM^^}" != "ARCH" ]]; then
+    echo "Only supported target system is arch and debian atm"
+    exit 1
+  fi;
 fi;
 
 if [[ -z "${TARGET_HOSTNAME}" ]]; then
@@ -204,7 +208,14 @@ if [[ -z "${TARGET_HOSTNAME}" ]]; then
   exit 1
 fi;
 
-installPackage debootstrap "" debootstrap;
+if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
+  installPackage debootstrap "" debootstrap;
+fi;
+
+if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
+  installPackage pacstrap "" pacstrap;
+fi;
+
 installPackage parted "" parted;
 
 # Format Disk
@@ -261,7 +272,9 @@ if [[ ! -z "${DEV_BACKUP}" ]];  then formatDrive ${DEV_BACKUP} backup ${DEV_BACK
 echo "Installing Base System..."
 
 # Install Strap
-if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
+if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
+  pacstrap /mnt base linux linux-firmware
+elif [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
   debootstrap stable /mnt http://ftp.de.debian.org/debian/;
 else
   echo "Could not install system"
@@ -375,9 +388,17 @@ cat > /mnt/chrootinit.sh <<- EOM
 EOM
 
 # Update System
-cat >> /mnt/chrootinit.sh <<- EOM
+if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
+  cat >> /mnt/chrootinit.sh <<- EOM
+pacman -syu --noconfirm
+EOM
+fi;
+
+if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
+  cat >> /mnt/chrootinit.sh <<- EOM
 DEBIAN_FRONTEND=noninteractive apt-get update -qq
 EOM
+fi;
 
 # Install Locales
 cat >> /mnt/chrootinit.sh <<- EOM
