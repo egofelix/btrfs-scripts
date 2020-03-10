@@ -407,7 +407,6 @@ fi;
 # Install Locales
 if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
   cat >> /mnt/chrootinit.sh <<- EOM
-pacman -Sy --noconfirm locales console-data dirmngr
 sed -i '/de_DE.UTF-8/s/^#//' /etc/locale.gen
 sed -i '/en_US.UTF-8/s/^#//' /etc/locale.gen
 locale-gen
@@ -453,7 +452,7 @@ fi;
 # Install Bootloader
 if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
   cat >> /mnt/chrootinit.sh <<- EOM
-pacman -Sy --noconfirm grub2-common grub-efi
+pacman -Sy --noconfirm efibootmgr grub
 grub-install
 grub-mkconfig -o /boot/grub/grub.cfg
 EOM
@@ -521,11 +520,21 @@ systemctl enable systemd-resolved
 EOM
 
 # Install sshd
-cat >> /mnt/chrootinit.sh <<- EOM
+if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
+  cat >> /mnt/chrootinit.sh <<- EOM
+pacman -Sy --noconfirm openssh
+sed -i 's/^#PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config
+sed -i 's/^PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config
+EOM
+fi;
+
+if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
+  cat >> /mnt/chrootinit.sh <<- EOM
 DEBIAN_FRONTEND=noninteractive apt-get install -y -qq openssh-server
 sed -i 's/^#PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config
 sed -i 's/^PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config
 EOM
+fi;
 
 # Call chrootinit.sh in chroot
 chmod +x /mnt/chrootinit.sh
