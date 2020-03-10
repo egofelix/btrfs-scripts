@@ -31,6 +31,8 @@ TARGET_HOSTNAME=""
 
 ANSIBLE_PULL_REPO=""
 
+AUTOREBOOT="yes"
+
 while [ "$#" -gt 0 ]; do
   case "$1" in
       --verbose) export VERBOSE=" --verbose"; shift 1;;
@@ -64,6 +66,8 @@ while [ "$#" -gt 0 ]; do
       --hostname) export TARGET_HOSTNAME="$2"; shift 2;;
 
       --pullrepo) export ANSIBLE_PULL_REPO="$2"; shift 2;;
+	  
+	  --no-reboot) export AUTOREBOOT="no"; shift 1;;
 
       -*) echo "unknown option: $1" >&2; exit 1;;
        *) echo "unknown option: $1" >&2; exit 1;;
@@ -530,7 +534,9 @@ chroot /mnt /chrootinit.sh;
 rm /mnt/chrootinit.sh
 sync
 
-umount -R /mnt
-sync
+if [[ "${AUTOREBOOT^^}" = "YES" ]]; then
+  umount -R /mnt
+  sync
 
-reboot now
+  reboot now
+fi;
