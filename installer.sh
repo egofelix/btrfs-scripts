@@ -394,7 +394,7 @@ EOM
 # Update System
 if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
   cat >> /mnt/chrootinit.sh <<- EOM
-pacman -syu --noconfirm
+pacman -Syu --noconfirm
 EOM
 fi;
 
@@ -407,7 +407,7 @@ fi;
 # Install Locales
 if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
   cat >> /mnt/chrootinit.sh <<- EOM
-pacman -s --no-confirm locales console-data dirmngr
+pacman -Sy --noconfirm locales console-data dirmngr
 sed -i '/de_DE.UTF-8/s/^#//' /etc/locale.gen
 sed -i '/en_US.UTF-8/s/^#//' /etc/locale.gen
 locale-gen
@@ -440,7 +440,7 @@ fi;
 if [[ "${DEV_ROOT_FS^^}${DEV_HOME_FS^^}${DEV_OPT_FS^^}${DEV_SRV_FS^^}${DEV_USR_FS^^}${DEV_VAR_FS^^}" == *"BTRFS"* ]]; then
   if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
     cat >> /mnt/chrootinit.sh <<- EOM
-pacman -S --no-confirm btrfs-progs
+pacman -Sy --noconfirm btrfs-progs
 EOM
   fi;
   if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
@@ -453,7 +453,7 @@ fi;
 # Install Bootloader
 if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
   cat >> /mnt/chrootinit.sh <<- EOM
-pacman -S --no-confirm grub2-common grub-efi
+pacman -Sy --noconfirm grub2-common grub-efi
 grub-install
 grub-mkconfig -o /boot/grub/grub.cfg
 EOM
