@@ -294,12 +294,12 @@ mount -t devpts devpts /mnt/dev/pts
 mount -t efivarfs efivarfs /mnt/sys/firmware/efi/efivars
 
 # Mount TMP
-mkdir /mnt/tmp
+mkdir -p /mnt/tmp
 mount -t tmpfs tmpfs /mnt/tmp
 
 function createBackupMountPoint {
   if [[ ! -z "${1}" && "${2^^}" = "BTRFS" ]]; then
-	mkdir /mnt/mnt/disks/${4}
+	mkdir -p /mnt/mnt/disks/${4}
 	
 	if [[ "${5^^}" = "TRUE" ]]; then
 	    mount -o subvolid=5 /dev/mapper/crypt${4} /mnt/mnt/disks/${4}
@@ -317,9 +317,9 @@ EOM
   fi;
 }
 if [[ ! -z "${DEV_BACKUP}" ]];  then
-  mkdir /mnt/mnt/disks
+  mkdir -p /mnt/mnt/disks
   
-  mkdir /mnt/etc/btrbk/
+  mkdir -p /mnt/etc/btrbk/
   cat > /mnt/etc/btrbk/btrbk.conf <<- EOM
 snapshot_dir snapshots
 
@@ -405,13 +405,25 @@ EOM
 fi;
 
 # Install Locales
-cat >> /mnt/chrootinit.sh <<- EOM
+if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
+  cat >> /mnt/chrootinit.sh <<- EOM
+pacman -s --no-confirm locales console-data dirmngr
+sed -i '/de_DE.UTF-8/s/^#//' /etc/locale.gen
+sed -i '/en_US.UTF-8/s/^#//' /etc/locale.gen
+locale-gen
+localectl set-locale LANG=en_US.UTF-8
+EOM
+fi;
+
+if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
+  cat >> /mnt/chrootinit.sh <<- EOM
 DEBIAN_FRONTEND=noninteractive apt-get install -y -qq locales console-data dirmngr
 sed -i '/de_DE.UTF-8/s/^#//' /etc/locale.gen
 sed -i '/en_US.UTF-8/s/^#//' /etc/locale.gen
 locale-gen
 echo -e 'LANG="en_US.UTF-8"\nLANGUAGE="en_US.UTF-8"\nLC_ALL="en_US.UTF-8"\n' > /etc/default/locale
 EOM
+fi;
 
 # Set Root Password
 cat >> /mnt/chrootinit.sh <<- EOM
@@ -419,22 +431,41 @@ echo -e "root\nroot" | passwd root
 EOM
 
 # Install linux-image
-cat >> /mnt/chrootinit.sh <<- EOM
+if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
+  cat >> /mnt/chrootinit.sh <<- EOM
 DEBIAN_FRONTEND=noninteractive apt-get install -y -qq linux-image-amd64
-EOM
-
-if [[ "${DEV_ROOT_FS^^}${DEV_HOME_FS^^}${DEV_OPT_FS^^}${DEV_SRV_FS^^}${DEV_USR_FS^^}${DEV_VAR_FS^^}" == *"BTRFS"* ]]; then
-cat >> /mnt/chrootinit.sh <<- EOM
-DEBIAN_FRONTEND=noninteractive apt-get install -y -qq btrfs-progs
 EOM
 fi;
 
+if [[ "${DEV_ROOT_FS^^}${DEV_HOME_FS^^}${DEV_OPT_FS^^}${DEV_SRV_FS^^}${DEV_USR_FS^^}${DEV_VAR_FS^^}" == *"BTRFS"* ]]; then
+  if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
+    cat >> /mnt/chrootinit.sh <<- EOM
+pacman -S --no-confirm btrfs-progs
+EOM
+  fi;
+  if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
+    cat >> /mnt/chrootinit.sh <<- EOM
+DEBIAN_FRONTEND=noninteractive apt-get install -y -qq btrfs-progs
+EOM
+  fi;
+fi;
+
 # Install Bootloader
-cat >> /mnt/chrootinit.sh <<- EOM
+if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
+  cat >> /mnt/chrootinit.sh <<- EOM
+pacman -S --no-confirm grub2-common grub-efi
+grub-install
+grub-mkconfig -o /boot/grub/grub.cfg
+EOM
+fi;
+
+if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
+  cat >> /mnt/chrootinit.sh <<- EOM
 DEBIAN_FRONTEND=noninteractive apt-get install -y -qq grub2-common grub-efi
 grub-install
 grub-mkconfig -o /boot/grub/grub.cfg
 EOM
+fi;
 
 if [[ "${CRYPTED^^}" = "TRUE" ]]; then
   # Install cryptsetup and dropbear
