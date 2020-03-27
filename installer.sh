@@ -237,6 +237,14 @@ fi;
 
 if [[ "${IS_EFI^^}" = "YES" ]]; then
 	ROOT_PART_NUM="3"
+	echo <<- EOM
+label: gpt
+unit: sectors
+
+start=        2048, size=      204800, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, name="efi"
+start=      206848, size=      512000, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="boot"
+start=      718848, size=      ${ROOT_BLOCK_SIZE}, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="root"
+EOM
 	sfdisk ${DEV_ROOT} <<- EOM
 label: gpt
 unit: sectors
@@ -249,6 +257,14 @@ fi;
 
 if [[ "${IS_EFI^^}" = "NO" ]]; then
 	ROOT_PART_NUM="2"
+	echo <<- EOM
+label: gpt
+unit: sectors
+
+start=2048, size=512000, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="boot"
+start=514048, size=${ROOT_BLOCK_SIZE}, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="root"
+
+EOM
 	sfdisk ${DEV_ROOT} <<- EOM
 label: gpt
 unit: sectors
