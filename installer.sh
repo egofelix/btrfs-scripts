@@ -303,7 +303,7 @@ sync
 # Generate a key file
 if [[ "${CRYPTED^^}" = "TRUE" ]]; then
   dd if=/dev/urandom of=/mnt/crypt.key bs=1024 count=1
-  echo test1234 | cryptsetup --batch-mode luksAddKey ${DEV_ROOT}3 /mnt/crypt.key
+  echo test1234 | cryptsetup --batch-mode luksAddKey ${DEV_ROOT}${ROOT_PART_NUM} /mnt/crypt.key
 fi;
 
 # Format Additional Partitions?
