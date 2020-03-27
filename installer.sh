@@ -34,8 +34,8 @@ ANSIBLE_PULL_REPO=""
 AUTOREBOOT="yes"
 
 IS_EFI="yes"
-
 ROOT_SIZE=""
+STOP_AT_INSTALL_BASE=""
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -74,6 +74,8 @@ while [ "$#" -gt 0 ]; do
 	  --no-reboot) export AUTOREBOOT="no"; shift 1;;
 	  
 	  --root-size) export ROOT_SIZE="$2"; shift 2;;
+	  
+	  --stop-at-base) export STOP_AT_INSTALL_BASE="YES"; shift 1;;
 
       -*) echo "unknown option: $1" >&2; exit 1;;
        *) echo "unknown option: $1" >&2; exit 1;;
@@ -331,6 +333,10 @@ if [[ ! -z "${DEV_SRV}" ]];     then formatDrive ${DEV_SRV} srv ${DEV_SRV_FS} ${
 if [[ ! -z "${DEV_USR}" ]];     then formatDrive ${DEV_USR} usr ${DEV_USR_FS} ${CRYPTED}; fi;
 if [[ ! -z "${DEV_VAR}" ]];     then formatDrive ${DEV_VAR} var ${DEV_VAR_FS} ${CRYPTED}; fi;
 if [[ ! -z "${DEV_BACKUP}" ]];  then formatDrive ${DEV_BACKUP} backup ${DEV_BACKUP_FS} ${CRYPTED}; fi;
+
+if [[ ! -z "${STOP_AT_INSTALL_BASE}" ]]; then
+	exit
+fi;
 
 # Install Base to /mnt
 echo "Installing Base System..."
