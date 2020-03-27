@@ -113,7 +113,7 @@ function installPackage {
       return 0
     fi;
   fi;
-
+  
   if [[ ( "${2}" = "" && $(getSystemName) = "DEBIAN" ) || ( $(getSystemName) == "${2^^}" ) ]]; then
     echo Installing ${1}...
     DEBIAN_FRONTEND=noninteractive apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $1 -qq > /dev/null
@@ -215,6 +215,7 @@ EOM
 
   sync
 }
+
 
 if [[ ! -d "/sys/firmware/efi" ]]; then
   IS_EFI="no"
@@ -370,7 +371,9 @@ mount -t proc proc /mnt/proc/
 mount -t sysfs sys /mnt/sys/
 mount -t devtmpfs dev /mnt/dev/
 mount -t devpts devpts /mnt/dev/pts
-mount -t efivarfs efivarfs /mnt/sys/firmware/efi/efivars
+if [[ "${IS_EFI^^}" = "YES" ]]; then
+	mount -t efivarfs efivarfs /mnt/sys/firmware/efi/efivars
+fi;
 
 # Mount TMP
 mkdir -p /mnt/tmp
@@ -510,9 +513,16 @@ EOM
 
 # Install linux-image
 if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
-  cat >> /mnt/chrootinit.sh <<- EOM
+
+	if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
+		cat >> /mnt/chrootinit.sh <<- EOM
+DEBIAN_FRONTEND=noninteractive apt-get install -y -qq linux-image-armmp-lpae
+EOM
+	else
+		cat >> /mnt/chrootinit.sh <<- EOM
 DEBIAN_FRONTEND=noninteractive apt-get install -y -qq linux-image-amd64
 EOM
+	fi;
 fi;
 
 if [[ "${DEV_ROOT_FS^^}${DEV_HOME_FS^^}${DEV_OPT_FS^^}${DEV_SRV_FS^^}${DEV_USR_FS^^}${DEV_VAR_FS^^}" == *"BTRFS"* ]]; then
@@ -538,11 +548,19 @@ EOM
 fi;
 
 if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
-  cat >> /mnt/chrootinit.sh <<- EOM
+	if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
+		cat >> /mnt/chrootinit.sh <<- EOM
+DEBIAN_FRONTEND=noninteractive apt-get install -y -qq grub2-common grub-uboot
+grub-install
+grub-mkconfig -o /boot/grub/grub.cfg
+EOM
+	else
+		cat >> /mnt/chrootinit.sh <<- EOM
 DEBIAN_FRONTEND=noninteractive apt-get install -y -qq grub2-common grub-efi
 grub-install
 grub-mkconfig -o /boot/grub/grub.cfg
 EOM
+	fi;
 fi;
 
 if [[ "${CRYPTED^^}" = "TRUE" ]]; then
