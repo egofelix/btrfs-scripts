@@ -144,10 +144,10 @@ function formatPartition {
 	  fi;
     else
 	  if [[ ! -z "${5}" ]]; then
-        echo test1234 | cryptsetup --batch-mode luksFormat --type luks1 ${1}
+        echo test1234 | cryptsetup --batch-mode luksFormat --type luks1 -c ${5} ${1}
         echo test1234 | cryptsetup --batch-mode open ${1} crypt${2}
 	  else
-        echo test1234 | cryptsetup --batch-mode luksFormat --type luks1 -c ${5} ${1}
+        echo test1234 | cryptsetup --batch-mode luksFormat --type luks1 ${1}
         echo test1234 | cryptsetup --batch-mode open ${1} crypt${2}
 	  fi;
     fi;
