@@ -36,6 +36,7 @@ AUTOREBOOT="yes"
 IS_EFI="yes"
 ROOT_SIZE=""
 STOP_AT_INSTALL_BASE=""
+CIPHER=""
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -67,6 +68,8 @@ while [ "$#" -gt 0 ]; do
 	  --os) export TARGET_SYSTEM="$2"; shift 2;;
 
       --crypt) export CRYPTED="true"; shift 1;;
+	  --cipher) export CIPHER="$2"; shift 2;;
+	  
       --hostname) export TARGET_HOSTNAME="$2"; shift 2;;
 
       --pullrepo) export ANSIBLE_PULL_REPO="$2"; shift 2;;
@@ -131,12 +134,22 @@ function formatPartition {
   fi;
 
   if [[ "${4^^}" = "TRUE" ]]; then
-    if [[ ! -z "${5}" ]]; then
-      cryptsetup --batch-mode luksFormat --type luks1 ${1} -d ${5}
-      cryptsetup --batch-mode open ${1} crypt${2} -d ${5}
+    if [[ ! -z "${6}" ]]; then
+	  if [[ ! -z "${5}" ]]; then
+        cryptsetup --batch-mode luksFormat --type luks1 -c ${5} ${1} -d ${6}
+        cryptsetup --batch-mode open ${1} crypt${2} -d ${6}
+	  else
+        cryptsetup --batch-mode luksFormat --type luks1 ${1} -d ${6}
+        cryptsetup --batch-mode open ${1} crypt${2} -d ${6}	  
+	  fi;
     else
-      echo test1234 | cryptsetup --batch-mode luksFormat --type luks1 ${1}
-      echo test1234 | cryptsetup --batch-mode open ${1} crypt${2}
+	  if [[ ! -z "${5}" ]]; then
+        echo test1234 | cryptsetup --batch-mode luksFormat --type luks1 ${1}
+        echo test1234 | cryptsetup --batch-mode open ${1} crypt${2}
+	  else
+        echo test1234 | cryptsetup --batch-mode luksFormat --type luks1 -c ${5} ${1}
+        echo test1234 | cryptsetup --batch-mode open ${1} crypt${2}
+	  fi;
     fi;
 
     mkfs.${3,,} ${FILESYSFORCE} -L ${2} /dev/mapper/crypt${2}
@@ -178,9 +191,9 @@ EOM
 
   # Create Filesystem
   if [[ "${4^^}" = "TRUE" ]]; then
-    formatPartition ${1}1 ${2} ${3} ${4} /mnt/crypt.key
+    formatPartition ${1}1 ${2} ${3} ${4} ${5} /mnt/crypt.key
   else
-    formatPartition ${1}1 ${2} ${3} ${4}
+    formatPartition ${1}1 ${2} ${3} ${4} ${5}
   fi;
 
   # Mount
@@ -298,7 +311,7 @@ else
 	
 fi;
 
-formatPartition ${DEV_ROOT}${ROOT_PART_NUM} root ${DEV_ROOT_FS} ${CRYPTED}
+formatPartition ${DEV_ROOT}${ROOT_PART_NUM} root ${DEV_ROOT_FS} ${CRYPTED} ${CIPHER}
 sync
 
 # Mount Root
@@ -327,12 +340,12 @@ if [[ "${CRYPTED^^}" = "TRUE" ]]; then
 fi;
 
 # Format Additional Partitions?
-if [[ ! -z "${DEV_HOME}" ]];    then formatDrive ${DEV_HOME} home ${DEV_HOME_FS} ${CRYPTED}; fi;
-if [[ ! -z "${DEV_OPT}" ]];     then formatDrive ${DEV_OPT} opt ${DEV_OPT_FS} ${CRYPTED}; fi;
-if [[ ! -z "${DEV_SRV}" ]];     then formatDrive ${DEV_SRV} srv ${DEV_SRV_FS} ${CRYPTED}; fi;
-if [[ ! -z "${DEV_USR}" ]];     then formatDrive ${DEV_USR} usr ${DEV_USR_FS} ${CRYPTED}; fi;
-if [[ ! -z "${DEV_VAR}" ]];     then formatDrive ${DEV_VAR} var ${DEV_VAR_FS} ${CRYPTED}; fi;
-if [[ ! -z "${DEV_BACKUP}" ]];  then formatDrive ${DEV_BACKUP} backup ${DEV_BACKUP_FS} ${CRYPTED}; fi;
+if [[ ! -z "${DEV_HOME}" ]];    then formatDrive ${DEV_HOME} home ${DEV_HOME_FS} ${CRYPTED} ${CIPHER}; fi;
+if [[ ! -z "${DEV_OPT}" ]];     then formatDrive ${DEV_OPT} opt ${DEV_OPT_FS} ${CRYPTED} ${CIPHER}; fi;
+if [[ ! -z "${DEV_SRV}" ]];     then formatDrive ${DEV_SRV} srv ${DEV_SRV_FS} ${CRYPTED} ${CIPHER}; fi;
+if [[ ! -z "${DEV_USR}" ]];     then formatDrive ${DEV_USR} usr ${DEV_USR_FS} ${CRYPTED} ${CIPHER}; fi;
+if [[ ! -z "${DEV_VAR}" ]];     then formatDrive ${DEV_VAR} var ${DEV_VAR_FS} ${CRYPTED} ${CIPHER}; fi;
+if [[ ! -z "${DEV_BACKUP}" ]];  then formatDrive ${DEV_BACKUP} backup ${DEV_BACKUP_FS} ${CRYPTED} ${CIPHER}; fi;
 
 if [[ ! -z "${STOP_AT_INSTALL_BASE}" ]]; then
 	exit
