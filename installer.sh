@@ -246,6 +246,7 @@ if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
 fi;
 
 installPackage parted "" parted;
+installPackage "arch-install-scripts" "DEBIAN" "";
 
 # Format Disk
 ROOT_BLOCK_SIZE="204800"
