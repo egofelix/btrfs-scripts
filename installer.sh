@@ -203,8 +203,10 @@ EOM
 
 if [[ ! -d "/sys/firmware/efi" ]]; then
   IS_EFI="no"
-  #echo "BIOS IS NOT SUPPORTED"
+  echo "BIOS DETECTED"
   #exit 1
+else
+  echo "EFI DETECTED"
 fi;
 
 if [[ "${TARGET_SYSTEM^^}" != "DEBIAN" ]]; then
