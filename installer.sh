@@ -449,17 +449,9 @@ Name=en*
 DHCP=yes
 EOM
 
-cat > /mnt/etc/systemd/network/eth0.network <<- EOM
+cat > /mnt/etc/systemd/network/eth.network <<- EOM
 [Match]
-Name=eth0
-
-[Network]
-DHCP=yes
-EOM
-
-cat > /mnt/etc/systemd/network/ens192.network <<- EOM
-[Match]
-Name=ens192
+Name=eth*
 
 [Network]
 DHCP=yes
