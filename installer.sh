@@ -33,6 +33,10 @@ ANSIBLE_PULL_REPO=""
 
 AUTOREBOOT="yes"
 
+IS_EFI="yes"
+
+ROOT_SIZE=""
+
 while [ "$#" -gt 0 ]; do
   case "$1" in
       --verbose) export VERBOSE=" --verbose"; shift 1;;
@@ -68,6 +72,8 @@ while [ "$#" -gt 0 ]; do
       --pullrepo) export ANSIBLE_PULL_REPO="$2"; shift 2;;
 	  
 	  --no-reboot) export AUTOREBOOT="no"; shift 1;;
+	  
+	  --root-size) export ROOT_SIZE="$2"; shift 2;;
 
       -*) echo "unknown option: $1" >&2; exit 1;;
        *) echo "unknown option: $1" >&2; exit 1;;
@@ -196,8 +202,9 @@ EOM
 }
 
 if [[ ! -d "/sys/firmware/efi" ]]; then
-  echo "BIOS IS NOT SUPPORTED"
-  exit 1
+  IS_EFI="no"
+  #echo "BIOS IS NOT SUPPORTED"
+  #exit 1
 fi;
 
 if [[ "${TARGET_SYSTEM^^}" != "DEBIAN" ]]; then
@@ -223,39 +230,74 @@ fi;
 installPackage parted "" parted;
 
 # Format Disk
-sfdisk ${DEV_ROOT} <<- EOM
+ROOT_BLOCK_SIZE="204800"
+if [[ ! -z "${ROOT_SIZE}" ]]; then
+  ROOT_BLOCK_SIZE=`expr ${ROOT_SIZE} \* 1024 \* 1024 \* 2048`
+fi;
+
+if [[ "${IS_EFI^^}" = "YES" ]]; then
+	ROOT_PART_NUM="3"
+	sfdisk ${DEV_ROOT} <<- EOM
 label: gpt
 unit: sectors
 
 start=        2048, size=      204800, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, name="efi"
 start=      206848, size=      512000, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="boot"
-start=      718848, size=      204800, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="root"
+start=      718848, size=      ${ROOT_BLOCK_SIZE}, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="root"
 EOM
+fi;
+
+if [[ "${IS_EFI^^}" = "NO" ]]; then
+	ROOT_PART_NUM="2"
+	sfdisk ${DEV_ROOT} <<- EOM
+label: gpt
+unit: sectors
+
+start=2048, size=512000, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="boot"
+start=514048, size=${ROOT_BLOCK_SIZE}, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="root"
+
+EOM
+fi;
 sync
 
 # Resize Root Partition
-parted ${DEV_ROOT} resizepart 3 100%
+if [[ -z "${ROOT_SIZE}" ]]; then
+  parted ${DEV_ROOT} resizepart ${ROOT_PART_NUM} 100%
+fi;
+
+
 sync
 
 # Create Filesystems
-mkfs.vfat -F32 ${DEV_ROOT}1
-fatlabel ${DEV_ROOT} EFI
-mkfs.ext2 -F -L boot ${DEV_ROOT}2
-formatPartition ${DEV_ROOT}3 root ${DEV_ROOT_FS} ${CRYPTED}
+if [[ "${IS_EFI^^}" = "YES" ]]; then
+	mkfs.vfat -F32 ${DEV_ROOT}1
+	fatlabel ${DEV_ROOT} EFI
+	mkfs.ext2 -F -L boot ${DEV_ROOT}2
+else
+	mkfs.ext2 -F -L boot ${DEV_ROOT}1
+	
+fi;
+
+formatPartition ${DEV_ROOT}${ROOT_PART_NUM} root ${DEV_ROOT_FS} ${CRYPTED}
 sync
 
 # Mount Root
 if [[ "${CRYPTED^^}" = "TRUE" ]]; then
   mount /dev/mapper/cryptroot /mnt
 else
-  mount ${DEV_ROOT}3 /mnt
+  mount ${DEV_ROOT}${ROOT_PART_NUM} /mnt
 fi;
 
 # Mount Boot and Efi
-mkdir /mnt/boot
-mount ${DEV_ROOT}2 /mnt/boot
-mkdir /mnt/boot/efi
-mount ${DEV_ROOT}1 /mnt/boot/efi
+if [[ "${IS_EFI^^}" = "YES" ]]; then
+	mkdir /mnt/boot
+	mount ${DEV_ROOT}2 /mnt/boot
+	mkdir /mnt/boot/efi
+	mount ${DEV_ROOT}1 /mnt/boot/efi
+else
+	mkdir /mnt/boot
+	mount ${DEV_ROOT}1 /mnt/boot
+fi;
 sync
 
 # Generate a key file
