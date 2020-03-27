@@ -234,7 +234,7 @@ installPackage parted "" parted;
 # Format Disk
 ROOT_BLOCK_SIZE="204800"
 if [[ ! -z "${ROOT_SIZE}" ]]; then
-  ROOT_BLOCK_SIZE=`expr ${ROOT_SIZE} \* 1024 \* 1024 \* 2048`
+  ROOT_BLOCK_SIZE=`expr ${ROOT_SIZE} \* 1024 \* 2048`
 fi;
 
 if [[ "${IS_EFI^^}" = "YES" ]]; then
