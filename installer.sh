@@ -247,6 +247,7 @@ fi;
 
 installPackage parted "" parted;
 installPackage "arch-install-scripts" "DEBIAN" "";
+installPackage "dosfstools" "DEBIAN" "";
 
 # Format Disk
 ROOT_BLOCK_SIZE="204800"
@@ -542,15 +543,19 @@ fi;
 
 if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
 	if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
+echo WILL USE GRUB-EFI-ARM
 		cat >> /mnt/chrootinit.sh <<- EOM
-DEBIAN_FRONTEND=noninteractive apt-get install -y -qq grub2-common grub-uboot
-grub-install
+DEBIAN_FRONTEND=noninteractive apt-get install -y -qq grub-efi-arm
+grub-install --target=arm-efi --boot-directory=/boot --efi-directory=/boot/efi
+update-initramfs -k all -u
 grub-mkconfig -o /boot/grub/grub.cfg
 EOM
 	else
+echo WILL USE GRUB-EFI
 		cat >> /mnt/chrootinit.sh <<- EOM
-DEBIAN_FRONTEND=noninteractive apt-get install -y -qq grub2-common grub-efi
+DEBIAN_FRONTEND=noninteractive apt-get install -y -qq grub-efi
 grub-install
+update-initramfs -k all -u
 grub-mkconfig -o /boot/grub/grub.cfg
 EOM
 	fi;
