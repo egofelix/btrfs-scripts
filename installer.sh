@@ -546,7 +546,7 @@ if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
 echo WILL USE GRUB-EFI-ARM
 		cat >> /mnt/chrootinit.sh <<- EOM
 DEBIAN_FRONTEND=noninteractive apt-get install -y -qq grub-efi-arm
-grub-install --target=arm-efi --boot-directory=/boot --efi-directory=/boot/efi
+grub-install --removable --target=arm-efi --boot-directory=/boot --efi-directory=/boot/efi
 update-initramfs -k all -u
 grub-mkconfig -o /boot/grub/grub.cfg
 EOM
