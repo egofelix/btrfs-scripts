@@ -246,8 +246,8 @@ if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
 fi;
 
 installPackage parted "" parted;
-installPackage "arch-install-scripts" "DEBIAN" "";
-installPackage "dosfstools" "DEBIAN" "";
+installPackage "arch-install-scripts" "DEBIAN" genfstab;
+installPackage "dosfstools" "DEBIAN" mkfs.vfat;
 
 # Format Disk
 ROOT_BLOCK_SIZE="204800"
@@ -458,6 +458,28 @@ Name=eth*
 DHCP=yes
 EOM
 
+cat > /mnt/etc/apt/sources.list <<- EOM
+deb http://ftp.de.debian.org/debian/ stable main contrib
+deb http://ftp2.de.debian.org/debian/ stable main contrib
+deb http://ftp.halifax.rwth-aachen.de/debian/ stable main contrib
+deb-src http://ftp.de.debian.org/debian/ stable main contrib
+deb-src http://ftp2.de.debian.org/debian/ stable main contrib
+deb-src http://ftp.halifax.rwth-aachen.de/debian/ stable main contrib
+
+# buster-updates, previously known as 'volatile'
+deb http://ftp.de.debian.org/debian/ stable-updates main contrib
+deb http://ftp2.de.debian.org/debian/ stable-updates main contrib
+deb http://ftp.halifax.rwth-aachen.de/debian/ stable-updates main contrib
+deb-src http://ftp.de.debian.org/debian/ stable-updates main contrib
+deb-src http://ftp2.de.debian.org/debian/ stable-updates main contrib
+deb-src http://ftp.halifax.rwth-aachen.de/debian/ stable-updates main contrib
+
+# Kernel (Backports)
+deb http://ftp.de.debian.org/debian/ stable-backports main
+deb http://ftp2.de.debian.org/debian/ stable-backports main
+deb http://ftp.halifax.rwth-aachen.de/debian/ stable-backports main
+EOM
+
 # Setup Hostname
 echo "${TARGET_HOSTNAME}" > /mnt/etc/hostname
 
@@ -510,7 +532,8 @@ if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
 
 	if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
 		cat >> /mnt/chrootinit.sh <<- EOM
-DEBIAN_FRONTEND=noninteractive apt-get install -y -qq linux-image-armmp-lpae
+DEBIAN_FRONTEND=noninteractive apt-get -t buster-backports upgrade -y -qq
+DEBIAN_FRONTEND=noninteractive apt-get install -y -qq linux-image-5.4.0-0.bpo.4-armmp-lpae linux-headers-5.4.0-0.bpo.4-armmp-lpae
 EOM
 	else
 		cat >> /mnt/chrootinit.sh <<- EOM
