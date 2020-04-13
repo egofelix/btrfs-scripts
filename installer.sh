@@ -354,7 +354,7 @@ if [[ ! -z "${STOP_AT_INSTALL_BASE}" ]]; then
 	exit
 fi;
 
-if [[ ! -z "${URL_RESTORE}" ]]; then
+#if [[ ! -z "${URL_RESTORE}" ]]; then
 	#umount -R /mnt/
 	#umount -R /tmp/btrfs/
 	
@@ -372,8 +372,8 @@ if [[ ! -z "${URL_RESTORE}" ]]; then
 	
 	
 	
-	exit
-fi;
+#	exit
+#fi;
 
 # Install Base to /mnt
 echo "Installing Base System..."
