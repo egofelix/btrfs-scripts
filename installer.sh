@@ -232,7 +232,7 @@ createBackupMountPoint ${DEV_ROOT} ${DEV_ROOT_FS} 3 root ${CRYPTED}
 	btrfs subvolume create /tmp/mnt/disks/${4}/data
 	btrfs subvolume create /mnt/mnt/disks/${4}/snapshots
 	
-	if [ "${4^^}" = "ROOT" ];; then
+	if [[ "${4^^}" = "ROOT" ]]; then
 		umount -R /mnt
 		
 		if [[ "${5^^}" = "TRUE" ]]; then
