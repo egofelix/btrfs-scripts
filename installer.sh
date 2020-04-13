@@ -218,9 +218,8 @@ EOM
 }
 
 function createBackupMountPoint {
-createBackupMountPoint ${DEV_ROOT} ${DEV_ROOT_FS} 3 root ${CRYPTED}
-
   if [[ ! -z "${1}" && "${2^^}" = "BTRFS" ]]; then
+	echo Wee
 	mkdir -p /tmp/mnt/disks/${4}
 	
 	if [[ "${5^^}" = "TRUE" ]]; then
@@ -229,10 +228,12 @@ createBackupMountPoint ${DEV_ROOT} ${DEV_ROOT_FS} 3 root ${CRYPTED}
 		mount -o subvolid=5 ${1}${3} /mnt/mnt/disks/${4}
 	fi;
 	
+	echo Creating Subvolumes
 	btrfs subvolume create /tmp/mnt/disks/${4}/data
 	btrfs subvolume create /mnt/mnt/disks/${4}/snapshots
 	
 	if [[ "${4^^}" = "ROOT" ]]; then
+		echo Unmounting /mnt
 		umount -R /mnt
 		
 		if [[ "${5^^}" = "TRUE" ]]; then
@@ -241,6 +242,7 @@ createBackupMountPoint ${DEV_ROOT} ${DEV_ROOT_FS} 3 root ${CRYPTED}
 			mount -o subvol=`btrfs subvol list /tmp/mnt/disks/${4} | grep data | cut -d' ' -f2` ${1}${3} /mnt
 		fi;
 	else
+	    echo Unmounting /mnt/${4}
 		umount /mnt/${4}
 		
 		if [[ "${5^^}" = "TRUE" ]]; then
