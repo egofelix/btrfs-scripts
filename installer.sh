@@ -355,20 +355,20 @@ if [[ ! -z "${STOP_AT_INSTALL_BASE}" ]]; then
 fi;
 
 if [[ ! -z "${URL_RESTORE}" ]]; then
-	umount -R /mnt/
+	#umount -R /mnt/
 	#umount -R /tmp/btrfs/
 	
 	
-	ssh "${URL_RESTORE}/root/" btrfs send ${URL_PATH_FILLME_TODO-->}/root/ | btrfs receive /tmp/btrfs/root/
-	btrfs subvolume snapshot /mnt/btr_pool/data.20150101 /mnt/btr_pool/data
-	mv /mnt/btr_pool/data /tmp/btrfs/root/data.BROKEN
+	#ssh "${URL_RESTORE}/root/" btrfs send ${URL_PATH_FILLME_TODO-->}/root/ | btrfs receive /tmp/btrfs/root/
+	#btrfs subvolume snapshot /mnt/btr_pool/data.20150101 /mnt/btr_pool/data
+	#mv /mnt/btr_pool/data /tmp/btrfs/root/data.BROKEN
 	
 	# Other Partitions
-	if [[ ! -z "${DEV_HOME]" ]]; then 
-		ssh "${URL_RESTORE}/home/" btrfs send ${URL_PATH_FILLME_TODO-->}/home/ | btrfs receive /tmp/btrfs/home/; 
-		btrfs subvolume snapshot /mnt/btr_pool/data.20150101 /mnt/btr_pool/data
-		btrfs subvolume delete /mnt/btr_pool/data.BROKEN
-	fi;
+	#if [[ ! -z "${DEV_HOME]" ]]; then 
+	#	ssh "${URL_RESTORE}/home/" btrfs send ${URL_PATH_FILLME_TODO-->}/home/ | btrfs receive /tmp/btrfs/home/; 
+	#	btrfs subvolume snapshot /mnt/btr_pool/data.20150101 /mnt/btr_pool/data
+	#	btrfs subvolume delete /mnt/btr_pool/data.BROKEN
+	#fi;
 	
 	
 	
