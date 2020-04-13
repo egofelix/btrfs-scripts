@@ -169,7 +169,7 @@ function formatPartition {
     else
       mount ${1} /tmp/btrfs/${2}
     fi;
-    btrfs subvol create /tmp/btrfs/${2}/data
+    #btrfs subvolume create /tmp/btrfs/${2}/data
     #btrfs subvol set-default `btrfs subvol list /tmp/btrfs/${2} | grep data | cut -d' ' -f2` /tmp/btrfs/${2}
     sync
     umount /tmp/btrfs/${2}
@@ -215,6 +215,41 @@ EOM
   fi;
 
   sync
+}
+
+function createBackupMountPoint {
+createBackupMountPoint ${DEV_ROOT} ${DEV_ROOT_FS} 3 root ${CRYPTED}
+
+  if [[ ! -z "${1}" && "${2^^}" = "BTRFS" ]]; then
+	mkdir -p /tmp/mnt/disks/${4}
+	
+	if [[ "${5^^}" = "TRUE" ]]; then
+	    mount -o subvolid=5 /dev/mapper/crypt${4} /tmp/mnt/disks/${4}
+	else
+		mount -o subvolid=5 ${1}${3} /mnt/mnt/disks/${4}
+	fi;
+	
+	btrfs subvolume create /tmp/mnt/disks/${4}/data
+	btrfs subvolume create /mnt/mnt/disks/${4}/snapshots
+	
+	if [ "${4^^}" = "ROOT" ];; then
+		umount -R /mnt
+		
+		if [[ "${5^^}" = "TRUE" ]]; then
+			mount -o subvol=`btrfs subvol list /tmp/mnt/disks/${4} | grep data | cut -d' ' -f2` /dev/mapper/crypt${4} /mnt
+		else
+			mount -o subvol=`btrfs subvol list /tmp/mnt/disks/${4} | grep data | cut -d' ' -f2` ${1}${3} /mnt
+		fi;
+	else
+		umount /mnt/${4}
+		
+		if [[ "${5^^}" = "TRUE" ]]; then
+			mount -o subvol=`btrfs subvol list /tmp/mnt/disks/${4} | grep data | cut -d' ' -f2` /dev/mapper/crypt${4} /mnt/${4}
+		else
+			mount -o subvol=`btrfs subvol list /tmp/mnt/disks/${4} | grep data | cut -d' ' -f2` ${1}${3} /mnt/${4}
+		fi;
+	fi;
+  fi;
 }
 
 
@@ -324,6 +359,7 @@ if [[ "${CRYPTED^^}" = "TRUE" ]]; then
 else
   mount ${DEV_ROOT}${ROOT_PART_NUM} /mnt
 fi;
+createBackupMountPoint ${DEV_ROOT} ${DEV_ROOT_FS} 3 root ${CRYPTED}
 
 # Mount Boot and Efi
 if [[ "${IS_EFI^^}" = "YES" ]]; then
@@ -352,15 +388,13 @@ if [[ ! -z "${DEV_VAR}" ]];     then formatDrive ${DEV_VAR} var ${DEV_VAR_FS} ${
 
 #if [[ ! -z "${URL_BACKUP}" ]];  then 
   # Mount root for backups and switch to data subvolume
-  mkdir -p /mnt/mnt/disks
-  createBackupMountPoint ${DEV_ROOT} ${DEV_ROOT_FS} 3 root ${CRYPTED}
   if [[ ! -z "${DEV_HOME}" ]];    then createBackupMountPoint ${DEV_HOME} ${DEV_HOME_FS} 1 home ${CRYPTED}; fi;
   if [[ ! -z "${DEV_OPT}" ]];     then createBackupMountPoint ${DEV_OPT} ${DEV_OPT_FS} 1 opt ${CRYPTED}; fi;
   if [[ ! -z "${DEV_SRV}" ]];     then createBackupMountPoint ${DEV_SRV} ${DEV_SRV_FS} 1 srv ${CRYPTED}; fi;
   if [[ ! -z "${DEV_USR}" ]];     then createBackupMountPoint ${DEV_USR} ${DEV_USR_FS} 1 usr ${CRYPTED}; fi;
   if [[ ! -z "${DEV_VAR}" ]];     then createBackupMountPoint ${DEV_VAR} ${DEV_VAR_FS} 1 var ${CRYPTED}; fi;
+  
 #fi;
-
 
 if [[ ! -z "${STOP_AT_INSTALL_BASE}" ]]; then
 	exit
@@ -413,26 +447,6 @@ fi;
 # Mount TMP
 mkdir -p /mnt/tmp
 mount -t tmpfs tmpfs /mnt/tmp
-
-function createBackupMountPoint {
-  if [[ ! -z "${1}" && "${2^^}" = "BTRFS" ]]; then
-	mkdir -p /mnt/mnt/disks/${4}
-	
-	if [[ "${5^^}" = "TRUE" ]]; then
-	    mount -o subvolid=5 /dev/mapper/crypt${4} /mnt/mnt/disks/${4}
-	else
-		mount -o subvolid=5 ${1}${3} /mnt/mnt/disks/${4}
-	fi;
-	
-	btrfs subvolume create /mnt/mnt/disks/${4}/snapshots
-	cat >> /mnt/etc/btrbk/btrbk.conf <<- EOM
-volume /mnt/disks/${4}
-        subvolume data
-                snapshot_name ${4}
-
-EOM
-  fi;
-}
 
 #if [[ ! -z "${URL_BACKUP}" ]];  then
   mkdir -p /mnt/etc/btrbk/
