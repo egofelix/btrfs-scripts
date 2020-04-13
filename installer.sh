@@ -223,9 +223,9 @@ function createBackupMountPoint {
 	mkdir -p /tmp/mnt/disks/${4}
 	
 	if [[ "${5^^}" = "TRUE" ]]; then
-	    mount -o subvolid=5 /dev/mapper/crypt${4} /tmp/mnt/disks/${4}
+	    mount /dev/mapper/crypt${4} /tmp/mnt/disks/${4}
 	else
-		mount -o subvolid=5 ${1}${3} /mnt/mnt/disks/${4}
+		mount ${1}${3} /mnt/mnt/disks/${4}
 	fi;
 	
 	echo Creating Subvolumes
