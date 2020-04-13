@@ -88,7 +88,7 @@ done
 
 function getSystemType {
   DISTIDENTIFIER=`uname -m`
-  if [ "${DISTIDENTIFIER^^}" = "ARMV7L" ]; then
+  if [[ "${DISTIDENTIFIER^^}" = "ARMV7L" ]]; then
     echo -n "ARMHF";
   else
     echo -n "AMD64";
@@ -285,6 +285,15 @@ installPackage parted "" parted;
 installPackage "arch-install-scripts" "DEBIAN" genfstab;
 installPackage "dosfstools" "" mkfs.vfat;
 
+umount -R /mnt
+umount -R /tmp/mnt/disks/*
+cryptsetup --batch-mode close cryptroot
+cryptsetup --batch-mode close crypthome
+cryptsetup --batch-mode close cryptopt
+cryptsetup --batch-mode close cryptsrv
+cryptsetup --batch-mode close cryptusr
+cryptsetup --batch-mode close cryptvar
+
 # Format Disk
 ROOT_BLOCK_SIZE="204800"
 if [[ ! -z "${ROOT_SIZE}" ]]; then
@@ -359,7 +368,10 @@ if [[ "${CRYPTED^^}" = "TRUE" ]]; then
 else
   mount ${DEV_ROOT}${ROOT_PART_NUM} /mnt
 fi;
+
+echo AAAAAAA
 createBackupMountPoint ${DEV_ROOT} ${DEV_ROOT_FS} 3 root ${CRYPTED}
+echo BBBBBBB
 
 # Mount Boot and Efi
 if [[ "${IS_EFI^^}" = "YES" ]]; then
