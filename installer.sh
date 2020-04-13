@@ -22,9 +22,6 @@ DEV_USR_FS="ext4"
 DEV_VAR=""
 DEV_VAR_FS="ext4"
 
-DEV_BACKUP=""
-DEV_BACKUP_FS="btrfs"
-
 FILESYS="btrfs"
 VERBOSE=""
 TARGET_HOSTNAME=""
@@ -37,6 +34,9 @@ IS_EFI="yes"
 ROOT_SIZE=""
 STOP_AT_INSTALL_BASE=""
 CIPHER=""
+
+URL_BACKUP=""
+URL_RESTORE=""
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -63,7 +63,8 @@ while [ "$#" -gt 0 ]; do
       --var) export DEV_VAR="$2"; shift 2;;
       --var-fs) export DEV_VAR_FS="$2"; shift 2;;
 	  
-	  --backup) export DEV_BACKUP="$2"; shift 2;;
+	  --backup) export URL_BACKUP="$2"; shift 2;;
+	  --restore) export URL_RESTORE="$2"; shift 2;;
 	  
 	  --os) export TARGET_SYSTEM="$2"; shift 2;;
 
@@ -348,9 +349,29 @@ if [[ ! -z "${DEV_OPT}" ]];     then formatDrive ${DEV_OPT} opt ${DEV_OPT_FS} ${
 if [[ ! -z "${DEV_SRV}" ]];     then formatDrive ${DEV_SRV} srv ${DEV_SRV_FS} ${CRYPTED} ${CIPHER}; fi;
 if [[ ! -z "${DEV_USR}" ]];     then formatDrive ${DEV_USR} usr ${DEV_USR_FS} ${CRYPTED} ${CIPHER}; fi;
 if [[ ! -z "${DEV_VAR}" ]];     then formatDrive ${DEV_VAR} var ${DEV_VAR_FS} ${CRYPTED} ${CIPHER}; fi;
-if [[ ! -z "${DEV_BACKUP}" ]];  then formatDrive ${DEV_BACKUP} backup ${DEV_BACKUP_FS} ${CRYPTED} ${CIPHER}; fi;
 
 if [[ ! -z "${STOP_AT_INSTALL_BASE}" ]]; then
+	exit
+fi;
+
+if [[ ! -z "${URL_RESTORE}" ]]; then
+	umount -R /mnt/
+	#umount -R /tmp/btrfs/
+	
+	
+	ssh "${URL_RESTORE}/root/" btrfs send ${URL_PATH_FILLME_TODO-->}/root/ | btrfs receive /tmp/btrfs/root/
+	btrfs subvolume snapshot /mnt/btr_pool/data.20150101 /mnt/btr_pool/data
+	mv /mnt/btr_pool/data /tmp/btrfs/root/data.BROKEN
+	
+	# Other Partitions
+	if [[ ! -z "${DEV_HOME]" ]]; then 
+		ssh "${URL_RESTORE}/home/" btrfs send ${URL_PATH_FILLME_TODO-->}/home/ | btrfs receive /tmp/btrfs/home/; 
+		btrfs subvolume snapshot /mnt/btr_pool/data.20150101 /mnt/btr_pool/data
+		btrfs subvolume delete /mnt/btr_pool/data.BROKEN
+	fi;
+	
+	
+	
 	exit
 fi;
 
@@ -400,7 +421,7 @@ volume /mnt/disks/${4}
 EOM
   fi;
 }
-if [[ ! -z "${DEV_BACKUP}" ]];  then
+#if [[ ! -z "${URL_BACKUP}" ]];  then
   mkdir -p /mnt/mnt/disks
   
   mkdir -p /mnt/etc/btrbk/
@@ -422,12 +443,12 @@ EOM
   
   # Mount root for backups
   createBackupMountPoint ${DEV_ROOT} ${DEV_ROOT_FS} 3 root ${CRYPTED}
-  createBackupMountPoint ${DEV_HOME} ${DEV_HOME_FS} 1 home ${CRYPTED}
-  createBackupMountPoint ${DEV_OPT} ${DEV_OPT_FS} 1 opt ${CRYPTED}
-  createBackupMountPoint ${DEV_SRV} ${DEV_SRV_FS} 1 srv ${CRYPTED}
-  createBackupMountPoint ${DEV_USR} ${DEV_USR_FS} 1 usr ${CRYPTED}
-  createBackupMountPoint ${DEV_VAR} ${DEV_VAR_FS} 1 var ${CRYPTED}
-fi;
+  if [[ ! -z "${DEV_HOME}" ]];    then createBackupMountPoint ${DEV_HOME} ${DEV_HOME_FS} 1 home ${CRYPTED}; fi;
+  if [[ ! -z "${DEV_OPT}" ]];     then createBackupMountPoint ${DEV_OPT} ${DEV_OPT_FS} 1 opt ${CRYPTED}; fi;
+  if [[ ! -z "${DEV_SRV}" ]];     then createBackupMountPoint ${DEV_SRV} ${DEV_SRV_FS} 1 srv ${CRYPTED}; fi;
+  if [[ ! -z "${DEV_USR}" ]];     then createBackupMountPoint ${DEV_USR} ${DEV_USR_FS} 1 usr ${CRYPTED}; fi;
+  if [[ ! -z "${DEV_VAR}" ]];     then createBackupMountPoint ${DEV_VAR} ${DEV_VAR_FS} 1 var ${CRYPTED}; fi;
+#fi;
 
 # Generate fstab
 genfstab -pL /mnt >> /mnt/etc/fstab
@@ -608,7 +629,7 @@ if [[ "${CRYPTED^^}" = "TRUE" ]]; then
 mv /crypt.key /etc/crypt.key
 chown root:root /etc/crypt.key
 chmod 600 /etc/crypt.key
-DEBIAN_FRONTEND=noninteractive apt-get install -y -qq cryptsetup #dropbear-initramfs
+DEBIAN_FRONTEND=noninteractive apt-get install -y -qq cryptsetup dropbear-initramfs
 echo cryptroot PARTLABEL=root none luks > /etc/crypttab
 EOM
 
@@ -618,7 +639,7 @@ EOM
   if [[ ! -z "${DEV_SRV}" ]];  then echo "echo cryptsrv PARTLABEL=srv /etc/crypt.key luks >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
   if [[ ! -z "${DEV_USR}" ]];  then echo "echo cryptusr PARTLABEL=usr /etc/crypt.key luks >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
   if [[ ! -z "${DEV_VAR}" ]];  then echo "echo cryptvar PARTLABEL=var /etc/crypt.key luks >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
-  if [[ ! -z "${DEV_BACKUP}" ]];  then echo "echo cryptbackup PARTLABEL=backup /etc/crypt.key luks >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
+  #if [[ ! -z "${URL_BACKUP}" ]];  then echo "echo cryptbackup PARTLABEL=backup /etc/crypt.key luks >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
 
   # Setup btrfs module for initramfs
   if [[ "${DEV_ROOT_FS^^}${DEV_HOME_FS^^}${DEV_OPT_FS^^}${DEV_SRV_FS^^}${DEV_USR_FS^^}${DEV_VAR_FS^^}" == *"BTRFS"* ]]; then
@@ -635,7 +656,7 @@ EOM
 fi;
 
 # Install btrbk/
-if [[ ! -z "${DEV_BACKUP}" ]];  then
+if [[ ! -z "${URL_BACKUP}" ]];  then
   cat >> /mnt/chrootinit.sh <<- EOM
 DEBIAN_FRONTEND=noninteractive apt-get install -y -qq btrbk
 EOM
