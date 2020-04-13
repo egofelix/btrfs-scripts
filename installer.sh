@@ -350,6 +350,18 @@ if [[ ! -z "${DEV_SRV}" ]];     then formatDrive ${DEV_SRV} srv ${DEV_SRV_FS} ${
 if [[ ! -z "${DEV_USR}" ]];     then formatDrive ${DEV_USR} usr ${DEV_USR_FS} ${CRYPTED} ${CIPHER}; fi;
 if [[ ! -z "${DEV_VAR}" ]];     then formatDrive ${DEV_VAR} var ${DEV_VAR_FS} ${CRYPTED} ${CIPHER}; fi;
 
+#if [[ ! -z "${URL_BACKUP}" ]];  then 
+  # Mount root for backups and switch to data subvolume
+  mkdir -p /mnt/mnt/disks
+  createBackupMountPoint ${DEV_ROOT} ${DEV_ROOT_FS} 3 root ${CRYPTED}
+  if [[ ! -z "${DEV_HOME}" ]];    then createBackupMountPoint ${DEV_HOME} ${DEV_HOME_FS} 1 home ${CRYPTED}; fi;
+  if [[ ! -z "${DEV_OPT}" ]];     then createBackupMountPoint ${DEV_OPT} ${DEV_OPT_FS} 1 opt ${CRYPTED}; fi;
+  if [[ ! -z "${DEV_SRV}" ]];     then createBackupMountPoint ${DEV_SRV} ${DEV_SRV_FS} 1 srv ${CRYPTED}; fi;
+  if [[ ! -z "${DEV_USR}" ]];     then createBackupMountPoint ${DEV_USR} ${DEV_USR_FS} 1 usr ${CRYPTED}; fi;
+  if [[ ! -z "${DEV_VAR}" ]];     then createBackupMountPoint ${DEV_VAR} ${DEV_VAR_FS} 1 var ${CRYPTED}; fi;
+#fi;
+
+
 if [[ ! -z "${STOP_AT_INSTALL_BASE}" ]]; then
 	exit
 fi;
@@ -421,9 +433,8 @@ volume /mnt/disks/${4}
 EOM
   fi;
 }
+
 #if [[ ! -z "${URL_BACKUP}" ]];  then
-  mkdir -p /mnt/mnt/disks
-  
   mkdir -p /mnt/etc/btrbk/
   cat > /mnt/etc/btrbk/btrbk.conf <<- EOM
 snapshot_dir snapshots
@@ -437,17 +448,9 @@ raw_target_compress   xz
 #gpg_keyring           /etc/btrbk/gpg/pubring.gpg
 #gpg_recipient         btrbk@mydomain.com
 
-target raw /backup
+#target raw /backup
 
 EOM
-  
-  # Mount root for backups
-  createBackupMountPoint ${DEV_ROOT} ${DEV_ROOT_FS} 3 root ${CRYPTED}
-  if [[ ! -z "${DEV_HOME}" ]];    then createBackupMountPoint ${DEV_HOME} ${DEV_HOME_FS} 1 home ${CRYPTED}; fi;
-  if [[ ! -z "${DEV_OPT}" ]];     then createBackupMountPoint ${DEV_OPT} ${DEV_OPT_FS} 1 opt ${CRYPTED}; fi;
-  if [[ ! -z "${DEV_SRV}" ]];     then createBackupMountPoint ${DEV_SRV} ${DEV_SRV_FS} 1 srv ${CRYPTED}; fi;
-  if [[ ! -z "${DEV_USR}" ]];     then createBackupMountPoint ${DEV_USR} ${DEV_USR_FS} 1 usr ${CRYPTED}; fi;
-  if [[ ! -z "${DEV_VAR}" ]];     then createBackupMountPoint ${DEV_VAR} ${DEV_VAR_FS} 1 var ${CRYPTED}; fi;
 #fi;
 
 # Generate fstab
