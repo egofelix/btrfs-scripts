@@ -486,6 +486,7 @@ EOM
 fi;
 
 if [[ "${CRYPTED^^}" = "TRUE" ]]; then
+    mountRootPoint ${DEV_ROOT} ${DEV_ROOT_FS} ${ROOT_PART_NUM} root ${CRYPTED};
 	if [[ ! -z "${DEV_HOME}" ]];    then mountRootPoint ${DEV_HOME} ${DEV_HOME_FS} 1 home ${CRYPTED}; fi;
 	if [[ ! -z "${DEV_OPT}" ]];     then mountRootPoint ${DEV_OPT} ${DEV_OPT_FS} 1 opt ${CRYPTED}; fi;
 	if [[ ! -z "${DEV_SRV}" ]];     then mountRootPoint ${DEV_SRV} ${DEV_SRV_FS} 1 srv ${CRYPTED}; fi;
