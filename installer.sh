@@ -85,13 +85,6 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
-if [[ ! -z "${URL_BACKUP}" ]]; then
-	URL_BACKUP=`echo ${URL_BACKUP} | sed -e "s/\%hostname\%/${TARGET_HOSTNAME}/g"`
-fi;
-if [[ ! -z "${URL_RESTORE}" ]]; then
-	URL_RESTORE=`echo ${URL_RESTORE} | sed -e "s/\%hostname\%/${TARGET_HOSTNAME}/g"`
-fi;
-
 function getSystemType {
   DISTIDENTIFIER=`uname -m`
   if [[ "${DISTIDENTIFIER^^}" = "ARMV7L" ]]; then
@@ -299,6 +292,14 @@ fi;
 
 if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
   installPackage pacstrap "" pacstrap;
+fi;
+
+TARGET_SHORT_HOSTNAME=`echo -n ${TARGET_HOSTNAME} | cut -d '.' -f 1`
+if [[ ! -z "${URL_BACKUP}" ]]; then
+	URL_BACKUP=`echo ${URL_BACKUP} | sed -e "s/\%hostname\%/${TARGET_SHORT_HOSTNAME}/g"`
+fi;
+if [[ ! -z "${URL_RESTORE}" ]]; then
+	URL_RESTORE=`echo ${URL_RESTORE} | sed -e "s/\%hostname\%/${TARGET_SHORT_HOSTNAME}/g"`
 fi;
 
 installPackage parted "" parted;
