@@ -441,6 +441,7 @@ if [[ ! -z "${URL_RESTORE}" ]]; then
 	RESTORE_USER=`echo -n ${TARGET_HOSTNAME} | cut -d '.' -f 1`
 	
 	# Restore root
+	echo restoreBackup "${RESTORE_USER}" "${RESTORE_HOST}" "${RESTORE_PATH}" "root"
 	restoreBackup "${RESTORE_USER}" "${RESTORE_HOST}" "${RESTORE_PATH}" "root"
 	
 	#ssh "${URL_RESTORE}/root/" btrfs send ${URL_PATH_FILLME_TODO-->}/root/ | btrfs receive /tmp/btrfs/root/
