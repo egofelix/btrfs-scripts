@@ -219,44 +219,45 @@ EOM
 
 function createBackupMountPoint {
   if [[ ! -z "${1}" && "${2^^}" = "BTRFS" ]]; then
-	echo Wee
 	mkdir -p /tmp/mnt/disks/${4}
 	
-	echo CRYPTED: ${5}
 	if [[ "${5^^}" = "TRUE" ]]; then
-		echo mount /dev/mapper/crypt${4} /tmp/mnt/disks/${4}
 	    mount /dev/mapper/crypt${4} /tmp/mnt/disks/${4}
 	else
-		echo mount ${1}${3} /tmp/mnt/disks/${4}
 		mount ${1}${3} /tmp/mnt/disks/${4}
 	fi;
 	
-	echo Creating Subvolumes
 	btrfs subvolume create /tmp/mnt/disks/${4}/data
 	btrfs subvolume create /tmp/mnt/disks/${4}/snapshots
 	
 	if [[ "${4^^}" = "ROOT" ]]; then
-		echo Unmounting /mnt
 		umount -R /mnt
 		
 		if [[ "${5^^}" = "TRUE" ]]; then
-			echo mount -o subvol=data /dev/mapper/crypt${4} /mnt
-			mount -o subvol=data /dev/mapper/crypt${4} /mnt
+			mount -o subvol=/data /dev/mapper/crypt${4} /mnt
 		else
-			echo mount -o subvol=data ${1}${3} /mnt
-			mount -o subvol=data ${1}${3} /mnt
+			mount -o subvol=/data ${1}${3} /mnt
 		fi;
 	else
-	    echo Unmounting /mnt/${4}
 		umount /mnt/${4}
 		
 		if [[ "${5^^}" = "TRUE" ]]; then
-			echo mount -o subvol=data /dev/mapper/crypt${4} /mnt/${4}
-			mount -o subvol=data /dev/mapper/crypt${4} /mnt/${4}
+			mount -o subvol=/data /dev/mapper/crypt${4} /mnt/${4}
 		else
-			echo mount -o subvol=data ${1}${3} /mnt/${4}
-			mount -o subvol=data ${1}${3} /mnt/${4}
+			mount -o subvol=/data ${1}${3} /mnt/${4}
 		fi;
+	fi;
+  fi;
+}
+
+function mountRootPoint {
+  if [[ ! -z "${1}" && "${2^^}" = "BTRFS" ]]; then
+	mkdir -p /mnt/mnt/disks/${4}
+	
+	if [[ "${5^^}" = "TRUE" ]]; then
+		mount /dev/mapper/crypt${4} /mnt/mnt/disks/${4}
+	else
+		mount ${1}${3} /mnt/mnt/disks/${4}
 	fi;
   fi;
 }
@@ -379,10 +380,7 @@ if [[ "${CRYPTED^^}" = "TRUE" ]]; then
 else
   mount ${DEV_ROOT}${ROOT_PART_NUM} /mnt
 fi;
-
-echo AAAAAAA
-createBackupMountPoint ${DEV_ROOT} ${DEV_ROOT_FS} 3 root ${CRYPTED}
-echo BBBBBBB
+createBackupMountPoint ${DEV_ROOT} ${DEV_ROOT_FS} ${ROOT_PART_NUM} root ${CRYPTED}
 
 # Mount Boot and Efi
 if [[ "${IS_EFI^^}" = "YES" ]]; then
@@ -409,15 +407,12 @@ if [[ ! -z "${DEV_SRV}" ]];     then formatDrive ${DEV_SRV} srv ${DEV_SRV_FS} ${
 if [[ ! -z "${DEV_USR}" ]];     then formatDrive ${DEV_USR} usr ${DEV_USR_FS} ${CRYPTED} ${CIPHER}; fi;
 if [[ ! -z "${DEV_VAR}" ]];     then formatDrive ${DEV_VAR} var ${DEV_VAR_FS} ${CRYPTED} ${CIPHER}; fi;
 
-#if [[ ! -z "${URL_BACKUP}" ]];  then 
-  # Mount root for backups and switch to data subvolume
-  if [[ ! -z "${DEV_HOME}" ]];    then createBackupMountPoint ${DEV_HOME} ${DEV_HOME_FS} 1 home ${CRYPTED}; fi;
-  if [[ ! -z "${DEV_OPT}" ]];     then createBackupMountPoint ${DEV_OPT} ${DEV_OPT_FS} 1 opt ${CRYPTED}; fi;
-  if [[ ! -z "${DEV_SRV}" ]];     then createBackupMountPoint ${DEV_SRV} ${DEV_SRV_FS} 1 srv ${CRYPTED}; fi;
-  if [[ ! -z "${DEV_USR}" ]];     then createBackupMountPoint ${DEV_USR} ${DEV_USR_FS} 1 usr ${CRYPTED}; fi;
-  if [[ ! -z "${DEV_VAR}" ]];     then createBackupMountPoint ${DEV_VAR} ${DEV_VAR_FS} 1 var ${CRYPTED}; fi;
-  
-#fi;
+# Mount root for backups and switch to data subvolume
+if [[ ! -z "${DEV_HOME}" ]];    then createBackupMountPoint ${DEV_HOME} ${DEV_HOME_FS} 1 home ${CRYPTED}; fi;
+if [[ ! -z "${DEV_OPT}" ]];     then createBackupMountPoint ${DEV_OPT} ${DEV_OPT_FS} 1 opt ${CRYPTED}; fi;
+if [[ ! -z "${DEV_SRV}" ]];     then createBackupMountPoint ${DEV_SRV} ${DEV_SRV_FS} 1 srv ${CRYPTED}; fi;
+if [[ ! -z "${DEV_USR}" ]];     then createBackupMountPoint ${DEV_USR} ${DEV_USR_FS} 1 usr ${CRYPTED}; fi;
+if [[ ! -z "${DEV_VAR}" ]];     then createBackupMountPoint ${DEV_VAR} ${DEV_VAR_FS} 1 var ${CRYPTED}; fi;
 
 if [[ ! -z "${STOP_AT_INSTALL_BASE}" ]]; then
 	exit
@@ -471,7 +466,7 @@ fi;
 mkdir -p /mnt/tmp
 mount -t tmpfs tmpfs /mnt/tmp
 
-#if [[ ! -z "${URL_BACKUP}" ]];  then
+if [[ ! -z "${URL_BACKUP}" ]];  then
   mkdir -p /mnt/etc/btrbk/
   cat > /mnt/etc/btrbk/btrbk.conf <<- EOM
 snapshot_dir snapshots
@@ -488,7 +483,15 @@ raw_target_compress   xz
 #target raw /backup
 
 EOM
-#fi;
+fi;
+
+if [[ "${CRYPTED^^}" = "TRUE" ]]; then
+	if [[ ! -z "${DEV_HOME}" ]];    then mountRootPoint ${DEV_HOME} ${DEV_HOME_FS} 1 home ${CRYPTED}; fi;
+	if [[ ! -z "${DEV_OPT}" ]];     then mountRootPoint ${DEV_OPT} ${DEV_OPT_FS} 1 opt ${CRYPTED}; fi;
+	if [[ ! -z "${DEV_SRV}" ]];     then mountRootPoint ${DEV_SRV} ${DEV_SRV_FS} 1 srv ${CRYPTED}; fi;
+	if [[ ! -z "${DEV_USR}" ]];     then mountRootPoint ${DEV_USR} ${DEV_USR_FS} 1 usr ${CRYPTED}; fi;
+	if [[ ! -z "${DEV_VAR}" ]];     then mountRootPoint ${DEV_VAR} ${DEV_VAR_FS} 1 var ${CRYPTED}; fi;
+fi;
 
 # Generate fstab
 genfstab -pL /mnt >> /mnt/etc/fstab
