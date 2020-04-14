@@ -222,9 +222,12 @@ function createBackupMountPoint {
 	echo Wee
 	mkdir -p /tmp/mnt/disks/${4}
 	
+	echo CRYPTED: ${5}
 	if [[ "${5^^}" = "TRUE" ]]; then
+		echo mount /dev/mapper/crypt${4} /tmp/mnt/disks/${4}
 	    mount /dev/mapper/crypt${4} /tmp/mnt/disks/${4}
 	else
+		echo mount ${1}${3} /tmp/mnt/disks/${4}
 		mount ${1}${3} /tmp/mnt/disks/${4}
 	fi;
 	
@@ -287,8 +290,10 @@ installPackage parted "" parted;
 installPackage "arch-install-scripts" "DEBIAN" genfstab;
 installPackage "dosfstools" "" mkfs.vfat;
 
+umount -R /mnt/*
 umount -R /mnt
 umount -R /tmp/mnt/disks/*
+umount -R /tmp/btrfs/*
 cryptsetup --batch-mode close cryptroot
 cryptsetup --batch-mode close crypthome
 cryptsetup --batch-mode close cryptopt
