@@ -300,6 +300,7 @@ fi;
 installPackage parted "" parted;
 installPackage "arch-install-scripts" "DEBIAN" genfstab;
 installPackage "cryptsetup" "DEBIAN" cryptsetup;
+installPackage "btrfs-progs" "DEBIAN" btrfs;
 installPackage "dosfstools" "" mkfs.vfat;
 
 umount -R /mnt/*
