@@ -268,6 +268,10 @@ function mountRootPoint {
   fi;
 }
 
+function restoreBackup {
+  backupFiles=`ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=/tmp/btrbk.identity ${1}@${2} find ${3}/backup/ -name ${4}.*.xz | sort | awk '{ print length, $0 }' | sort -n -s | cut -d" " -f2-`
+}
+
 
 if [[ ! -d "/sys/firmware/efi" ]]; then
   IS_EFI="no"
@@ -301,6 +305,7 @@ installPackage parted "" parted;
 installPackage "arch-install-scripts" "DEBIAN" genfstab;
 installPackage "cryptsetup" "DEBIAN" cryptsetup;
 installPackage "btrfs-progs" "DEBIAN" btrfs;
+installPackage "btrbk" "DEBIAN" btrbk;
 installPackage "dosfstools" "" mkfs.vfat;
 
 umount -R /mnt/*
@@ -429,24 +434,14 @@ fi;
 if [[ ! -z "${URL_RESTORE}" ]]; then
 	
 	umount -R /mnt/
-	  cat > /tmp/btrbk.conf <<- EOM
-snapshot_dir snapshots
 
-snapshot_preserve_min latest
-snapshot_preserve 0h
-
-raw_target_compress   xz
-#raw_target_encrypt    gpg
-
-#gpg_keyring           /etc/btrbk/gpg/pubring.gpg
-#gpg_recipient         btrbk@mydomain.com
-
-ssh_user                ${TARGET_HOSTNAME%%.*}
-ssh_identity            /etc/btrbk/identity
-
-target raw ${URL_RESTORE}
-
-EOM
+	RESTORE_HOST=`echo -n ${URL_RESTORE} | cut -d '/' -f 3`
+	RESTORE_PATH=`echo -n ${URL_RESTORE} | cut -d '/' -f 4- | sed 's/\/$//g'`
+	RESTORE_PATH="/${RESTORE_PATH}/"
+	RESTORE_USER=`echo -n ${TARGET_HOSTNAME} | cut -d '.' -f 1`
+	
+	# Restore root
+	restoreBackup "${RESTORE_USER}" "${RESTORE_HOST}" "${RESTORE_PATH}" "root"
 	
 	#ssh "${URL_RESTORE}/root/" btrfs send ${URL_PATH_FILLME_TODO-->}/root/ | btrfs receive /tmp/btrfs/root/
 	#btrfs subvolume snapshot /mnt/btr_pool/data.20150101 /mnt/btr_pool/data
