@@ -267,10 +267,10 @@ function restoreBackup {
   for file in ${backupFiles}
   do
 	echo Restoring ${file}
+	ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=/tmp/btrbk.identity ${1}@${2} cat ${file} | xz -d -c | btrfs receive /tmp/mnt/disks/root
   done
-  
-  echo Found Backups!
-  echo $backupFiles
+
+  echo ${4} restored!
 }
 
 
