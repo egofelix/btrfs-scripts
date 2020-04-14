@@ -27,7 +27,6 @@ VERBOSE=""
 TARGET_HOSTNAME=""
 
 ANSIBLE_PULL_REPO=""
-
 AUTOREBOOT="yes"
 
 IS_EFI="yes"
@@ -85,6 +84,13 @@ while [ "$#" -gt 0 ]; do
        *) echo "unknown option: $1" >&2; exit 1;;
   esac
 done
+
+if [[ ! -z "${URL_BACKUP}" ]]; then
+	URL_BACKUP=`echo ${URL_BACKUP} | sed -e "s/\%hostname\%/${TARGET_HOSTNAME}/g"`
+fi;
+if [[ ! -z "${URL_RESTORE}" ]]; then
+	URL_RESTORE=`echo ${URL_RESTORE} | sed -e "s/\%hostname\%/${TARGET_HOSTNAME}/g"`
+fi;
 
 function getSystemType {
   DISTIDENTIFIER=`uname -m`
@@ -418,10 +424,27 @@ if [[ ! -z "${STOP_AT_INSTALL_BASE}" ]]; then
 	exit
 fi;
 
-#if [[ ! -z "${URL_RESTORE}" ]]; then
-	#umount -R /mnt/
-	#umount -R /tmp/btrfs/
+if [[ ! -z "${URL_RESTORE}" ]]; then
 	
+	umount -R /mnt/
+	  cat > /tmp/btrbk.conf <<- EOM
+snapshot_dir snapshots
+
+snapshot_preserve_min latest
+snapshot_preserve 0h
+
+raw_target_compress   xz
+#raw_target_encrypt    gpg
+
+#gpg_keyring           /etc/btrbk/gpg/pubring.gpg
+#gpg_recipient         btrbk@mydomain.com
+
+ssh_user                ${TARGET_HOSTNAME%%.*}
+ssh_identity            /etc/btrbk/identity
+
+target raw ${URL_RESTORE}
+
+EOM
 	
 	#ssh "${URL_RESTORE}/root/" btrfs send ${URL_PATH_FILLME_TODO-->}/root/ | btrfs receive /tmp/btrfs/root/
 	#btrfs subvolume snapshot /mnt/btr_pool/data.20150101 /mnt/btr_pool/data
@@ -436,8 +459,8 @@ fi;
 	
 	
 	
-#	exit
-#fi;
+	exit
+fi;
 
 # Install Base to /mnt
 echo "Installing Base System..."
