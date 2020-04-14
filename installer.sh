@@ -263,11 +263,21 @@ function mountRootPoint {
 
 function restoreBackup {
   backupFiles=`ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=/tmp/btrbk.identity ${1}@${2} find ${3}backup/ -name ${4}.*.xz | sort | awk '{ print length, $0 }' | sort -n -s | cut -d" " -f2-`
-  
+  LASTFILE=""
   for file in ${backupFiles}
   do
+	LASTFILE="basename ${file} | rev | cut -d '.' -f 3- | rev"
 	echo Restoring ${file}
 	ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=/tmp/btrbk.identity ${1}@${2} cat ${file} | xz -d -c | btrfs receive /tmp/mnt/disks/root
+  done
+  
+  btrfs subvolume delete /tmp/mnt/disks/root/data
+  btrfs subvolume snapshot /tmp/mnt/disks/root/${LASTFILE} /tmp/mnt/disks/root/data
+  for file in ${backupFiles}
+  do
+	# Cleanup
+	SNAP="basename ${file} | rev | cut -d '.' -f 3- | rev"
+	btrfs subvolume delete /tmp/mnt/disks/root/${SNAP}
   done
 
   echo ${4} restored!
