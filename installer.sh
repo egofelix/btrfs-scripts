@@ -240,22 +240,22 @@ function createBackupMountPoint {
 		umount -R /mnt
 		
 		if [[ "${5^^}" = "TRUE" ]]; then
-			echo mount -o subvol=`btrfs subvol list /tmp/mnt/disks/${4} | grep data | cut -d' ' -f2` /dev/mapper/crypt${4} /mnt
-			mount -o subvol=`btrfs subvol list /tmp/mnt/disks/${4} | grep data | cut -d' ' -f2` /dev/mapper/crypt${4} /mnt
+			echo mount -o subvol=data /dev/mapper/crypt${4} /mnt
+			mount -o subvol=data /dev/mapper/crypt${4} /mnt
 		else
-			echo mount -o subvol=`btrfs subvol list /tmp/mnt/disks/${4} | grep data | cut -d' ' -f2` ${1}${3} /mnt
-			mount -o subvol=`btrfs subvol list /tmp/mnt/disks/${4} | grep data | cut -d' ' -f2` ${1}${3} /mnt
+			echo mount -o subvol=data ${1}${3} /mnt
+			mount -o subvol=data ${1}${3} /mnt
 		fi;
 	else
 	    echo Unmounting /mnt/${4}
 		umount /mnt/${4}
 		
 		if [[ "${5^^}" = "TRUE" ]]; then
-			echo mount -o subvol=`btrfs subvol list /tmp/mnt/disks/${4} | grep data | cut -d' ' -f2` /dev/mapper/crypt${4} /mnt/${4}
-			mount -o subvol=`btrfs subvol list /tmp/mnt/disks/${4} | grep data | cut -d' ' -f2` /dev/mapper/crypt${4} /mnt/${4}
+			echo mount -o subvol=data /dev/mapper/crypt${4} /mnt/${4}
+			mount -o subvol=data /dev/mapper/crypt${4} /mnt/${4}
 		else
-			echo mount -o subvol=`btrfs subvol list /tmp/mnt/disks/${4} | grep data | cut -d' ' -f2` ${1}${3} /mnt/${4}
-			mount -o subvol=`btrfs subvol list /tmp/mnt/disks/${4} | grep data | cut -d' ' -f2` ${1}${3} /mnt/${4}
+			echo mount -o subvol=data ${1}${3} /mnt/${4}
+			mount -o subvol=data ${1}${3} /mnt/${4}
 		fi;
 	fi;
   fi;
