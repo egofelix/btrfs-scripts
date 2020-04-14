@@ -460,21 +460,73 @@ if [[ ! -z "${URL_RESTORE}" ]]; then
 	RESTORE_USER=`echo -n ${TARGET_HOSTNAME} | cut -d '.' -f 1`
 	
 	# Restore root
-	echo restoreBackup "${RESTORE_USER}" "${RESTORE_HOST}" "${RESTORE_PATH}" "root"
 	restoreBackup "${RESTORE_USER}" "${RESTORE_HOST}" "${RESTORE_PATH}" "root"
+
+	# Restore other Partitions	
+	if [[ ! -z "${DEV_HOME}" ]];    then restoreBackup "${RESTORE_USER}" "${RESTORE_HOST}" "${RESTORE_PATH}" "home"; fi;
+	if [[ ! -z "${DEV_OPT}" ]];     then restoreBackup "${RESTORE_USER}" "${RESTORE_HOST}" "${RESTORE_PATH}" "opt"; fi;
+	if [[ ! -z "${DEV_SRV}" ]];     then restoreBackup "${RESTORE_USER}" "${RESTORE_HOST}" "${RESTORE_PATH}" "srv"; fi;
+	if [[ ! -z "${DEV_USR}" ]];     then restoreBackup "${RESTORE_USER}" "${RESTORE_HOST}" "${RESTORE_PATH}" "usr"; fi;
+	if [[ ! -z "${DEV_VAR}" ]];     then restoreBackup "${RESTORE_USER}" "${RESTORE_HOST}" "${RESTORE_PATH}" "var"; fi;
 	
-	#ssh "${URL_RESTORE}/root/" btrfs send ${URL_PATH_FILLME_TODO-->}/root/ | btrfs receive /tmp/btrfs/root/
-	#btrfs subvolume snapshot /mnt/btr_pool/data.20150101 /mnt/btr_pool/data
-	#mv /mnt/btr_pool/data /tmp/btrfs/root/data.BROKEN
+	# Mount Root
+	if [[ "${CRYPTED^^}" = "TRUE" ]]; then
+		mount -o subvol=/data /dev/mapper/cryptroot /mnt
+	else
+		mount -o subvol=/data ${DEV_ROOT}${ROOT_PART_NUM} /mnt
+	fi;
 	
-	# Other Partitions
-	#if [[ ! -z "${DEV_HOME]" ]]; then 
-	#	ssh "${URL_RESTORE}/home/" btrfs send ${URL_PATH_FILLME_TODO-->}/home/ | btrfs receive /tmp/btrfs/home/; 
-	#	btrfs subvolume snapshot /mnt/btr_pool/data.20150101 /mnt/btr_pool/data
-	#	btrfs subvolume delete /mnt/btr_pool/data.BROKEN
-	#fi;
+	# Mount Boot and Efi
+	if [[ "${IS_EFI^^}" = "YES" ]]; then
+		mkdir /mnt/boot
+		mount ${DEV_ROOT}2 /mnt/boot
+		mkdir /mnt/boot/efi
+		mount ${DEV_ROOT}1 /mnt/boot/efi
+	else
+		mkdir /mnt/boot
+		mount ${DEV_ROOT}1 /mnt/boot
+	fi;
+	sync
+
+	# Remount drives
 	
+	# Reinstall Grub
+	cat > /mnt/chrootinit.sh <<- EOM
+#!/bin/bash
+. /etc/profile
+EOM
+
+	# Install Bootloader
+	if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
+	  cat >> /mnt/chrootinit.sh <<- EOM
+	pacman -Sy --noconfirm efibootmgr grub
+	grub-install
+	grub-mkconfig -o /boot/grub/grub.cfg
+	EOM
+	fi;
+
+	if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
+		if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
+	echo WILL USE GRUB-EFI-ARM
+			cat >> /mnt/chrootinit.sh <<- EOM
+	DEBIAN_FRONTEND=noninteractive apt-get install -y -qq grub-efi-arm
+	grub-install --removable --target=arm-efi --boot-directory=/boot --efi-directory=/boot/efi
+	update-initramfs -k all -u
+	grub-mkconfig -o /boot/grub/grub.cfg
+	EOM
+		else
+	echo WILL USE GRUB-EFI
+			cat >> /mnt/chrootinit.sh <<- EOM
+	DEBIAN_FRONTEND=noninteractive apt-get install -y -qq grub-efi
+	grub-install
+	update-initramfs -k all -u
+	grub-mkconfig -o /boot/grub/grub.cfg
+	EOM
+		fi;
+	fi;
 	
+	chmod +x /mnt/chrootinit.sh
+	chroot /mnt /chrootinit.sh;
 	
 	exit
 fi;
