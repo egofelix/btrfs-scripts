@@ -225,12 +225,12 @@ function createBackupMountPoint {
 	if [[ "${5^^}" = "TRUE" ]]; then
 	    mount /dev/mapper/crypt${4} /tmp/mnt/disks/${4}
 	else
-		mount ${1}${3} /mnt/mnt/disks/${4}
+		mount ${1}${3} /tmp/mnt/disks/${4}
 	fi;
 	
 	echo Creating Subvolumes
 	btrfs subvolume create /tmp/mnt/disks/${4}/data
-	btrfs subvolume create /mnt/mnt/disks/${4}/snapshots
+	btrfs subvolume create /tmp/mnt/disks/${4}/snapshots
 	
 	if [[ "${4^^}" = "ROOT" ]]; then
 		echo Unmounting /mnt
