@@ -264,6 +264,11 @@ function mountRootPoint {
 function restoreBackup {
   backupFiles=`ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=/tmp/btrbk.identity ${1}@${2} find ${3}backup/ -name ${4}.*.xz | sort | awk '{ print length, $0 }' | sort -n -s | cut -d" " -f2-`
   
+  for file in ${backupFiles}
+  do
+	echo Restoring ${file}
+  done
+  
   echo Found Backups!
   echo $backupFiles
 }
