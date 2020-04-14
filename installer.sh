@@ -240,8 +240,10 @@ function createBackupMountPoint {
 		umount -R /mnt
 		
 		if [[ "${5^^}" = "TRUE" ]]; then
+			echo mount -o subvol=`btrfs subvol list /tmp/mnt/disks/${4} | grep data | cut -d' ' -f2` /dev/mapper/crypt${4} /mnt
 			mount -o subvol=`btrfs subvol list /tmp/mnt/disks/${4} | grep data | cut -d' ' -f2` /dev/mapper/crypt${4} /mnt
 		else
+			echo mount -o subvol=`btrfs subvol list /tmp/mnt/disks/${4} | grep data | cut -d' ' -f2` ${1}${3} /mnt
 			mount -o subvol=`btrfs subvol list /tmp/mnt/disks/${4} | grep data | cut -d' ' -f2` ${1}${3} /mnt
 		fi;
 	else
@@ -249,8 +251,10 @@ function createBackupMountPoint {
 		umount /mnt/${4}
 		
 		if [[ "${5^^}" = "TRUE" ]]; then
+			echo mount -o subvol=`btrfs subvol list /tmp/mnt/disks/${4} | grep data | cut -d' ' -f2` /dev/mapper/crypt${4} /mnt/${4}
 			mount -o subvol=`btrfs subvol list /tmp/mnt/disks/${4} | grep data | cut -d' ' -f2` /dev/mapper/crypt${4} /mnt/${4}
 		else
+			echo mount -o subvol=`btrfs subvol list /tmp/mnt/disks/${4} | grep data | cut -d' ' -f2` ${1}${3} /mnt/${4}
 			mount -o subvol=`btrfs subvol list /tmp/mnt/disks/${4} | grep data | cut -d' ' -f2` ${1}${3} /mnt/${4}
 		fi;
 	fi;
