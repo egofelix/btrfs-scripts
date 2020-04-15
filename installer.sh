@@ -669,7 +669,6 @@ if [[ ! -z "${URL_RESTORE}" ]]; then
 		declare DEV_${addDrive^^}_PART="1"
 		formatDrive "${addDrive}"
 		restoreBackup "${addDrive}"
-		exit
 	done
 	
 	# Restore normal drives
