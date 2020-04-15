@@ -118,6 +118,15 @@ function validateArguments {
 		URL_RESTORE_PATH=`echo -n ${URL_RESTORE} | cut -d '/' -f 4- | sed 's/\/$//g'`
 		URL_RESTORE_PATH="/${URL_RESTORE_PATH}/"
 		URL_RESTORE_USER=`echo -n ${TARGET_HOSTNAME} | cut -d '.' -f 1`
+		
+		chmod 600 /tmp/btrbk.identity
+		
+		SSH_OK=$(ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=/tmp/btrbk.identity ${URL_RESTORE_USER}@${URL_RESTORE_HOST} ls -ls ${URL_RESTORE_PATH} &> /dev/null && echo YES)
+		
+		if ! isTrue "${SSH_OK}"; then
+			echo SSH Connection is not working
+			exit
+		fi;
 	fi;
 	
 	ROOT_BLOCK_SIZE="204800"
