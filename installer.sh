@@ -623,6 +623,15 @@ EOM
 	done
 }
 
+function installCryptoKey {
+	# Save key on root drive to unlock other drives
+	if isTrue "${CRYPTED}"; then
+		cp /tmp/cryptsetup.key /mnt/etc/crypt.key
+		chown root:root /mnt/etc/crypt.key
+		chmod 600 /mnt/etc/crypt.key
+	fi;
+}
+
 parseArguments $@
 validateArguments
 detectSystem
@@ -682,6 +691,9 @@ if [[ ! -z "${URL_RESTORE}" ]]; then
 		mountDrive "${addDrive}"
 	done
 	
+	# Save key on root drive to unlock other drives
+	installCryptoKey
+	
 	# Reinstall Kernel to restore /boot
 	prepareChroot
 	cat > /mnt/chroot.sh <<- 'EOF'
@@ -719,11 +731,7 @@ genfstab -pL /mnt >> /mnt/etc/fstab
 echo -n "${TARGET_HOSTNAME}" > /mnt/etc/hostname
 
 # Save key on root drive to unlock other drives
-if isTrue "${CRYPTED}"; then
-	cp /tmp/cryptsetup.key /mnt/etc/crypt.key
-	chown root:root /mnt/etc/crypt.key
-	chmod 600 /mnt/etc/crypt.key
-fi;
+installCryptoKey
 
 # Prepare Chroot
 prepareChroot
