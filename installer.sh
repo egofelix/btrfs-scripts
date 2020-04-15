@@ -623,7 +623,7 @@ if isTrue "${CRYPTED}"; then
 	dd if=/dev/urandom of=/tmp/cryptsetup.key bs=1024 count=1
 fi;
 
-formatDrive "root" "home" "opt" "srv" "usr" "var"
+formatDrive "root"
 
 # Add Password for root
 if isTrue "${CRYPTED}"; then
