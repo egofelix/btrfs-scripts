@@ -438,6 +438,7 @@ function restoreBackup {
 			continue;
 		fi;
 		
+		echo ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=/tmp/btrbk.identity ${URL_RESTORE_USER}@${URL_RESTORE_HOST} find ${URL_RESTORE_PATH} -name ${var}.*.btrfs.xz | sort | awk '{ print length, $0 }' | sort -n -s | cut -d" " -f2-
 		backupFiles=$(ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=/tmp/btrbk.identity ${URL_RESTORE_USER}@${URL_RESTORE_HOST} find ${URL_RESTORE_PATH} -name ${var}.*.btrfs.xz | sort | awk '{ print length, $0 }' | sort -n -s | cut -d" " -f2-)
 		LASTFILE=""
 		for file in ${backupFiles}
