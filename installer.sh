@@ -32,7 +32,7 @@ function parseArguments {
 	DEV_VAR_PART="1"
 
 	FILESYS="btrfs"
-	VERBOSE=""
+	VERBOSE="TRUE"
 	TARGET_HOSTNAME=""
 
 	AUTOREBOOT="FALSE"
@@ -47,7 +47,7 @@ function parseArguments {
 
 	while [ "$#" -gt 0 ]; do
 	  case "$1" in
-		  --verbose) export VERBOSE="true"; shift 1;;
+		  --verbose) export VERBOSE="TRUE"; shift 1;;
 		  #--system) export TARGET_SYSTEM="$2"; shift 2;;
 		  
 		  #--fs) export DEV_ROOT_FS="$2"; export export DEV_HOME_FS="$2"; export DEV_OPT_FS="$2"; export DEV_SRV_FS="$2"; export DEV_USR_FS="$2"; export DEV_VAR_FS="$2"; shift 2;;
@@ -400,9 +400,11 @@ function mountDrive {
 			fi;
 		else
 			if [[ -z "${dev_path}" ]]; then
+				logLine "Mountin ${var} at /mnt/${var}"
 				mkdir /mnt/${var} &> /dev/null
 				mount ${mountOpts}${mountDev} /mnt/${var}
 			else
+				logLine "Mountin ${var} at /mnt/${dev_path}"
 				mkdir -p /mnt/${dev_path} &> /dev/null
 				mount ${mountOpts}${mountDev} /mnt/${dev_path}
 			fi;
