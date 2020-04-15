@@ -664,9 +664,12 @@ if [[ ! -z "${URL_RESTORE}" ]]; then
 		driveCount=$((driveCount + 1))
 		targetDrive=$(find /dev -name 'sd*' | grep -v '[0-9]$' | sort | tail -${driveCount} | head -1)
 		
-		declare DEV_${addDrive}="${targetDrive}"
-		declare DEV_${addDrive}_FS="btrfs"
-		declare DEV_${addDrive}_PART="1"
+		declare DEV_${addDrive^^}="${targetDrive}"
+		declare DEV_${addDrive^^}_FS="btrfs"
+		declare DEV_${addDrive^^}_PART="1"
+		formatDrive "${addDrive}"
+		restoreBackup "${addDrive}"
+		exit
 	done
 	
 	# Restore normal drives
@@ -677,8 +680,6 @@ if [[ ! -z "${URL_RESTORE}" ]]; then
 	# Restore additional drives
 	for addDrive in "${additionalDrives}"
 	do
-		formatDrive "${addDrive}"
-		restoreBackup "${addDrive}"
 		mountDrive "${addDrive}"
 	done
 	
