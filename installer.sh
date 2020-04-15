@@ -1,92 +1,168 @@
 #!/bin/bash
 
 # Parse arguments
-CRYPTED=""
-TARGET_SYSTEM="DEBIAN"
+function parseArguments {
+	CRYPTED="TRUE"
+	TARGET_SYSTEM="DEBIAN"
+	
+	DEV_AUTO="TRUE"
+	
+	DEV_ROOT="/dev/sda"
+	DEV_ROOT_FS="btrfs"
+	DEV_ROOT_PART="2"
 
-DEV_ROOT="/dev/sda"
-DEV_ROOT_FS="ext4"
+	DEV_HOME=""
+	DEV_HOME_FS="btrfs"
+	DEV_HOME_PART="1"
 
-DEV_HOME=""
-DEV_HOME_FS="ext4"
+	DEV_OPT=""
+	DEV_OPT_FS="btrfs"
+	DEV_OPT_PART="1"
 
-DEV_OPT=""
-DEV_OPT_FS="ext4"
+	DEV_SRV=""
+	DEV_SRV_FS="btrfs"
+	DEV_SRV_PART="1"
 
-DEV_SRV=""
-DEV_SRV_FS="ext4"
+	DEV_USR=""
+	DEV_USR_FS="btrfs"
+	DEV_USR_PART="1"
 
-DEV_USR=""
-DEV_USR_FS="ext4"
+	DEV_VAR=""
+	DEV_VAR_FS="btrfs"
+	DEV_VAR_PART="1"
 
-DEV_VAR=""
-DEV_VAR_FS="ext4"
+	FILESYS="btrfs"
+	VERBOSE=""
+	TARGET_HOSTNAME=""
 
-FILESYS="btrfs"
-VERBOSE=""
-TARGET_HOSTNAME=""
+	AUTOREBOOT="FALSE"
 
-ANSIBLE_PULL_REPO=""
-AUTOREBOOT="yes"
+	IS_EFI="TRUE"
+	ROOT_SIZE=""
+	STOP_AT_INSTALL_BASE="FALSE"
+	CIPHER=""
 
-IS_EFI="yes"
-ROOT_SIZE=""
-STOP_AT_INSTALL_BASE=""
-CIPHER=""
+	URL_BACKUP=""
+	URL_RESTORE=""
 
-URL_BACKUP=""
-URL_RESTORE=""
+	while [ "$#" -gt 0 ]; do
+	  case "$1" in
+		  --verbose) export VERBOSE="true"; shift 1;;
+		  #--system) export TARGET_SYSTEM="$2"; shift 2;;
+		  
+		  #--fs) export DEV_ROOT_FS="$2"; export export DEV_HOME_FS="$2"; export DEV_OPT_FS="$2"; export DEV_SRV_FS="$2"; export DEV_USR_FS="$2"; export DEV_VAR_FS="$2"; shift 2;;
 
-while [ "$#" -gt 0 ]; do
-  case "$1" in
-      --verbose) export VERBOSE=" --verbose"; shift 1;;
-      --system) export TARGET_SYSTEM="$2"; shift 2;;
-      
-      --fs) export DEV_ROOT_FS="$2"; export export DEV_HOME_FS="$2"; export DEV_OPT_FS="$2"; export DEV_SRV_FS="$2"; export DEV_USR_FS="$2"; export DEV_VAR_FS="$2"; shift 2;;
+		  --root) export DEV_ROOT="$2"; DEV_AUTO="FALSE"; shift 2;;
+		  #--root-fs) export DEV_ROOT_FS="$2"; shift 2;;
 
-      --root) export DEV_ROOT="$2"; shift 2;;
-      --root-fs) export DEV_ROOT_FS="$2"; shift 2;;
+		  --home) export DEV_HOME="$2"; DEV_AUTO="FALSE"; shift 2;;
+		  #--home-fs) export DEV_HOME_FS="$2"; shift 2;;
 
-      --home) export DEV_HOME="$2"; shift 2;;
-      --home-fs) export DEV_HOME_FS="$2"; shift 2;;
+		  --opt) export DEV_OPT="$2"; DEV_AUTO="FALSE"; shift 2;;
+		  #--opt-fs) export DEV_OPT_FS="$2"; shift 2;;
 
-      --opt) export DEV_OPT="$2"; shift 2;;
-      --opt-fs) export DEV_OPT_FS="$2"; shift 2;;
+		  --srv) export DEV_SRV="$2"; DEV_AUTO="FALSE"; shift 2;;
+		  #--srv-fs) export DEV_SRV_FS="$2"; shift 2;;
 
-      --srv) export DEV_SRV="$2"; shift 2;;
-      --srv-fs) export DEV_SRV_FS="$2"; shift 2;;
+		  --usr) export DEV_USR="$2"; DEV_AUTO="FALSE"; shift 2;;
+		  #--usr-fs) export DEV_USR_FS="$2"; shift 2;;
 
-      --usr) export DEV_USR="$2"; shift 2;;
-      --usr-fs) export DEV_USR_FS="$2"; shift 2;;
+		  --var) export DEV_VAR="$2"; DEV_AUTO="FALSE"; shift 2;;
+		  #--var-fs) export DEV_VAR_FS="$2"; shift 2;;
+		  
+		  --backup) export URL_BACKUP="$2"; shift 2;;
+		  --restore) export URL_RESTORE="$2"; shift 2;;
+		  
+		  --os) export TARGET_SYSTEM="$2"; shift 2;;
 
-      --var) export DEV_VAR="$2"; shift 2;;
-      --var-fs) export DEV_VAR_FS="$2"; shift 2;;
+		  --no-crypt) export CRYPTED="FALSE"; shift 1;;
+		  --cipher) export CIPHER=" -c $2"; shift 2;;
+		  
+		  --hostname) export TARGET_HOSTNAME="$2"; shift 2;;
 	  
-	  --backup) export URL_BACKUP="$2"; shift 2;;
-	  --restore) export URL_RESTORE="$2"; shift 2;;
-	  
-	  --os) export TARGET_SYSTEM="$2"; shift 2;;
+		  --no-reboot) export AUTOREBOOT="FALSE"; shift 1;;
+		  
+		  --root-size) export ROOT_SIZE="$2"; shift 2;;
+		  
+		  --stop-at-base) export STOP_AT_INSTALL_BASE="TRUE"; shift 1;;
 
-      --crypt) export CRYPTED="true"; shift 1;;
-	  --cipher) export CIPHER="$2"; shift 2;;
-	  
-      --hostname) export TARGET_HOSTNAME="$2"; shift 2;;
+		  -*) echo "unknown option: $1" >&2; exit 1;;
+		   *) echo "unknown option: $1" >&2; exit 1;;
+	  esac
+	done
+}
 
-      --pullrepo) export ANSIBLE_PULL_REPO="$2"; shift 2;;
-	  
-	  --no-reboot) export AUTOREBOOT="no"; shift 1;;
-	  
-	  --root-size) export ROOT_SIZE="$2"; shift 2;;
-	  
-	  --stop-at-base) export STOP_AT_INSTALL_BASE="YES"; shift 1;;
+function validateArguments {
+	if [[ "${TARGET_SYSTEM^^}" != "DEBIAN" ]]; then
+		echo "Only supported target system is debian at the moment"
+		exit 1
+	fi;
 
-      -*) echo "unknown option: $1" >&2; exit 1;;
-       *) echo "unknown option: $1" >&2; exit 1;;
-  esac
-done
+	if [[ -z "${TARGET_HOSTNAME}" ]]; then
+	  echo "Please specify a hostname with --hostname HOSTNAME"
+	  exit 1
+	fi;
+	
+	TARGET_HOSTNAME_SHORT=`echo -n ${TARGET_HOSTNAME} | cut -d '.' -f 1`
+	
+	if [[ ! -z "${URL_BACKUP}" ]]; then
+		URL_BACKUP=`echo ${URL_BACKUP} | sed -e "s/\%hostname\%/${TARGET_HOSTNAME_SHORT}/g"`
+		URL_BACKUP_HOST=`echo -n ${URL_BACKUP} | cut -d '/' -f 3`
+		URL_BACKUP_PATH=`echo -n ${URL_BACKUP} | cut -d '/' -f 4- | sed 's/\/$//g'`
+		URL_BACKUP_PATH="/${URL_BACKUP_PATH}/"
+		URL_BACKUP_USER=`echo -n ${TARGET_HOSTNAME} | cut -d '.' -f 1`
+	fi;
+	if [[ ! -z "${URL_RESTORE}" ]]; then
+		URL_RESTORE=`echo ${URL_RESTORE} | sed -e "s/\%hostname\%/${TARGET_HOSTNAME_SHORT}/g"`
+		URL_RESTORE_HOST=`echo -n ${URL_RESTORE} | cut -d '/' -f 3`
+		URL_RESTORE_PATH=`echo -n ${URL_RESTORE} | cut -d '/' -f 4- | sed 's/\/$//g'`
+		URL_RESTORE_PATH="/${URL_RESTORE_PATH}/"
+		URL_RESTORE_USER=`echo -n ${TARGET_HOSTNAME} | cut -d '.' -f 1`
+	fi;
+	
+	ROOT_BLOCK_SIZE="204800"
+	if [[ ! -z "${ROOT_SIZE}" ]]; then
+		ROOT_BLOCK_SIZE=`expr ${ROOT_SIZE} \* 1024 \* 2048`
+	fi;
+}
+
+function isTrue {
+	if [[ "${1^^}" = "YES" ]]; then return 0; fi;
+	if [[ "${1^^}" = "TRUE" ]]; then return 0; fi;
+	return 1;
+}
+
+function logLine {
+	if isTrue "true"; then
+        echo $@
+	fi;
+}
+
+function detectSystem {
+	IS_EFI="false"
+	if [[ ! -d "/sys/firmware/efi" ]]; then
+		logLine "BIOS DETECTED"
+	else
+		IS_EFI="true"
+		DEV_ROOT_PART="3"
+		logLine "EFI DETECTED"
+	fi;
+	
+	if isTrue "${DEV_AUTO}"; then
+		if [[ -b "/dev/sdd" ]]; then
+			DEV_SRV="/dev/sdd"
+		fi
+		if [[ -b "/dev/sdc" ]]; then
+			DEV_USR="/dev/sdc"
+		fi
+		if [[ -b "/dev/sdb" ]]; then
+			DEV_VAR="/dev/sdb"
+		fi
+	fi;
+}
 
 function getSystemType {
-  DISTIDENTIFIER=`uname -m`
+  DISTIDENTIFIER=$(uname -m)
   if [[ "${DISTIDENTIFIER^^}" = "ARMV7L" ]]; then
     echo -n "ARMHF";
   else
@@ -95,7 +171,7 @@ function getSystemType {
 }
 
 function getSystemName {
-  SYSNAME=`uname -a`
+  SYSNAME=$(uname -a)
   if [[ "${SYSNAME^^}" = *"DEBIAN"* ]]; then
     echo -n "DEBIAN";
   elif [[ "${SYSNAME^^}" = *"ARCH"* ]]; then
@@ -105,771 +181,505 @@ function getSystemName {
   fi;
 }
 
-function installPackage {
-  if [[ ( "${3}" != "" ) && ( "${2}" = "" || $(getSystemName) == "${2^^}" ) ]]; then
-    EXISTS=`type ${3} >/dev/null 2>&1 || echo "Not Installed"`
-    if [[ "${EXISTS}" = "" ]]; then
-      echo ${1} is already installed...
-      return 0
-    fi;
-  fi;
-  
-  if [[ ( "${2}" = "" && $(getSystemName) = "DEBIAN" ) || ( $(getSystemName) == "${2^^}" ) ]]; then
-    echo Installing ${1}...
-    DEBIAN_FRONTEND=noninteractive apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $1 -qq > /dev/null
-  fi;
-
-  if [[ ( "${2}" = "" && $(getSystemName) = "ARCHLINUX" ) || ( $(getSystemName) == "${2^^}" ) ]]; then
-    echo Installing ${1}...
-    pacman -Sy --noconfirm ${1}
-  fi;
-
-  return 0
+function installDependency {
+	local SYSTEM_NAME=${1^^}
+	local PACKAGE=${2}
+	local CMD_NAME=${3}
+	
+	if [[ $(getSystemName) != "${SYSTEM_NAME}" ]]; then return 0; fi;
+	
+	if [[ $(getSystemName) = "DEBIAN" ]]; then
+		if which ${CMD_NAME} > /dev/null; then
+			return 1
+		else
+			echo Installing ${PACKAGE}...
+			DEBIAN_FRONTEND=noninteractive apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ${PACKAGE} -qq > /dev/null
+		fi;
+	fi;
+	
+	return -1;
 }
 
-function formatPartition {
-  FILESYSFORCE="-F"
-  if [[ "${3^^}" = "BTRFS" ]]; then
-    FILESYSFORCE="-f"
-  fi;
+function installDependencies {
+	installDependency "DEBIAN" "debootstrap" "debootstrap"
+	installDependency "DEBIAN" "parted" "parted"
+	installDependency "DEBIAN" "arch-install-scripts" "genfstab"
+	installDependency "DEBIAN" "btrfs-progs" "btrfs"
+	installDependency "DEBIAN" "cryptsetup" "cryptsetup"
+	installDependency "DEBIAN" "dosfstools" "mkfs.vfat"
+	#installDependency "DEBIAN" "btrbk" "btrbk"
+}
 
-  if [[ "${4^^}" = "TRUE" ]]; then
-    if [[ ! -z "${6}" ]]; then
-	  if [[ ! -z "${5}" ]]; then
-        cryptsetup --batch-mode luksFormat --type luks1 -c ${5} ${1} -d ${6}
-        cryptsetup --batch-mode open ${1} crypt${2} -d ${6}
-	  else
-        cryptsetup --batch-mode luksFormat --type luks1 ${1} -d ${6}
-        cryptsetup --batch-mode open ${1} crypt${2} -d ${6}	  
-	  fi;
-    else
-	  if [[ ! -z "${5}" ]]; then
-        echo test1234 | cryptsetup --batch-mode luksFormat --type luks1 -c ${5} ${1}
-        echo test1234 | cryptsetup --batch-mode open ${1} crypt${2}
-	  else
-        echo test1234 | cryptsetup --batch-mode luksFormat --type luks1 ${1}
-        echo test1234 | cryptsetup --batch-mode open ${1} crypt${2}
-	  fi;
-    fi;
-
-    mkfs.${3,,} ${FILESYSFORCE} -L ${2} /dev/mapper/crypt${2}
-    sync
-  else
-    mkfs.${3,,} ${FILESYSFORCE} -L ${2} ${1}
-    sync
-  fi;
-
-
-  if [[ "${3^^}" = "BTRFS" ]]; then
-    mkdir -p /tmp/btrfs/${2}
-
-    if [[ "${4^^}" = "TRUE" ]]; then
-      mount /dev/mapper/crypt${2} /tmp/btrfs/${2}
-    else
-      mount ${1} /tmp/btrfs/${2}
-    fi;
-    #btrfs subvolume create /tmp/btrfs/${2}/data
-    #btrfs subvol set-default `btrfs subvol list /tmp/btrfs/${2} | grep data | cut -d' ' -f2` /tmp/btrfs/${2}
-    sync
-    umount /tmp/btrfs/${2}
-    sync
-  fi;
+function cleanupOldMounts {
+	umount -R /mnt/* &> /dev/null
+	umount -R /mnt &> /dev/null
+	umount -R /tmp/mnt/disks/* &> /dev/null
+	sync
+	
+	rm -rf /tmp/mnt/disks/*
+	
+	cryptsetup --batch-mode close cryptroot &> /dev/null
+	cryptsetup --batch-mode close crypthome &> /dev/null
+	cryptsetup --batch-mode close cryptopt &> /dev/null
+	cryptsetup --batch-mode close cryptsrv &> /dev/null
+	cryptsetup --batch-mode close cryptusr &> /dev/null
+	cryptsetup --batch-mode close cryptvar &> /dev/null
 }
 
 function formatDrive {
-  sfdisk ${1} <<- EOM
+	for var in "$@"
+	do
+		local DEV="${var}"
+
+		local dev_name=DEV_${DEV^^}
+		local dev_name=${!dev_name}
+
+		local dev_fs=DEV_${DEV^^}_FS
+		local dev_fs=${!dev_fs}
+
+		local dev_part=DEV_${DEV^^}_PART
+		local dev_part=${!dev_part}
+		
+		if [[ -z "${dev_name}" ]]; then
+			continue;
+		fi;
+
+		logLine "Partitioning ${dev_name}"
+		
+		if [[ "${var^^}" = "ROOT" ]]; then
+			if isTrue "${IS_EFI^^}"; then
+				sfdisk -q ${dev_name} &> /dev/null <<- EOM
 label: gpt
 unit: sectors
 
-start=        2048, size=      204800, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="${2}"
+start=        2048, size=      204800, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, name="efi"
+start=      206848, size=      512000, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="boot"
+start=      718848, size=      ${ROOT_BLOCK_SIZE}, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="root"
 EOM
-  sync
 
-  # Resize Root Partition
-  parted ${1} resizepart 1 100%
-  sync
+				if [[ $? -ne 0 ]]; then
+					echo "Failed to partition drive"
+					exit 1
+				fi;
+				
+				mkfs.vfat -F32 ${dev_name}1 &> /dev/null
+				fatlabel ${dev_name} EFI &> /dev/null
+				mkfs.ext2 -F -L boot ${dev_name}2 &> /dev/null
+			else
+				sfdisk -q ${dev_name} &> /dev/null <<- EOM
+label: gpt
+unit: sectors
 
-  # Create Filesystem
-  if [[ "${4^^}" = "TRUE" ]]; then
-    formatPartition ${1}1 ${2} ${3} ${4} ${5} /mnt/crypt.key
-  else
-    formatPartition ${1}1 ${2} ${3} ${4} ${5}
-  fi;
+start=2048, size=512000, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="boot"
+start=514048, size=${ROOT_BLOCK_SIZE}, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="root"
 
-  # Mount
-  mkdir /mnt/${2}
-  
-  if [[ "${4^^}" = "TRUE" ]]; then
-	if [[ "${3^^}" = "BTRFS" ]]; then
-		mount -o subvol=data /dev/mapper/crypt${2} /mnt/${2}
-	else
-		mount /dev/mapper/crypt${2} /mnt/${2}
-	fi;
-  else
-	if [[ "${3^^}" = "BTRFS" ]]; then
-		mount -o subvol=data ${1}1 /mnt/${2}
-	else
-		mount ${1}1 /mnt/${2}
-	fi;
-  fi;
+EOM
+				if [[ $? -ne 0 ]]; then
+					echo "Failed to partition drive"
+					exit 1
+				fi;
 
-  sync
+				mkfs.ext2 -F -L boot ${dev_name}1 &> /dev/null
+			fi;
+			
+			# Resize root if no size was specified
+			if [[ -z "${ROOT_SIZE}" ]]; then
+				parted ${dev_name} resizepart ${dev_part} 100%
+			fi;
+		else
+			sfdisk -q ${dev_name} <<- EOM
+label: gpt
+unit: sectors
+
+start=        2048, size=      204800, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="${DEV}"
+EOM
+
+			if [[ $? -ne 0 ]]; then
+				echo "Failed to partition drive"
+				exit 1
+			fi;
+
+			parted ${dev_name} resizepart ${dev_part} 100%
+		fi;
+		
+		local FILESYSFORCE="-F"
+		if [[ "${dev_fs^^}" = "BTRFS" ]]; then
+			FILESYSFORCE="-f"
+		fi;
+		
+		mkdir -p /tmp/mnt/disks/${var}
+		if isTrue "${CRYPTED}"; then
+			logLine "Encrypting ${dev_name}${dev_part}"
+			
+			cryptsetup --batch-mode luksFormat --type luks1 -d /tmp/cryptsetup.key${CIPHER} ${dev_name}${dev_part} &> /dev/null
+			cryptsetup --batch-mode open ${dev_name}${dev_part} crypt${var} -d /tmp/cryptsetup.key &> /dev/null
+			
+			logLine "Formatting ${dev_name}"
+			mkfs.${dev_fs} ${FILESYSFORCE} -L ${var} /dev/mapper/crypt${var} &> /dev/null
+			mount /dev/mapper/crypt${var} /tmp/mnt/disks/${var}
+		else
+			logLine "Formatting ${dev_name}"
+			mkfs.${dev_fs} ${FILESYSFORCE} -L ${var} ${dev_name}${dev_part} &> /dev/null
+			mount ${dev_name}${dev_part} /tmp/mnt/disks/${var}
+		fi;
+		
+		if [[ "${dev_fs^^}" = "BTRFS" ]]; then
+			btrfs subvolume create /tmp/mnt/disks/${var}/data
+			btrfs subvolume create /tmp/mnt/disks/${var}/snapshots
+		fi;
+		
+		logLine "Prepared ${dev_name}"
+	done
+	
+	sync
 }
 
-function createBackupMountPoint {
-  if [[ ! -z "${1}" && "${2^^}" = "BTRFS" ]]; then
-	mkdir -p /tmp/mnt/disks/${4}
-	
-	if [[ "${5^^}" = "TRUE" ]]; then
-	    mount /dev/mapper/crypt${4} /tmp/mnt/disks/${4}
-	else
-		mount ${1}${3} /tmp/mnt/disks/${4}
-	fi;
-	
-	btrfs subvolume create /tmp/mnt/disks/${4}/data
-	btrfs subvolume create /tmp/mnt/disks/${4}/snapshots
-	
-	if [[ "${4^^}" = "ROOT" ]]; then
-		umount -R /mnt
+function mountDrive {
+	for var in "$@"
+	do
+		local DEV="${var}"
+
+		local dev_name=DEV_${DEV^^}
+		local dev_name=${!dev_name}
+
+		local dev_fs=DEV_${DEV^^}_FS
+		local dev_fs=${!dev_fs}
+
+		local dev_part=DEV_${DEV^^}_PART
+		local dev_part=${!dev_part}
 		
-		if [[ "${5^^}" = "TRUE" ]]; then
-			mount -o subvol=/data /dev/mapper/crypt${4} /mnt
-		else
-			mount -o subvol=/data ${1}${3} /mnt
+		if [[ -z "${dev_name}" ]]; then
+			continue;
 		fi;
-	else
-		umount /mnt/${4}
+
+		logLine "Mounting ${dev_name}"
 		
-		if [[ "${5^^}" = "TRUE" ]]; then
-			mount -o subvol=/data /dev/mapper/crypt${4} /mnt/${4}
-		else
-			mount -o subvol=/data ${1}${3} /mnt/${4}
+		local mountOpts=""
+		if [[ "${dev_fs^^}" = "BTRFS" ]]; then
+			mountOpts="-o subvol=/data "
 		fi;
-	fi;
-  fi;
+		local mountDev="${dev_name}${dev_part}"
+		if isTrue "${CRYPTED}"; then
+			mountDev="/dev/mapper/crypt${var}"
+		fi;
+		
+		if [[ "${var^^}" = "ROOT" ]]; then
+			mount ${mountOpts}${mountDev} /mnt
+		
+			if isTrue "${IS_EFI^^}"; then
+				mkdir -p /mnt/boot &> /dev/null
+				mount ${dev_name}2 /mnt/boot
+				mkdir -p /mnt/boot/efi &> /dev/null
+				mount ${dev_name}1 /mnt/boot/efi
+			else
+				mkdir -p /mnt/boot &> /dev/null
+				mount ${dev_name}1 /mnt/boot
+			fi;
+		else
+			mkdir /mnt/${var}
+			mount ${mountOpts}${mountDev} /mnt/${var}
+		fi;
+	done
 }
 
-function mountRootPoint {
-  if [[ ! -z "${1}" && "${2^^}" = "BTRFS" ]]; then
-	mkdir -p /mnt/mnt/disks/${4}
-	
-	if [[ "${5^^}" = "TRUE" ]]; then
-		mount /dev/mapper/crypt${4} /mnt/mnt/disks/${4}
-	else
-		mount ${1}${3} /mnt/mnt/disks/${4}
+function prepareChroot {
+	# Additional Mounts for chroot
+	mount -t proc proc /mnt/proc/
+	mount -t sysfs sys /mnt/sys/
+	mount -t devtmpfs dev /mnt/dev/
+	mount -t devpts devpts /mnt/dev/pts
+	if [[ "${IS_EFI^^}" = "YES" ]]; then
+		mount -t efivarfs efivarfs /mnt/sys/firmware/efi/efivars
 	fi;
-  fi;
+
+	# Mount TMP
+	mkdir -p /mnt/tmp
+	mount -t tmpfs tmpfs /mnt/tmp
+	
+	# Enable Systemd-Networkd resolv.conf
+	rm -f /mnt/etc/resolv.conf
+	cp /etc/resolv.conf /mnt/etc/resolv.conf
 }
 
 function restoreBackup {
-  backupFiles=`ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=/tmp/btrbk.identity ${1}@${2} find ${3}backup/ -name ${4}.*.xz | sort | awk '{ print length, $0 }' | sort -n -s | cut -d" " -f2-`
-  LASTFILE=""
-  for file in ${backupFiles}
-  do
-	LASTFILE="basename ${file} | rev | cut -d '.' -f 3- | rev"
-	echo Restoring ${file}
-	ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=/tmp/btrbk.identity ${1}@${2} cat ${file} | xz -d -c | btrfs receive /tmp/mnt/disks/root
-  done
-  
-  btrfs subvolume delete /tmp/mnt/disks/root/data
-  btrfs subvolume snapshot /tmp/mnt/disks/root/${LASTFILE} /tmp/mnt/disks/root/data
-  for file in ${backupFiles}
-  do
-	# Cleanup
-	SNAP="basename ${file} | rev | cut -d '.' -f 3- | rev"
-	btrfs subvolume delete /tmp/mnt/disks/root/${SNAP}
-  done
+	for var in "$@"
+	do
+		local DEV="${var}"
 
-  echo ${4} restored!
+		local dev_name=DEV_${DEV^^}
+		local dev_name=${!dev_name}
+
+		local dev_fs=DEV_${DEV^^}_FS
+		local dev_fs=${!dev_fs}
+
+		local dev_part=DEV_${DEV^^}_PART
+		local dev_part=${!dev_part}
+		
+		if [[ -z "${dev_name}" ]]; then
+			continue;
+		fi;
+		
+		backupFiles=`ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=/tmp/btrbk.identity ${URL_RESTORE_USER}@${URL_RESTORE_HOST} find ${URL_RESTORE_PATH}backup/ -name ${var}.*.xz | sort | awk '{ print length, $0 }' | sort -n -s | cut -d" " -f2-`
+		LASTFILE=""
+		for file in ${backupFiles}
+		do
+			LASTFILE=$(basename ${file} | rev | cut -d '.' -f 3- | rev)
+			logLine Restoring ${file}
+			ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=/tmp/btrbk.identity ${URL_RESTORE_USER}@${URL_RESTORE_HOST} cat ${file} | xz -d -c | btrfs receive /tmp/mnt/disks/${var}
+		done
+  
+		btrfs subvolume delete /tmp/mnt/disks/${var}/data
+		btrfs subvolume snapshot /tmp/mnt/disks/${var}/${LASTFILE} /tmp/mnt/disks/${var}/data
+  
+		for file in ${backupFiles}
+		do
+			# Cleanup
+			SNAP=$(basename ${file} | rev | cut -d '.' -f 3- | rev)
+			btrfs subvolume delete /tmp/mnt/disks/${var}/${SNAP}
+		done
+	done
 }
 
-
-if [[ ! -d "/sys/firmware/efi" ]]; then
-  IS_EFI="no"
-  echo "BIOS DETECTED"
-  #exit 1
-else
-  echo "EFI DETECTED"
-fi;
-
-if [[ "${TARGET_SYSTEM^^}" != "DEBIAN" ]]; then
-  if [[ "${TARGET_SYSTEM^^}" != "ARCH" ]]; then
-    echo "Only supported target system is arch and debian atm"
-    exit 1
-  fi;
-fi;
-
-if [[ -z "${TARGET_HOSTNAME}" ]]; then
-  echo "Please specify a hostname with --hostname HOSTNAME"
-  exit 1
-fi;
-
-if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
-  installPackage debootstrap "" debootstrap;
-fi;
-
-if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
-  installPackage pacstrap "" pacstrap;
-fi;
-
-TARGET_SHORT_HOSTNAME=`echo -n ${TARGET_HOSTNAME} | cut -d '.' -f 1`
-if [[ ! -z "${URL_BACKUP}" ]]; then
-	URL_BACKUP=`echo ${URL_BACKUP} | sed -e "s/\%hostname\%/${TARGET_SHORT_HOSTNAME}/g"`
-fi;
-if [[ ! -z "${URL_RESTORE}" ]]; then
-	URL_RESTORE=`echo ${URL_RESTORE} | sed -e "s/\%hostname\%/${TARGET_SHORT_HOSTNAME}/g"`
-fi;
-
-installPackage parted "" parted;
-installPackage "arch-install-scripts" "DEBIAN" genfstab;
-installPackage "cryptsetup" "DEBIAN" cryptsetup;
-installPackage "btrfs-progs" "DEBIAN" btrfs;
-installPackage "btrbk" "DEBIAN" btrbk;
-installPackage "dosfstools" "" mkfs.vfat;
-
-umount -R /mnt/*
-umount -R /mnt
-umount -R /tmp/mnt/disks/*
-umount -R /tmp/btrfs/*
-cryptsetup --batch-mode close cryptroot
-cryptsetup --batch-mode close crypthome
-cryptsetup --batch-mode close cryptopt
-cryptsetup --batch-mode close cryptsrv
-cryptsetup --batch-mode close cryptusr
-cryptsetup --batch-mode close cryptvar
-
-# Format Disk
-ROOT_BLOCK_SIZE="204800"
-if [[ ! -z "${ROOT_SIZE}" ]]; then
-  ROOT_BLOCK_SIZE=`expr ${ROOT_SIZE} \* 1024 \* 2048`
-fi;
-
-if [[ "${IS_EFI^^}" = "YES" ]]; then
-	ROOT_PART_NUM="3"
-	echo <<- EOM
-label: gpt
-unit: sectors
-
-start=        2048, size=      204800, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, name="efi"
-start=      206848, size=      512000, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="boot"
-start=      718848, size=      ${ROOT_BLOCK_SIZE}, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="root"
-EOM
-	sfdisk ${DEV_ROOT} <<- EOM
-label: gpt
-unit: sectors
-
-start=        2048, size=      204800, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, name="efi"
-start=      206848, size=      512000, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="boot"
-start=      718848, size=      ${ROOT_BLOCK_SIZE}, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="root"
-EOM
-fi;
-
-if [[ "${IS_EFI^^}" = "NO" ]]; then
-	ROOT_PART_NUM="2"
-	echo <<- EOM
-label: gpt
-unit: sectors
-
-start=2048, size=512000, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="boot"
-start=514048, size=${ROOT_BLOCK_SIZE}, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="root"
-
-EOM
-	sfdisk ${DEV_ROOT} <<- EOM
-label: gpt
-unit: sectors
-
-start=2048, size=512000, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="boot"
-start=514048, size=${ROOT_BLOCK_SIZE}, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="root"
-
-EOM
-fi;
-sync
-
-# Resize Root Partition
-if [[ -z "${ROOT_SIZE}" ]]; then
-  parted ${DEV_ROOT} resizepart ${ROOT_PART_NUM} 100%
-fi;
-
-
-sync
-
-# Create Filesystems
-if [[ "${IS_EFI^^}" = "YES" ]]; then
-	mkfs.vfat -F32 ${DEV_ROOT}1
-	fatlabel ${DEV_ROOT} EFI
-	mkfs.ext2 -F -L boot ${DEV_ROOT}2
-else
-	mkfs.ext2 -F -L boot ${DEV_ROOT}1
-	
-fi;
-
-formatPartition ${DEV_ROOT}${ROOT_PART_NUM} root ${DEV_ROOT_FS} ${CRYPTED} ${CIPHER}
-sync
-
-# Mount Root
-if [[ "${CRYPTED^^}" = "TRUE" ]]; then
-  mount /dev/mapper/cryptroot /mnt
-else
-  mount ${DEV_ROOT}${ROOT_PART_NUM} /mnt
-fi;
-createBackupMountPoint ${DEV_ROOT} ${DEV_ROOT_FS} ${ROOT_PART_NUM} root ${CRYPTED}
-
-# Mount Boot and Efi
-if [[ "${IS_EFI^^}" = "YES" ]]; then
-	mkdir /mnt/boot
-	mount ${DEV_ROOT}2 /mnt/boot
-	mkdir /mnt/boot/efi
-	mount ${DEV_ROOT}1 /mnt/boot/efi
-else
-	mkdir /mnt/boot
-	mount ${DEV_ROOT}1 /mnt/boot
-fi;
-sync
-
-# Generate a key file
-if [[ "${CRYPTED^^}" = "TRUE" ]]; then
-  dd if=/dev/urandom of=/mnt/crypt.key bs=1024 count=1
-  echo test1234 | cryptsetup --batch-mode luksAddKey ${DEV_ROOT}${ROOT_PART_NUM} /mnt/crypt.key
-fi;
-
-# Format Additional Partitions?
-if [[ ! -z "${DEV_HOME}" ]];    then formatDrive ${DEV_HOME} home ${DEV_HOME_FS} ${CRYPTED} ${CIPHER}; fi;
-if [[ ! -z "${DEV_OPT}" ]];     then formatDrive ${DEV_OPT} opt ${DEV_OPT_FS} ${CRYPTED} ${CIPHER}; fi;
-if [[ ! -z "${DEV_SRV}" ]];     then formatDrive ${DEV_SRV} srv ${DEV_SRV_FS} ${CRYPTED} ${CIPHER}; fi;
-if [[ ! -z "${DEV_USR}" ]];     then formatDrive ${DEV_USR} usr ${DEV_USR_FS} ${CRYPTED} ${CIPHER}; fi;
-if [[ ! -z "${DEV_VAR}" ]];     then formatDrive ${DEV_VAR} var ${DEV_VAR_FS} ${CRYPTED} ${CIPHER}; fi;
-
-# Mount root for backups and switch to data subvolume
-if [[ ! -z "${DEV_HOME}" ]];    then createBackupMountPoint ${DEV_HOME} ${DEV_HOME_FS} 1 home ${CRYPTED}; fi;
-if [[ ! -z "${DEV_OPT}" ]];     then createBackupMountPoint ${DEV_OPT} ${DEV_OPT_FS} 1 opt ${CRYPTED}; fi;
-if [[ ! -z "${DEV_SRV}" ]];     then createBackupMountPoint ${DEV_SRV} ${DEV_SRV_FS} 1 srv ${CRYPTED}; fi;
-if [[ ! -z "${DEV_USR}" ]];     then createBackupMountPoint ${DEV_USR} ${DEV_USR_FS} 1 usr ${CRYPTED}; fi;
-if [[ ! -z "${DEV_VAR}" ]];     then createBackupMountPoint ${DEV_VAR} ${DEV_VAR_FS} 1 var ${CRYPTED}; fi;
-
-if [[ ! -z "${STOP_AT_INSTALL_BASE}" ]]; then
-	exit
-fi;
-
-if [[ ! -z "${URL_RESTORE}" ]]; then
-	
-	umount -R /mnt/
-
-	RESTORE_HOST=`echo -n ${URL_RESTORE} | cut -d '/' -f 3`
-	RESTORE_PATH=`echo -n ${URL_RESTORE} | cut -d '/' -f 4- | sed 's/\/$//g'`
-	RESTORE_PATH="/${RESTORE_PATH}/"
-	RESTORE_USER=`echo -n ${TARGET_HOSTNAME} | cut -d '.' -f 1`
-	
-	# Restore root
-	restoreBackup "${RESTORE_USER}" "${RESTORE_HOST}" "${RESTORE_PATH}" "root"
-
-	# Restore other Partitions	
-	if [[ ! -z "${DEV_HOME}" ]];    then restoreBackup "${RESTORE_USER}" "${RESTORE_HOST}" "${RESTORE_PATH}" "home"; fi;
-	if [[ ! -z "${DEV_OPT}" ]];     then restoreBackup "${RESTORE_USER}" "${RESTORE_HOST}" "${RESTORE_PATH}" "opt"; fi;
-	if [[ ! -z "${DEV_SRV}" ]];     then restoreBackup "${RESTORE_USER}" "${RESTORE_HOST}" "${RESTORE_PATH}" "srv"; fi;
-	if [[ ! -z "${DEV_USR}" ]];     then restoreBackup "${RESTORE_USER}" "${RESTORE_HOST}" "${RESTORE_PATH}" "usr"; fi;
-	if [[ ! -z "${DEV_VAR}" ]];     then restoreBackup "${RESTORE_USER}" "${RESTORE_HOST}" "${RESTORE_PATH}" "var"; fi;
-	
-	# Mount Root
-	if [[ "${CRYPTED^^}" = "TRUE" ]]; then
-		mount -o subvol=/data /dev/mapper/cryptroot /mnt
-	else
-		mount -o subvol=/data ${DEV_ROOT}${ROOT_PART_NUM} /mnt
-	fi;
-	
-	# Mount Boot and Efi
-	if [[ "${IS_EFI^^}" = "YES" ]]; then
-		mkdir /mnt/boot
-		mount ${DEV_ROOT}2 /mnt/boot
-		mkdir /mnt/boot/efi
-		mount ${DEV_ROOT}1 /mnt/boot/efi
-	else
-		mkdir /mnt/boot
-		mount ${DEV_ROOT}1 /mnt/boot
-	fi;
-	sync
-
-	# Remount drives
-	
-	# Reinstall Grub
-	cat > /mnt/chrootinit.sh <<- EOM
+function installGrub {
+	cat > /mnt/chroot.sh <<- EOM
 #!/bin/bash
 . /etc/profile
 EOM
-
-	# Install Bootloader
-	if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
-	  cat >> /mnt/chrootinit.sh <<- EOM
-	pacman -Sy --noconfirm efibootmgr grub
-	grub-install
-	grub-mkconfig -o /boot/grub/grub.cfg
-	EOM
-	fi;
-
+	chmod +x /mnt/chroot.sh
+	
 	if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
 		if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
-	echo WILL USE GRUB-EFI-ARM
-			cat >> /mnt/chrootinit.sh <<- EOM
-	DEBIAN_FRONTEND=noninteractive apt-get install -y -qq grub-efi-arm
-	grub-install --removable --target=arm-efi --boot-directory=/boot --efi-directory=/boot/efi
-	update-initramfs -k all -u
-	grub-mkconfig -o /boot/grub/grub.cfg
-	EOM
+			echo WILL USE GRUB-EFI-ARM
+			echo "DEBIAN_FRONTEND=noninteractive apt-get install -y -qq grub-efi-arm" >> /mnt/chroot.sh
+			echo "grub-install --removable --target=arm-efi --boot-directory=/boot --efi-directory=/boot/efi" >> /mnt/chroot.sh
 		else
-	echo WILL USE GRUB-EFI
-			cat >> /mnt/chrootinit.sh <<- EOM
-	DEBIAN_FRONTEND=noninteractive apt-get install -y -qq grub-efi
-	grub-install
-	update-initramfs -k all -u
-	grub-mkconfig -o /boot/grub/grub.cfg
-	EOM
+			echo WILL USE GRUB-EFI
+			echo "DEBIAN_FRONTEND=noninteractive apt-get install -y -qq grub-efi" >> /mnt/chroot.sh
+			echo "grub-install --target=x86_64-efi --boot-directory=/boot --efi-directory=/boot/efi" >> /mnt/chroot.sh
 		fi;
 	fi;
 	
-	chmod +x /mnt/chrootinit.sh
-	chroot /mnt /chrootinit.sh;
-	
-	exit
-fi;
+	echo "update-initramfs -k all -u" >> /mnt/chroot.sh
+	echo "grub-mkconfig -o /boot/grub/grub.cfg" >> /mnt/chroot.sh
+	chroot /mnt /chroot.sh
+	rm /mnt/chroot.sh
+}
 
-# Install Base to /mnt
-echo "Installing Base System..."
+function restoreResolve {
+	cat > /mnt/chroot.sh <<- 'EOF'
+#!/bin/bash
+. /etc/profile
+rm -f /etc/resolv.conf
+ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+EOF
+	chmod +x /mnt/chroot.sh
+	chroot /mnt /chroot.sh
+	rm /mnt/chroot.sh
+}
 
-# Install Strap
-if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
-  pacstrap /mnt base linux linux-firmware
-elif [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
-  debootstrap stable /mnt http://ftp.de.debian.org/debian/;
-else
-  echo "Could not install system"
-  exit 1
-fi;
+function installDebian {
+	cat > /mnt/chroot.sh <<- 'EOF'
+#!/bin/bash
+. /etc/profile
 
-# Additional Mounts for chroot
-echo "Mountint additional Mounts";
-mount -t proc proc /mnt/proc/
-mount -t sysfs sys /mnt/sys/
-mount -t devtmpfs dev /mnt/dev/
-mount -t devpts devpts /mnt/dev/pts
-if [[ "${IS_EFI^^}" = "YES" ]]; then
-	mount -t efivarfs efivarfs /mnt/sys/firmware/efi/efivars
-fi;
+DEBIAN_FRONTEND=noninteractive apt-get update -qq
+echo -e "root\nroot" | passwd root
 
-# Mount TMP
-mkdir -p /mnt/tmp
-mount -t tmpfs tmpfs /mnt/tmp
+DEBIAN_FRONTEND=noninteractive apt-get install -y -qq locales console-data dirmngr btrfs-progs btrbk
+sed -i '/de_DE.UTF-8/s/^#//' /etc/locale.gen
+sed -i '/en_US.UTF-8/s/^#//' /etc/locale.gen
+locale-gen
+echo -e 'LANG="en_US.UTF-8"\nLANGUAGE="en_US.UTF-8"\nLC_ALL="en_US.UTF-8"\n' > /etc/default/locale
 
-if [[ ! -z "${URL_BACKUP}" ]];  then
-  mkdir -p /mnt/etc/btrbk/
-  cat > /mnt/etc/btrbk/btrbk.conf <<- EOM
-snapshot_dir snapshots
+echo "btrfs" >> /etc/initramfs-tools/modules
 
-snapshot_preserve_min latest
-snapshot_preserve 0h
+systemctl enable systemd-networkd
+systemctl enable systemd-resolved
 
-raw_target_compress   xz
-#raw_target_encrypt    gpg
+DEBIAN_FRONTEND=noninteractive apt-get install -y -qq openssh-server
+sed -i 's/^#PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config
+sed -i 's/^PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config
 
-#gpg_keyring           /etc/btrbk/gpg/pubring.gpg
-#gpg_recipient         btrbk@mydomain.com
+EOF
 
-#target raw /backup
+	# Install Kernel
+	if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
+		echo "DEBIAN_FRONTEND=noninteractive apt-get install -y -qq linux-image-armmp-lpae" >> /mnt/chroot.sh
+	else
+		echo "DEBIAN_FRONTEND=noninteractive apt-get install -y -qq linux-image-amd64" >> /mnt/chroot.sh
+	fi;
 
-EOM
-fi;
+	# Crypted?
+	if isTrue "${CRYPTED}"; then
+		# Install cryptsetup & dropbear
+		echo "DEBIAN_FRONTEND=noninteractive apt-get install -y -qq cryptsetup dropbear-initramfs" >> /mnt/chroot.sh
 
-if [[ "${CRYPTED^^}" = "TRUE" ]]; then
-    mountRootPoint ${DEV_ROOT} ${DEV_ROOT_FS} ${ROOT_PART_NUM} root ${CRYPTED};
-	if [[ ! -z "${DEV_HOME}" ]];    then mountRootPoint ${DEV_HOME} ${DEV_HOME_FS} 1 home ${CRYPTED}; fi;
-	if [[ ! -z "${DEV_OPT}" ]];     then mountRootPoint ${DEV_OPT} ${DEV_OPT_FS} 1 opt ${CRYPTED}; fi;
-	if [[ ! -z "${DEV_SRV}" ]];     then mountRootPoint ${DEV_SRV} ${DEV_SRV_FS} 1 srv ${CRYPTED}; fi;
-	if [[ ! -z "${DEV_USR}" ]];     then mountRootPoint ${DEV_USR} ${DEV_USR_FS} 1 usr ${CRYPTED}; fi;
-	if [[ ! -z "${DEV_VAR}" ]];     then mountRootPoint ${DEV_VAR} ${DEV_VAR_FS} 1 var ${CRYPTED}; fi;
-fi;
+		# Also create crypttab
+		echo "echo cryptroot PARTLABEL=root none luks > /etc/crypttab" >> /mnt/chroot.sh
+		if [[ ! -z "${DEV_HOME}" ]]; then echo "echo crypthome PARTLABEL=home /etc/crypt.key luks >> /etc/crypttab" >> /mnt/chroot.sh; fi;
+		if [[ ! -z "${DEV_OPT}" ]];  then echo "echo cryptopt PARTLABEL=opt /etc/crypt.key luks >> /etc/crypttab" >> /mnt/chroot.sh; fi;
+		if [[ ! -z "${DEV_SRV}" ]];  then echo "echo cryptsrv PARTLABEL=srv /etc/crypt.key luks >> /etc/crypttab" >> /mnt/chroot.sh; fi;
+		if [[ ! -z "${DEV_USR}" ]];  then echo "echo cryptusr PARTLABEL=usr /etc/crypt.key luks >> /etc/crypttab" >> /mnt/chroot.sh; fi;
+		if [[ ! -z "${DEV_VAR}" ]];  then echo "echo cryptvar PARTLABEL=var /etc/crypt.key luks >> /etc/crypttab" >> /mnt/chroot.sh; fi;
+	fi;
 
-# Generate fstab
-genfstab -pL /mnt >> /mnt/etc/fstab
+	# Run Script
+	chmod +x /mnt/chroot.sh
+	chroot /mnt /chroot.sh
+	rm /mnt/chroot.sh
 
-# Setup Network
-# Disable old interfaces
-rm -f /mnt/etc/network/interfaces
-rm -f /mnt/etc/network/interfaces.d/*
-
-# Enable Systemd-Networkd resolv.conf
-rm -f /mnt/etc/resolv.conf
-cp /etc/resolv.conf /mnt/etc/resolv.conf
-
-# Setup Systemd-Networkd interface
-cat > /mnt/etc/systemd/network/en.network <<- EOM
+	# Setup Network
+	rm -f /mnt/etc/network/interfaces
+	rm -f /mnt/etc/network/interfaces.d/*
+	cat > /mnt/etc/systemd/network/en.network <<- EOM
 [Match]
 Name=en*
 
 [Network]
 DHCP=yes
 EOM
-
-cat > /mnt/etc/systemd/network/eth.network <<- EOM
+	cat > /mnt/etc/systemd/network/eth.network <<- EOM
 [Match]
 Name=eth*
 
 [Network]
 DHCP=yes
 EOM
+}
 
-if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
-	cat > /mnt/etc/apt/sources.list <<- EOM
-deb http://ftp.de.debian.org/debian/ stable main contrib
-deb http://ftp2.de.debian.org/debian/ stable main contrib
-deb http://ftp.halifax.rwth-aachen.de/debian/ stable main contrib
-deb-src http://ftp.de.debian.org/debian/ stable main contrib
-deb-src http://ftp2.de.debian.org/debian/ stable main contrib
-deb-src http://ftp.halifax.rwth-aachen.de/debian/ stable main contrib
+function setupBtrbk {
+	rm -f /mnt/etc/btrbk/${TARGET_HOSTNAME_SHORT}.key &> /dev/null
+	rm -f /mnt/etc/btrbk/${TARGET_HOSTNAME_SHORT}.key.pub &> /dev/null
+	ssh-keygen -t ed25519 -N '' -C "btrbk-backup-key@hostname" -f /mnt/etc/btrbk/${TARGET_HOSTNAME_SHORT}.key &> /dev/null
+	chown root:root /mnt/etc/btrbk/${TARGET_HOSTNAME_SHORT}.key
+	chmod 0600 /mnt/etc/btrbk/${TARGET_HOSTNAME_SHORT}.key
 
-# buster-updates, previously known as 'volatile'
-deb http://ftp.de.debian.org/debian/ stable-updates main contrib
-deb http://ftp2.de.debian.org/debian/ stable-updates main contrib
-deb http://ftp.halifax.rwth-aachen.de/debian/ stable-updates main contrib
-deb-src http://ftp.de.debian.org/debian/ stable-updates main contrib
-deb-src http://ftp2.de.debian.org/debian/ stable-updates main contrib
-deb-src http://ftp.halifax.rwth-aachen.de/debian/ stable-updates main contrib
+	cat > /mnt/etc/btrbk/btrbk.conf <<- EOF
+snapshot_dir snapshots
 
-EOM
+snapshot_preserve_min latest
+snapshot_preserve 0h
 
+raw_target_compress   xz
 
-	if [[ -z "${CIPHER}" && "${CRYPTED^^}" = "TRUE" ]]; then
-		cat >> /mnt/etc/apt/sources.list <<- EOM
-# Kernel (Backports)
-deb http://ftp.de.debian.org/debian/ stable-backports main
-deb http://ftp2.de.debian.org/debian/ stable-backports main
-deb http://ftp.halifax.rwth-aachen.de/debian/ stable-backports main	
+ssh_user ${TARGET_HOSTNAME_SHORT}
+ssh_identity /etc/btrbk/${TARGET_HOSTNAME_SHORT}.key
 
-EOM
-	fi;
+target raw ssh://${URL_BACKUP_HOST}${URL_BACKUP_PATH}
 
-fi;
+EOF
 
+	for var in "$@"
+	do
+		local DEV="${var}"
 
+		local dev_name=DEV_${DEV^^}
+		local dev_name=${!dev_name}
 
-# Setup Hostname
-echo "${TARGET_HOSTNAME}" > /mnt/etc/hostname
+		local dev_fs=DEV_${DEV^^}_FS
+		local dev_fs=${!dev_fs}
 
-# Script Header
-cat > /mnt/chrootinit.sh <<- EOM
-#!/bin/bash
-. /etc/profile
-EOM
-
-# Update System
-if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
-  cat >> /mnt/chrootinit.sh <<- EOM
-pacman -Syu --noconfirm
-EOM
-fi;
-
-if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
-  cat >> /mnt/chrootinit.sh <<- EOM
-DEBIAN_FRONTEND=noninteractive apt-get update -qq
-EOM
-fi;
-
-# Install Locales
-if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
-  cat >> /mnt/chrootinit.sh <<- EOM
-sed -i '/de_DE.UTF-8/s/^#//' /etc/locale.gen
-sed -i '/en_US.UTF-8/s/^#//' /etc/locale.gen
-locale-gen
-localectl set-locale LANG=en_US.UTF-8
-EOM
-fi;
-
-if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
-  cat >> /mnt/chrootinit.sh <<- EOM
-DEBIAN_FRONTEND=noninteractive apt-get install -y -qq locales console-data dirmngr
-sed -i '/de_DE.UTF-8/s/^#//' /etc/locale.gen
-sed -i '/en_US.UTF-8/s/^#//' /etc/locale.gen
-locale-gen
-echo -e 'LANG="en_US.UTF-8"\nLANGUAGE="en_US.UTF-8"\nLC_ALL="en_US.UTF-8"\n' > /etc/default/locale
-EOM
-fi;
-
-# Set Root Password
-cat >> /mnt/chrootinit.sh <<- EOM
-echo -e "root\nroot" | passwd root
-EOM
-
-# Install linux-image
-if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
-
-	if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
-		if [[ -z "${CIPHER}" && "${CRYPTED^^}" = "TRUE" ]]; then
-			cat >> /mnt/chrootinit.sh <<- EOM
-DEBIAN_FRONTEND=noninteractive apt-get -t buster-backports upgrade -y -qq
-DEBIAN_FRONTEND=noninteractive apt-get install -y -qq linux-image-5.4.0-0.bpo.4-armmp-lpae linux-headers-5.4.0-0.bpo.4-armmp-lpae
-EOM
-		else
-			cat >> /mnt/chrootinit.sh <<- EOM
-DEBIAN_FRONTEND=noninteractive apt-get install -y -qq linux-image-armmp-lpae
-EOM
+		local dev_part=DEV_${DEV^^}_PART
+		local dev_part=${!dev_part}
+		
+		if [[ -z "${dev_name}" ]]; then
+			continue;
 		fi;
-	else
-		cat >> /mnt/chrootinit.sh <<- EOM
-DEBIAN_FRONTEND=noninteractive apt-get install -y -qq linux-image-amd64
+
+		cat >> /mnt/etc/btrbk/btrbk.conf <<- EOM
+volume /mnt/disks/${var}
+        subvolume data
+                snapshot_name ${var}
 EOM
-	fi;
+	done
+}
+
+parseArguments $@
+validateArguments
+detectSystem
+installDependencies
+cleanupOldMounts
+
+if isTrue "${CRYPTED}"; then
+	rm -f /tmp/cryptsetup.key &> /dev/null
+	dd if=/dev/urandom of=/tmp/cryptsetup.key bs=1024 count=1
 fi;
 
-if [[ "${DEV_ROOT_FS^^}${DEV_HOME_FS^^}${DEV_OPT_FS^^}${DEV_SRV_FS^^}${DEV_USR_FS^^}${DEV_VAR_FS^^}" == *"BTRFS"* ]]; then
-  if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
-    cat >> /mnt/chrootinit.sh <<- EOM
-pacman -Sy --noconfirm btrfs-progs
-EOM
-  fi;
-  if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
-    cat >> /mnt/chrootinit.sh <<- EOM
-DEBIAN_FRONTEND=noninteractive apt-get install -y -qq btrfs-progs
-EOM
-  fi;
+formatDrive "root" "home" "opt" "srv" "usr" "var"
+
+# Add Password for root
+if isTrue "${CRYPTED}"; then
+	logLine "Setting default password test1234 for root device"
+	echo test1234 | cryptsetup --batch-mode luksAddKey ${DEV_ROOT}${DEV_ROOT_PART} -d /tmp/cryptsetup.key
 fi;
 
-# Install Bootloader
-if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
-  cat >> /mnt/chrootinit.sh <<- EOM
-pacman -Sy --noconfirm efibootmgr grub
-grub-install
-grub-mkconfig -o /boot/grub/grub.cfg
-EOM
-fi;
-
-if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
-	if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
-echo WILL USE GRUB-EFI-ARM
-		cat >> /mnt/chrootinit.sh <<- EOM
-DEBIAN_FRONTEND=noninteractive apt-get install -y -qq grub-efi-arm
-grub-install --removable --target=arm-efi --boot-directory=/boot --efi-directory=/boot/efi
-update-initramfs -k all -u
-grub-mkconfig -o /boot/grub/grub.cfg
-EOM
-	else
-echo WILL USE GRUB-EFI
-		cat >> /mnt/chrootinit.sh <<- EOM
-DEBIAN_FRONTEND=noninteractive apt-get install -y -qq grub-efi
-grub-install
-update-initramfs -k all -u
-grub-mkconfig -o /boot/grub/grub.cfg
-EOM
-	fi;
-fi;
-
-if [[ "${CRYPTED^^}" = "TRUE" ]]; then
-  # Install cryptsetup and dropbear
-  cat >> /mnt/chrootinit.sh <<- EOM
-mv /crypt.key /etc/crypt.key
-chown root:root /etc/crypt.key
-chmod 600 /etc/crypt.key
-DEBIAN_FRONTEND=noninteractive apt-get install -y -qq cryptsetup dropbear-initramfs
-echo cryptroot PARTLABEL=root none luks > /etc/crypttab
-EOM
-
-  # Additional Drives?
-  if [[ ! -z "${DEV_HOME}" ]]; then echo "echo crypthome PARTLABEL=home /etc/crypt.key luks >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
-  if [[ ! -z "${DEV_OPT}" ]];  then echo "echo cryptopt PARTLABEL=opt /etc/crypt.key luks >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
-  if [[ ! -z "${DEV_SRV}" ]];  then echo "echo cryptsrv PARTLABEL=srv /etc/crypt.key luks >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
-  if [[ ! -z "${DEV_USR}" ]];  then echo "echo cryptusr PARTLABEL=usr /etc/crypt.key luks >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
-  if [[ ! -z "${DEV_VAR}" ]];  then echo "echo cryptvar PARTLABEL=var /etc/crypt.key luks >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
-  #if [[ ! -z "${URL_BACKUP}" ]];  then echo "echo cryptbackup PARTLABEL=backup /etc/crypt.key luks >> /etc/crypttab" >> /mnt/chrootinit.sh; fi;
-
-  # Setup btrfs module for initramfs
-  if [[ "${DEV_ROOT_FS^^}${DEV_HOME_FS^^}${DEV_OPT_FS^^}${DEV_SRV_FS^^}${DEV_USR_FS^^}${DEV_VAR_FS^^}" == *"BTRFS"* ]]; then
-    cat >> /mnt/chrootinit.sh <<- EOM
-echo "btrfs" >> /etc/initramfs-tools/modules
-EOM
-  fi;
-
-  # Update initramfs & grub
-  cat >> /mnt/chrootinit.sh <<- EOM
-update-initramfs -k all -u
-grub-mkconfig -o /boot/grub/grub.cfg
-EOM
-fi;
-
-# Install btrbk/
-if [[ ! -z "${URL_BACKUP}" ]];  then
-  cat >> /mnt/chrootinit.sh <<- EOM
-DEBIAN_FRONTEND=noninteractive apt-get install -y -qq btrbk
-EOM
-
-  cat >> /mnt/etc/cron.daily/btrbk <<- EOM
-#!/bin/sh
-exec /usr/sbin/btrbk -q run
-EOM
-
-  chown root:root /mnt/etc/cron.daily/btrbk
-  chmod 755 /mnt/etc/cron.daily/btrbk
-fi;
-
-# Enable Systemd-Networkd
-cat >> /mnt/chrootinit.sh <<- EOM
-systemctl enable systemd-networkd
-systemctl enable systemd-resolved
-EOM
-
-# Install sshd
-if [[ "${TARGET_SYSTEM^^}" = "ARCH" ]]; then
-  cat >> /mnt/chrootinit.sh <<- EOM
-pacman -Sy --noconfirm openssh
-sed -i 's/^#PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config
-sed -i 's/^PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config
-EOM
-fi;
-
-if [[ "${TARGET_SYSTEM^^}" = "DEBIAN" ]]; then
-  cat >> /mnt/chrootinit.sh <<- EOM
-DEBIAN_FRONTEND=noninteractive apt-get install -y -qq openssh-server
-sed -i 's/^#PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config
-sed -i 's/^PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config
-EOM
-fi;
-
-# Call chrootinit.sh in chroot
-chmod +x /mnt/chrootinit.sh
-chroot /mnt /chrootinit.sh;
-
-# Ansible Pull?
-if [[ ! -z "${ANSIBLE_PULL_REPO}" ]]; then
-  cat > /mnt/chrootinit.sh <<- EOM
+if [[ ! -z "${URL_RESTORE}" ]]; then
+	logLine "Restoring from ${URL_RESTORE}"
+	restoreBackup "root" "home" "opt" "srv" "usr" "var"
+	mountDrive "root" "home" "opt" "srv" "usr" "var"
+	prepareChroot
+	
+	# Reinstall Kernel to restore /boot
+	cat > /mnt/chroot.sh <<- 'EOF'
 #!/bin/bash
 . /etc/profile
+dpkg -l | grep linux-image- | grep -v 'meta' | sort -k3 | tail -n1 | awk '{system ("apt-get install --reinstall " $2)}'
 
-echo "deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main" > /etc/apt/sources.list.d/ansible.list
-apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
-DEBIAN_FRONTEND=noninteractive apt-get update
+EOF
+	chmod +x /mnt/chroot.sh
+	chroot /mnt /chroot.sh
+	rm /mnt/chroot.sh
+	
+	# Install Grub
+	installGrub
+	
+	# Restore resolv.conf
+	restoreResolve
+	
+	if [[ "${AUTOREBOOT^^}" = "YES" ]]; then
+		cleanupOldMounts
+		echo "All Done, rebooting"
+		reboot now
+	fi;
 
-DEBIAN_FRONTEND=noninteractive apt-get install -y -qq git ansible
-
-ansible-pull -U ${ANSIBLE_PULL_REPO} installer.yml
-EOM
-
-  # Run Pull
-  chmod +x /mnt/chrootinit.sh
-  chroot /mnt /chrootinit.sh;
+	echo "All Done, please reboot"
+	exit
 fi;
 
-# Fix systemd-resolvd
-cat > /mnt/chrootinit.sh <<- EOM
-#!/bin/bash
-. /etc/profile
-rm -f /etc/resolv.conf
-ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
-EOM
-chmod +x /mnt/chrootinit.sh
-chroot /mnt /chrootinit.sh;
+mountDrive "root" "home" "opt" "srv" "usr" "var"
 
-# Cleanup
-rm /mnt/chrootinit.sh
-sync
+logLine "Debootstrapping"
+debootstrap stable /mnt http://ftp.de.debian.org/debian/;
+genfstab -pL /mnt >> /mnt/etc/fstab
+echo -n "${TARGET_HOSTNAME}" > /mnt/etc/hostname
 
+# Save key on root drive to unlock other drives
+if isTrue "${CRYPTED}"; then
+	cp /tmp/cryptsetup.key /mnt/etc/crypt.key
+	chown root:root /mnt/etc/crypt.key
+	chmod 600 /mnt/etc/crypt.key
+fi;
+
+# Prepare Chroot
+prepareChroot
+
+# Install Debian
+installDebian
+
+# Setup BTRBK
+setupBtrbk "root" "home" "opt" "srv" "usr" "var"
+
+# Install Grub
+installGrub
+
+# Restore resolv.conf
+restoreResolve
+
+# Done
 if [[ "${AUTOREBOOT^^}" = "YES" ]]; then
-  umount -R /mnt
-  sync
-
-  reboot now
+	cleanupOldMounts
+	echo "All Done, rebooting"
+	reboot now
 fi;
+
+echo "All Done, please reboot"
