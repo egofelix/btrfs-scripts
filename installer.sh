@@ -667,8 +667,6 @@ if [[ ! -z "${URL_RESTORE}" ]]; then
 		declare DEV_${addDrive^^}="${targetDrive}"
 		declare DEV_${addDrive^^}_FS="btrfs"
 		declare DEV_${addDrive^^}_PART="1"
-		formatDrive "${addDrive}"
-		restoreBackup "${addDrive}"
 	done
 	
 	# Restore normal drives
@@ -679,6 +677,8 @@ if [[ ! -z "${URL_RESTORE}" ]]; then
 	# Restore additional drives
 	for addDrive in "${additionalDrives}"
 	do
+		formatDrive "${addDrive}"
+		restoreBackup "${addDrive}"
 		mountDrive "${addDrive}"
 	done
 	
