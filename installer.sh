@@ -119,10 +119,15 @@ function validateArguments {
 		URL_RESTORE_PATH="/${URL_RESTORE_PATH}/"
 		URL_RESTORE_USER=`echo -n ${TARGET_HOSTNAME} | cut -d '.' -f 1`
 		
-		chmod 600 /tmp/btrbk.identity
-		
 		echo "Testing SSH Connection"
-		SSH_OK=$(ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=/tmp/btrbk.identity ${URL_RESTORE_USER}@${URL_RESTORE_HOST} ls -ls ${URL_RESTORE_PATH} &> /dev/null && echo YES)
+		SSH_COMMAND="ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${URL_RESTORE_USER}@${URL_RESTORE_HOST}"
+		SSH_OK=$(${SSH_COMMAND} "ls -ls ${URL_RESTORE_PATH} &> /dev/null && echo YES")
+		
+		if ! isTrue "${SSH_OK}"; then
+			chmod 600 /tmp/btrbk.identity
+			SSH_COMMAND="ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=/tmp/btrbk.identity ${URL_RESTORE_USER}@${URL_RESTORE_HOST}"
+			SSH_OK=$(${SSH_COMMAND} ${URL_RESTORE_USER}@${URL_RESTORE_HOST} "ls -ls ${URL_RESTORE_PATH} &> /dev/null && echo YES")
+		fi;
 		
 		if ! isTrue "${SSH_OK}"; then
 			echo SSH Connection is not working
@@ -448,13 +453,13 @@ function restoreBackup {
 		fi;
 		
 		echo "Restoring ${var} to ${dev_name}"
-		backupFiles=$(ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=/tmp/btrbk.identity ${URL_RESTORE_USER}@${URL_RESTORE_HOST} "find ${URL_RESTORE_PATH} -name '${var}.*.btrfs.xz'" 2> /dev/null | sort | awk '{ print length, $0 }' | sort -n -s | cut -d" " -f2-)
+		backupFiles=$(${SSH_COMMAND} "find ${URL_RESTORE_PATH} -name '${var}.*.btrfs.xz'" 2> /dev/null | sort | awk '{ print length, $0 }' | sort -n -s | cut -d" " -f2-)
 		LASTFILE=""
 		for file in ${backupFiles}
 		do
 			LASTFILE=$(basename ${file} | rev | cut -d '.' -f 3- | rev)
 			logLine Restoring ${file}
-			ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=/tmp/btrbk.identity ${URL_RESTORE_USER}@${URL_RESTORE_HOST} "cat ${file}" 2> /dev/null | xz -d -c | btrfs receive /tmp/mnt/disks/${var}
+			${SSH_COMMAND} "cat ${file}" 2> /dev/null | xz -d -c | btrfs receive /tmp/mnt/disks/${var}
 		done
   
 		btrfs subvolume delete /tmp/mnt/disks/${var}/data
