@@ -650,10 +650,15 @@ if [[ ! -z "${URL_RESTORE}" ]]; then
 	for addDrive in "${additionalDrives}"
 	do
 		driveCount=$((driveCount + 1))
-		
 		targetDrive=$(find /dev -name 'sd*' | grep -v '[0-9]$' | sort | tail -${driveCount} | head -1)
 		
+		declare DEV_${var}="${targetDrive}"
+		declare DEV_${var}_FS="btrfs"
+		declare DEV_${var}_PART="1"
+		
 		echo "Will restore ${addDrive} to ${targetDrive}"
+		
+		#restoreBackup "${var}"
 	done
 	
 	exit
