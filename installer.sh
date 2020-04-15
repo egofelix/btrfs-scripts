@@ -632,10 +632,6 @@ function installCryptoKey {
 	fi;
 }
 
-function fixFStab {
-
-}
-
 parseArguments $@
 validateArguments
 detectSystem
