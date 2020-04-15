@@ -365,6 +365,11 @@ function mountDrive {
 		
 		if [[ "${var^^}" = "ROOT" ]]; then
 			mount ${mountOpts}${mountDev} /mnt
+			
+			if [[ "${dev_fs^^}" = "BTRFS" ]]; then
+				mkdir -p /mnt/mnt/disks/${var}
+				mount -o subvol=/ ${mountDev} /mnt/mnt/disks/${var}
+			fi;
 		
 			if isTrue "${IS_EFI^^}"; then
 				mkdir -p /mnt/boot &> /dev/null
@@ -378,6 +383,11 @@ function mountDrive {
 		else
 			mkdir /mnt/${var}
 			mount ${mountOpts}${mountDev} /mnt/${var}
+			
+			if [[ "${dev_fs^^}" = "BTRFS" ]]; then
+				mkdir -p /mnt/mnt/disks/${var}
+				mount -o subvol=/ ${mountDev} /mnt/mnt/disks/${var}
+			fi;
 		fi;
 	done
 }
@@ -554,6 +564,14 @@ function setupBtrbk {
 	chown root:root /mnt/etc/btrbk/${TARGET_HOSTNAME_SHORT}.key
 	chmod 0600 /mnt/etc/btrbk/${TARGET_HOSTNAME_SHORT}.key
 
+	cat > /mnt/etc/cron.daily/btrbk <<- EOF
+#!/bin/sh
+
+/usr/sbin/btrbk run
+EOF
+	chown root:root /mnt/etc/cron.daily/btrbk
+	chmod 0755 /mnt/etc/cron.daily/btrbk
+	
 	cat > /mnt/etc/btrbk/btrbk.conf <<- EOF
 snapshot_dir snapshots
 
