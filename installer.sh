@@ -438,13 +438,13 @@ function restoreBackup {
 			continue;
 		fi;
 		
-		backupFiles=$(ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=/tmp/btrbk.identity ${URL_RESTORE_USER}@${URL_RESTORE_HOST} "find ${URL_RESTORE_PATH} -name '${var}.*.btrfs.xz'" | sort | awk '{ print length, $0 }' | sort -n -s | cut -d" " -f2-)
+		backupFiles=$(ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=/tmp/btrbk.identity ${URL_RESTORE_USER}@${URL_RESTORE_HOST} "find ${URL_RESTORE_PATH} -name '${var}.*.btrfs.xz'" 2> /dev/null | sort | awk '{ print length, $0 }' | sort -n -s | cut -d" " -f2-)
 		LASTFILE=""
 		for file in ${backupFiles}
 		do
 			LASTFILE=$(basename ${file} | rev | cut -d '.' -f 3- | rev)
 			logLine Restoring ${file}
-			ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=/tmp/btrbk.identity ${URL_RESTORE_USER}@${URL_RESTORE_HOST} cat ${file} | xz -d -c | btrfs receive /tmp/mnt/disks/${var}
+			ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=/tmp/btrbk.identity ${URL_RESTORE_USER}@${URL_RESTORE_HOST} "cat ${file}" 2> /dev/null | xz -d -c | btrfs receive /tmp/mnt/disks/${var}
 		done
   
 		btrfs subvolume delete /tmp/mnt/disks/${var}/data
