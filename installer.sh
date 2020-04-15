@@ -35,7 +35,7 @@ function parseArguments {
 	VERBOSE="TRUE"
 	TARGET_HOSTNAME=""
 
-	AUTOREBOOT="FALSE"
+	AUTOREBOOT="TRUE"
 
 	IS_EFI="TRUE"
 	ROOT_SIZE=""
