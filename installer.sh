@@ -696,7 +696,7 @@ if [[ ! -z "${URL_RESTORE}" ]]; then
 			cryptsetup --batch-mode close crypt${addDrive} &> /dev/null
 			
 			# Ensure crypttab is complete
-			grep -qxF "crypt${addDrive}" /mnt/etc/crypttab || echo "cryptvar PARTLABEL=${addDrive} /etc/crypt.key luks" >> /mnt/etc/crypttab
+			grep -qxF "crypt${addDrive}" /mnt/etc/crypttab || echo "crypt${addDrive} PARTLABEL=${addDrive} /etc/crypt.key luks" >> /mnt/etc/crypttab
 		fi;
 		
 		rm -rf /tmp/mnt/disks/${addDrive}
