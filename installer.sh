@@ -121,6 +121,7 @@ function validateArguments {
 		
 		chmod 600 /tmp/btrbk.identity
 		
+		echo "Testing SSH Connection"
 		SSH_OK=$(ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=/tmp/btrbk.identity ${URL_RESTORE_USER}@${URL_RESTORE_HOST} ls -ls ${URL_RESTORE_PATH} &> /dev/null && echo YES)
 		
 		if ! isTrue "${SSH_OK}"; then
