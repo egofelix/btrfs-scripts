@@ -358,6 +358,9 @@ function mountDrive {
 		local dev_part=DEV_${DEV^^}_PART
 		local dev_part=${!dev_part}
 		
+		local dev_path=DEV_${DEV^^}_PATH
+		local dev_path=${!dev_path}
+		
 		if [[ -z "${dev_name}" ]]; then
 			continue;
 		fi;
@@ -391,8 +394,13 @@ function mountDrive {
 				mount ${dev_name}1 /mnt/boot
 			fi;
 		else
-			mkdir /mnt/${var} &> /dev/null
-			mount ${mountOpts}${mountDev} /mnt/${var}
+			if [[ -z "${dev_path}" ]]; then
+				mkdir /mnt/${var} &> /dev/null
+				mount ${mountOpts}${mountDev} /mnt/${var}
+			else
+				mkdir -p /mnt/${dev_path} &> /dev/null
+				mount ${mountOpts}${mountDev} /mnt/${dev_path}
+			fi;
 			
 			if [[ "${dev_fs^^}" = "BTRFS" ]]; then
 				mkdir -p /mnt/mnt/disks/${var} &> /dev/null
@@ -632,6 +640,10 @@ function installCryptoKey {
 	fi;
 }
 
+function fixFSTab {
+	sed -i 's/,subvolid=[0-9]*//g' /mnt/etc/fstab
+}
+
 parseArguments $@
 validateArguments
 detectSystem
@@ -667,13 +679,15 @@ if [[ ! -z "${URL_RESTORE}" ]]; then
 	
 	# Prepare Variables for additional Drives
 	driveCount="0"
-	additionalDrives=$(cat /mnt/etc/fstab | grep /mnt/disks | grep btrfs | grep -v '^LABEL\=root' | awk '{ print $1 }' | cut -d '=' -f 2- | grep -v 'srv' | grep -v 'var' | grep -v 'usr' | grep -v 'home' | grep -v 'opt')
+	additionalDrives=$(cat /mnt/etc/fstab | grep /mnt/disks | grep btrfs | grep -v '^LABEL\=root' | awk '{ print length($2), $0 }' | sort -n -s | cut -d" " -f2 | cut -d '=' -f 2- | grep -v 'srv' | grep -v 'var' | grep -v 'usr' | grep -v 'home' | grep -v 'opt')
 	for addDrive in "${additionalDrives}"
 	do
 		driveCount=$((driveCount + 1))
 		targetDrive=$(find /dev -name 'sd*' | grep -v '[0-9]$' | sort | tail -${driveCount} | head -1)
+		targetDir=$(cat /mnt/etc/fstab | grep -v /mnt/disks | grep btrfs | grep "LABEL\=cloud" | awk '{ print $2 }')
 		
 		declare DEV_${addDrive^^}="${targetDrive}"
+		declare DEV_${addDrive^^}_PATH="${targetDir}"
 		declare DEV_${addDrive^^}_FS="btrfs"
 		declare DEV_${addDrive^^}_PART="1"
 	done
@@ -704,6 +718,9 @@ if [[ ! -z "${URL_RESTORE}" ]]; then
 	
 	# Save key on root drive to unlock other drives
 	installCryptoKey
+	
+	# Fix fstab
+	fixFSTab
 	
 	# Reinstall Kernel to restore /boot
 	prepareChroot
@@ -743,6 +760,9 @@ echo -n "${TARGET_HOSTNAME}" > /mnt/etc/hostname
 
 # Save key on root drive to unlock other drives
 installCryptoKey
+
+# Fix fstab
+fixFSTab
 
 # Prepare Chroot
 prepareChroot
