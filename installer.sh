@@ -645,16 +645,17 @@ if [[ ! -z "${URL_RESTORE}" ]]; then
 	logLine "Restoring from ${URL_RESTORE}"
 	restoreBackup "root"
 	mountDrive "root"
-	
+
+	# Check if there are enough drives for restore
 	driveCount=$(find /dev -name 'sd*' | grep -v '[0-9]$' | wc -l)
 	totalDrives=$(cat /mnt/etc/fstab | grep /mnt/disks | grep btrfs | awk '{ print $1 }' | wc -l)
-	
 	while [[ "${driveCount}" -gt "${totalDrives}" ]];
 	do
 		echo "Not enough Harddisks found for restore, please add another one"
 		read -p "Press enter to continue"
 	done
 	
+	# Prepare Variables for additional Drives
 	driveCount="0"
 	additionalDrives=$(cat /mnt/etc/fstab | grep /mnt/disks | grep btrfs | grep -v '^LABEL\=root' | awk '{ print $1 }' | cut -d '=' -f 2- | grep -v 'srv' | grep -v 'var' | grep -v 'usr' | grep -v 'home' | grep -v 'opt')
 	for addDrive in "${additionalDrives}"
@@ -662,25 +663,28 @@ if [[ ! -z "${URL_RESTORE}" ]]; then
 		driveCount=$((driveCount + 1))
 		targetDrive=$(find /dev -name 'sd*' | grep -v '[0-9]$' | sort | tail -${driveCount} | head -1)
 		
-		declare DEV_${var}="${targetDrive}"
-		declare DEV_${var}_FS="btrfs"
-		declare DEV_${var}_PART="1"
+		declare DEV_${addDrive}="${targetDrive}"
+		declare DEV_${addDrive}_FS="btrfs"
+		declare DEV_${addDrive}_PART="1"
 		
 		echo "Will restore ${addDrive} to ${targetDrive}"
 		
-		#restoreBackup "${var}"
+		restoreBackup "${addDrive}"
 	done
 	
-	exit
-	
+	# Restore normal drives
 	restoreBackup "home" "opt" "srv" "usr" "var"
 	mountDrive "home" "opt" "srv" "usr" "var"
 	
-	
-	
-	prepareChroot
+	# Restore additional drives
+	for addDrive in "${additionalDrives}"
+	do
+		restoreBackup "${addDrive}"
+		mountDrive "${addDrive}"
+	done
 	
 	# Reinstall Kernel to restore /boot
+	prepareChroot
 	cat > /mnt/chroot.sh <<- 'EOF'
 #!/bin/bash
 . /etc/profile
