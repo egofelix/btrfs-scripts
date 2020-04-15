@@ -377,7 +377,7 @@ function mountDrive {
 			mount ${mountOpts}${mountDev} /mnt
 			
 			if [[ "${dev_fs^^}" = "BTRFS" ]]; then
-				mkdir -p /mnt/mnt/disks/${var}
+				mkdir -p /mnt/mnt/disks/${var} &> /dev/null
 				mount -o subvol=/ ${mountDev} /mnt/mnt/disks/${var}
 			fi;
 		
@@ -391,11 +391,11 @@ function mountDrive {
 				mount ${dev_name}1 /mnt/boot
 			fi;
 		else
-			mkdir /mnt/${var}
+			mkdir /mnt/${var} &> /dev/null
 			mount ${mountOpts}${mountDev} /mnt/${var}
 			
 			if [[ "${dev_fs^^}" = "BTRFS" ]]; then
-				mkdir -p /mnt/mnt/disks/${var}
+				mkdir -p /mnt/mnt/disks/${var} &> /dev/null
 				mount -o subvol=/ ${mountDev} /mnt/mnt/disks/${var}
 			fi;
 		fi;
@@ -632,6 +632,10 @@ function installCryptoKey {
 	fi;
 }
 
+function fixFStab {
+
+}
+
 parseArguments $@
 validateArguments
 detectSystem
@@ -688,7 +692,18 @@ if [[ ! -z "${URL_RESTORE}" ]]; then
 	do
 		formatDrive "${addDrive}"
 		restoreBackup "${addDrive}"
-		mountDrive "${addDrive}"
+		
+		# Cleanup Custom drive
+		umount /tmp/mnt/disks/${addDrive}
+		
+		if isTrue "${CRYPTED}"; then
+			cryptsetup --batch-mode close crypt${addDrive} &> /dev/null
+			
+			# Ensure crypttab is complete
+			grep -qxF "crypt${addDrive}" /mnt/etc/crypttab || echo "cryptvar PARTLABEL=${addDrive} /etc/crypt.key luks" >> /mnt/etc/crypttab
+		fi;
+		
+		rm -rf /tmp/mnt/disks/${addDrive}
 	done
 	
 	# Save key on root drive to unlock other drives
