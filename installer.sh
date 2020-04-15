@@ -439,6 +439,7 @@ function restoreBackup {
 			continue;
 		fi;
 		
+		echo "Restoring ${var} to ${dev_name}"
 		backupFiles=$(ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=/tmp/btrbk.identity ${URL_RESTORE_USER}@${URL_RESTORE_HOST} "find ${URL_RESTORE_PATH} -name '${var}.*.btrfs.xz'" 2> /dev/null | sort | awk '{ print length, $0 }' | sort -n -s | cut -d" " -f2-)
 		LASTFILE=""
 		for file in ${backupFiles}
@@ -666,8 +667,6 @@ if [[ ! -z "${URL_RESTORE}" ]]; then
 		declare DEV_${addDrive}="${targetDrive}"
 		declare DEV_${addDrive}_FS="btrfs"
 		declare DEV_${addDrive}_PART="1"
-		
-		echo "Will restore ${addDrive} to ${targetDrive}"
 		
 		restoreBackup "${addDrive}"
 	done
