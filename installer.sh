@@ -633,8 +633,36 @@ fi;
 
 if [[ ! -z "${URL_RESTORE}" ]]; then
 	logLine "Restoring from ${URL_RESTORE}"
-	restoreBackup "root" "home" "opt" "srv" "usr" "var"
-	mountDrive "root" "home" "opt" "srv" "usr" "var"
+	restoreBackup "root"
+	mountDrive "root"
+	
+	driveCount=$(find /dev -name 'sd*' | grep -v '[0-9]$' | wc -l)
+	totalDrives=$(cat /mnt/etc/fstab | grep /mnt/disks | grep btrfs | awk '{ print $1 }' | wc -l)
+	
+	while [[ "${driveCount}" -gt "${totalDrives}" ]];
+	do
+		echo "Not enough Harddisks found for restore, please add another one"
+		read -p "Press enter to continue"
+	done
+	
+	driveCount="0"
+	additionalDrives=$(cat /mnt/etc/fstab | grep /mnt/disks | grep btrfs | grep -v '^LABEL\=root' | awk '{ print $1 }' | cut -d '=' -f 2- | grep -v 'srv' | grep -v 'var' | grep -v 'usr' | grep -v 'home' | grep -v 'opt')
+	for addDrive in "${additionalDrives}"
+	do
+		driveCount=$((driveCount + 1))
+		
+		targetDrive=$(find /dev -name 'sd*' | grep -v '[0-9]$' | sort | tail -${driveCount} | head -1)
+		
+		echo "Will restore ${addDrive} to ${targetDrive}"
+	done
+	
+	exit
+	
+	restoreBackup "home" "opt" "srv" "usr" "var"
+	mountDrive "home" "opt" "srv" "usr" "var"
+	
+	
+	
 	prepareChroot
 	
 	# Reinstall Kernel to restore /boot
@@ -664,6 +692,7 @@ EOF
 	exit
 fi;
 
+formatDrive "home" "opt" "srv" "usr" "var"
 mountDrive "root" "home" "opt" "srv" "usr" "var"
 
 logLine "Debootstrapping"
