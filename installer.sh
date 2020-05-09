@@ -506,7 +506,7 @@ function restoreResolve {
 #!/bin/bash
 . /etc/profile
 rm -f /etc/resolv.conf
-ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+ln -s /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 EOF
 	chmod +x /mnt/chroot.sh
 	chroot /mnt /chroot.sh
@@ -651,6 +651,14 @@ function fixFSTab {
 	sed -i 's/,subvolid=[0-9]*//g' /mnt/etc/fstab
 }
 
+function setupSwap {
+	dd if=/dev/zero of=/mnt/swapfile bs=1M count=1024
+
+	mkswap /mnt/swapfile
+
+	echo "/swapfile swap swap defaults 0 0" >> /mnt/etc/fstab
+}
+
 parseArguments $@
 validateArguments
 detectSystem
@@ -785,6 +793,9 @@ installGrub
 
 # Restore resolv.conf
 restoreResolve
+
+# Setup Swapfile
+setupSwap
 
 # Done
 if [[ "${AUTOREBOOT^^}" = "YES" ]]; then
