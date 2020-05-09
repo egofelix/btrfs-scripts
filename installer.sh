@@ -651,14 +651,6 @@ function fixFSTab {
 	sed -i 's/,subvolid=[0-9]*//g' /mnt/etc/fstab
 }
 
-function setupSwap {
-	dd if=/dev/zero of=/mnt/swapfile bs=1M count=1024
-
-	mkswap /mnt/swapfile
-
-	echo "/swapfile swap swap defaults 0 0" >> /mnt/etc/fstab
-}
-
 parseArguments $@
 validateArguments
 detectSystem
@@ -793,9 +785,6 @@ installGrub
 
 # Restore resolv.conf
 restoreResolve
-
-# Setup Swapfile
-setupSwap
 
 # Done
 if [[ "${AUTOREBOOT^^}" = "YES" ]]; then
