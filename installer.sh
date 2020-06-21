@@ -105,6 +105,11 @@ function validateArguments {
 	
 	TARGET_HOSTNAME_SHORT=`echo -n ${TARGET_HOSTNAME} | cut -d '.' -f 1`
 	
+
+        if [[ -z "${URL_BACKUP}" ]]; then
+          BACKUP_SRV_ENTRY="_backup._tcp.$(echo -n ${TARGET_HOSTNAME} | cut -d '.' -f 2-)"
+          URL_BACKUP=$(nslookup -q=SRV ${BACKUP_SRV_ENTRY} | grep -oe 'service = .*' | grep -oe 'ssh\:\/\/.*' | rev | cut -c 2- | rev)
+        fi;
 	if [[ ! -z "${URL_BACKUP}" ]]; then
 		URL_BACKUP=`echo ${URL_BACKUP} | sed -e "s/\%hostname\%/${TARGET_HOSTNAME_SHORT}/g"`
 		URL_BACKUP_HOST=`echo -n ${URL_BACKUP} | cut -d '/' -f 3`
@@ -112,6 +117,11 @@ function validateArguments {
 		URL_BACKUP_PATH="/${URL_BACKUP_PATH}/"
 		URL_BACKUP_USER=`echo -n ${TARGET_HOSTNAME} | cut -d '.' -f 1`
 	fi;
+
+        if [[ -z "${URL_RESTORE}" ]]; then
+          RESTORE_SRV_ENTRY="_backup._tcp.$(echo -n ${TARGET_HOSTNAME} | cut -d '.' -f 2-)"
+          URL_RESTORE=$(nslookup -q=SRV ${RESTORE_SRV_ENTRY} | grep -oe 'service = .*' | grep -oe 'ssh\:\/\/.*' | rev | cut -c 2- | rev)
+        fi;
 	if [[ ! -z "${URL_RESTORE}" ]]; then
 		URL_RESTORE=`echo ${URL_RESTORE} | sed -e "s/\%hostname\%/${TARGET_HOSTNAME_SHORT}/g"`
 		URL_RESTORE_HOST=`echo -n ${URL_RESTORE} | cut -d '/' -f 3`
