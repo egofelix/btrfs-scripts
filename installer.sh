@@ -188,7 +188,7 @@ logLine "Installing Base-System"
 if [[ "${DISTRO^^}" == "DEBIAN" ]]; then
 	if ! runCmd debootstrap stable /tmp/mnt/root http://ftp.de.debian.org/debian/; then echo "Failed to install Base-System"; exit; fi;
 elif [[ "${DISTRO^^}" == "ARCHLINUX" ]]; then
-	if ! runCmd pacstrap /tmp/mnt/root base linux linux-firmware; then echo "Failed to install Base-System"; exit; fi;
+	if ! runCmd pacstrap /tmp/mnt/root base; then echo "Failed to install Base-System"; exit; fi;
 fi;
 
 # Generate fstab

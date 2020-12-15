@@ -11,12 +11,12 @@ EOF
 if isTrue "${CRYPTED}"; then
 	cat >> /tmp/mnt/root/chroot.sh <<- EOF
 # install grub
-pacman -Sy --noconfirm grub efibootmgr btrfs-progs cryptsetup
+pacman -Sy --noconfirm linux linux-firmware grub efibootmgr btrfs-progs cryptsetup
 EOF
 else
 	cat >> /tmp/mnt/root/chroot.sh <<- EOF
 # install grub
-pacman -Sy --noconfirm grub efibootmgr btrfs-progs
+pacman -Sy --noconfirm linux linux-firmware grub efibootmgr btrfs-progs
 EOF
 fi;
 
@@ -24,6 +24,7 @@ fi;
 chmod +x /tmp/mnt/root/chroot.sh
 chroot /tmp/mnt/root /chroot.sh
 
+# Setup crypto
 if isTrue "${CRYPTED}"; then
 	echo cryptsystem PARTLABEL=system none luks > /tmp/mnt/root/etc/crypttab
 	echo cryptsystem PARTLABEL=system none luks > /tmp/mnt/root/etc/crypttab.initramfs
@@ -39,6 +40,7 @@ if isTrue "${CRYPTED}"; then
 	sed -i "s;GRUB_CMDLINE_LINUX=.*;${REPLACEMENT};g" /tmp/mnt/root/etc/default/grub
 fi;
 
+# Install grub
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 mkinitcpio -P
