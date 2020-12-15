@@ -6,23 +6,25 @@ cat > /tmp/mnt/root/chroot.sh <<- EOF
 
 # Set root password
 echo -e "root\nroot" | passwd root
+EOF
 
+if isTrue "${CRYPTED}"; then
+	cat >> /tmp/mnt/root/chroot.sh <<- EOF
+# install grub
+pacman -Sy --noconfirm grub efibootmgr btrfs-progs cryptsetup
+EOF
+else
+	cat >> /tmp/mnt/root/chroot.sh <<- EOF
 # install grub
 pacman -Sy --noconfirm grub efibootmgr btrfs-progs
-
 EOF
+fi;
 
 # Run script
 chmod +x /tmp/mnt/root/chroot.sh
 chroot /tmp/mnt/root /chroot.sh
 
 if isTrue "${CRYPTED}"; then
-	cat > /tmp/mnt/root/chroot.sh <<- EOF
-#!/bin/bash
-pacman -Sy --noconfirm cryptsetup
-EOF
-	chroot /tmp/mnt/root /chroot.sh
-
 	echo cryptsystem PARTLABEL=system none luks > /tmp/mnt/root/etc/crypttab
 	echo cryptsystem PARTLABEL=system none luks > /tmp/mnt/root/etc/crypttab.initramfs
 	
