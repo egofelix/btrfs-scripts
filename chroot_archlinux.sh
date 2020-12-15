@@ -48,3 +48,23 @@ grub-install
 grub-mkconfig -o /boot/grub/grub.cfg
 EOF
 chroot /tmp/mnt/root /chroot.sh &> /dev/null
+
+# Setup Network
+rm -f /tmp/mnt/root/etc/resolv.conf
+ln -s /tmp/mnt/root/run/systemd/resolve/stub-resolv.conf /tmp/mnt/root/etc/resolv.conf
+rm -f /tmp/mnt/root/etc/network/interfaces
+rm -f /tmp/mnt/root/etc/network/interfaces.d/*
+cat > /tmp/mnt/root/etc/systemd/network/en.network <<- EOM
+[Match]
+Name=en*
+
+[Network]
+DHCP=yes
+EOM
+cat > /tmp/mnt/root/etc/systemd/network/eth.network <<- EOM
+[Match]
+Name=eth*
+
+[Network]
+DHCP=yes
+EOM
