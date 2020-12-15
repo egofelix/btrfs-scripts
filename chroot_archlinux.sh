@@ -27,7 +27,7 @@ EOF
 	echo cryptsystem PARTLABEL=system none luks > /tmp/mnt/root/etc/crypttab.initramfs
 	
 	# Add hooks for cryptsetup to mkinitcpio.conf
-	HOOKS="HOOKS($(source /tmp/mnt/root/etc/mkinitcpio.conf && HOOKS+=(encrypt keymap keyboard) && echo ${HOOKS[@]} | tr ' ' '\n' | sort -u | tr '\n' ' ' | xargs echo -n))"
+	HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && HOOKS+=(encrypt keymap keyboard) && echo ${HOOKS[@]} | tr ' ' '\n' | sort -u | tr '\n' ' ' | xargs echo -n))"
 	sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
 	
 	# Setup Grub for Cryptsetup
