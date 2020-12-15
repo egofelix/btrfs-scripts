@@ -139,6 +139,7 @@ if isTrue "${CRYPTED}"; then
 	
 	logLine "Encrypting SYSTEM-Partition";
 	if ! runCmd cryptsetup --batch-mode luksFormat --type luks1 -d /tmp/crypto.key ${PART_SYSTEM}; then echo "Failed to cryptformat SYSTEM-Partiton"; exit; fi;
+	if ! runCmd echo ${CRYPTEDPASSWORD} | cryptsetup --batch-mode luksAddKey /dev/sda3 -d /tmp/crypto.key; then echo "Failed to add password to SYSTEM-Partition"; exit; fi;
 	if ! runCmd cryptsetup --batch-mode open ${PART_SYSTEM} cryptsystem -d /tmp/crypto.key; then echo "Failed to open CRYPTSYSTEM-Partition"; exit; fi;
 	
 	# Remap partition to crypted one
@@ -181,8 +182,11 @@ done;
 
 # Install base system
 logLine "Installing Base-System"
-#debootstrap stable /tmp/mnt/root http://ftp.de.debian.org/debian/;
-if ! runCmd pacstrap /tmp/mnt/root base linux linux-firmware; then echo "Failed to install Base-System"; exit; fi;
+if [[ "${DISTRO^^}" == "DEBIAN" ]]; then
+	if ! runCmd debootstrap stable /tmp/mnt/root http://ftp.de.debian.org/debian/; then echo "Failed to install Base-System"; exit; fi;
+elif [[ "${DISTRO^^}" == "ARCHLINUX" ]]; then
+	if ! runCmd pacstrap /tmp/mnt/root base linux linux-firmware; then echo "Failed to install Base-System"; exit; fi;
+fi;
 
 # Generate fstab
 genfstab -pL /tmp/mnt/root >> /tmp/mnt/root/etc/fstab;
@@ -211,11 +215,37 @@ if isTrue "${CRYPTED}"; then
 	if ! runCmd cp /tmp/crypto.key /tmp/mnt/root/etc/; then logLine "Failed to copy crypto.key"; exit; fi;
 fi;
 
+# Run installer
+if [[ "${DISTRO^^}" == "DEBIAN" ]]; then
+	source "${BASH_SOURCE%/*}/chroot_debian.sh"
+elif [[ "${DISTRO^^}" == "ARCHLINUX" ]]; then
+	source "${BASH_SOURCE%/*}/chroot_archlinux.sh"
+fi;
 
-# Run in chroot
+
 #chroot /tmp/mnt/root /bin/bash
-#pacman -Sy --noconfirm grub efibootmgr
+#echo -e "root\nroot" | passwd root
+#pacman -Sy --noconfirm grub efibootmgr btrfs-progs cryptsetup nano
+#echo cryptsystem PARTLABEL=system none luks > /etc/crypttab
+#echo cryptsystem PARTLABEL=system none luks > /etc/crypttab.initramfs
+##Enable HOOKS (keyboard keymap encrypt)
+#nano /etc/mkinitcpio.conf
+# echo "GRUB_ENABLE_CRYPTODISK=y" >> /etc/default/grub
+# #ADD 
+# GRUB_CMDLINE_LINUX="cryptdevice=/dev/sda3:cryptsystem"
+##Rebuild initramfs
+#mkinitcpio -P
 #grub-install
+#grub-mkconfig -o /boot/grub/grub.cfg
+
+#umount -R /tmp/mnt/root
+
+
+#cryptsetup benchmark
+
+#echo "btrfs" >> /etc/initramfs-tools/modules
+#mkinitcpio -P
+
 
 
 # Cleanup

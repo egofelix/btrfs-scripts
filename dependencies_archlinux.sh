@@ -48,7 +48,20 @@ if ! which debootstrap > /dev/null; then
 	pacman -Sy --noconfirm debootstrap
 fi;
 
+# Install genfstab
 if ! which genfstab > /dev/null; then
 	logLine "Installing dependency arch-install-scripts"
 	pacman -Sy --noconfirm arch-install-scripts
+fi;
+
+# Install xargs
+if ! which xargs > /dev/null; then
+	logLine "Installing dependency findutils"
+	pacman -Sy --noconfirm findutils
+fi;
+
+# Install sed
+if ! which sed > /dev/null; then
+	logLine "Installing dependency sed"
+	pacman -Sy --noconfirm sed
 fi;
