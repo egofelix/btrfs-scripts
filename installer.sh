@@ -139,8 +139,11 @@ if isTrue "${CRYPTED}"; then
 	
 	logLine "Encrypting SYSTEM-Partition";
 	if ! runCmd cryptsetup --batch-mode luksFormat --type luks1 -d /tmp/crypto.key ${PART_SYSTEM}; then echo "Failed to cryptformat SYSTEM-Partiton"; exit; fi;
-	if ! runCmd echo ${CRYPTEDPASSWORD} | cryptsetup --batch-mode luksAddKey /dev/sda3 -d /tmp/crypto.key; then echo "Failed to add password to SYSTEM-Partition"; exit; fi;
 	if ! runCmd cryptsetup --batch-mode open ${PART_SYSTEM} cryptsystem -d /tmp/crypto.key; then echo "Failed to open CRYPTSYSTEM-Partition"; exit; fi;
+	
+	# Add Password
+	echo ${CRYPTEDPASSWORD} | cryptsetup --batch-mode luksAddKey /dev/sda3 -d /tmp/crypto.key; 
+	if [ $? -ne 0 ]; then logLine "Failed to add password to SYSTEM-Partition"; exit; fi;
 	
 	# Remap partition to crypted one
 	PART_SYSTEM="/dev/mapper/cryptsystem"
