@@ -13,6 +13,9 @@ fi;
 
 ## We only support EFI systems for now
 if ! isEfiSystem; then
-  echo "Installer only works on EFI systems";
-  exit;
+  IS_EFI="false"
+  logLine "BIOS System detected"
+else
+  IS_EFI="true"
+  logLine "EFI System detected"
 fi;
