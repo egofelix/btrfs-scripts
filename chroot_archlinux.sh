@@ -22,7 +22,7 @@ fi;
 
 # Run script
 chmod +x /tmp/mnt/root/chroot.sh
-chroot /tmp/mnt/root /chroot.sh
+chroot /tmp/mnt/root /chroot.sh &> /dev/null
 
 # Setup crypto
 if isTrue "${CRYPTED}"; then
@@ -47,4 +47,4 @@ mkinitcpio -P
 grub-install
 grub-mkconfig -o /boot/grub/grub.cfg
 EOF
-chroot /tmp/mnt/root /chroot.sh
+chroot /tmp/mnt/root /chroot.sh &> /dev/null
