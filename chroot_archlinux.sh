@@ -30,7 +30,7 @@ if isTrue "${CRYPTED}"; then
 	echo cryptsystem PARTLABEL=system none luks > /tmp/mnt/root/etc/crypttab.initramfs
 	
 	# Add hooks for cryptsetup to mkinitcpio.conf
-	HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && HOOKS+=(encrypt keymap keyboard) && echo ${HOOKS[@]} | xargs echo -n))"
+	HOOKS="HOOKS=($(source /etc/mkinitcpio.conf && if [[ ${HOOKS[@]} != *"keyboard"* ]]; then HOOKS+=(keyboard); fi && if [[ ${HOOKS[@]} != *"keymap"* ]]; then HOOKS+=(keymap); fi && if [[ ${HOOKS[@]} != *"encrypt"* ]]; then HOOKS+=(encrypt); fi && echo ${HOOKS[@]} | xargs echo -n))"
 	sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
 	
 	# Setup Grub for Cryptsetup
