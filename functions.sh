@@ -6,7 +6,7 @@ function isTrue {
 }
 
 function logDebug {
-	if isTrue "true"; then
+	if isTrue "${DEBUG:-}"; then
         echo $@
 	fi;
 }

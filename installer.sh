@@ -159,7 +159,7 @@ mkdir -p /tmp/mnt/disks/system
 if ! runCmd mount ${PART_SYSTEM} /tmp/mnt/disks/system; then echo "Failed to mount SYSTEM-Partition"; exit; fi;
 
 # Create Subvolumes
-logLine "Creating BTRFS-Subvolumes on SYSTEM-Partition";
+logLine "Creating BTRFS-Subvolumes on SYSTEM-Partition...";
 if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/snapshots; then echo "Failed to create btrfs SNAPSHOTS-Volume on ${partName^^}-Partition"; exit; fi;
 if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/root-data; then echo "Failed to create btrfs ROOT-DATA-Volume"; exit; fi;
 for subvolName in ${SUBVOLUMES}
@@ -184,7 +184,7 @@ do
 done;
 
 # Install base system
-logLine "Installing Base-System"
+logLine "Installing Base-System..."
 if [[ "${DISTRO^^}" == "DEBIAN" ]]; then
 	if ! runCmd debootstrap stable /tmp/mnt/root http://ftp.de.debian.org/debian/; then echo "Failed to install Base-System"; exit; fi;
 elif [[ "${DISTRO^^}" == "ARCHLINUX" ]]; then
@@ -219,6 +219,7 @@ if isTrue "${CRYPTED}"; then
 fi;
 
 # Run installer
+logLine "Setting up system...";
 if [[ "${DISTRO^^}" == "DEBIAN" ]]; then
 	source "${BASH_SOURCE%/*}/chroot_debian.sh"
 elif [[ "${DISTRO^^}" == "ARCHLINUX" ]]; then
