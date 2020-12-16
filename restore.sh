@@ -122,7 +122,7 @@ do
 	mkdir /tmp/mnt/disks/system/snapshots/${VOLNAME}
 	
 	echo "Latest"
-	LATESTBACKUP=$(ls ${SNAPSOURCE}${subvol} | sort | tail -1)
+	LATESTBACKUP=$(ls ${SNAPSOURCE}/${VOLNAME} | sort | tail -1)
 	echo "Latest done"
 	btrfs send ${SNAPSOURCE}/${VOLNAME}/${LATESTBACKUP} | btrfs receive /tmp/mnt/disks/system/snapshots/${VOLNAME}
 	# Check Result
