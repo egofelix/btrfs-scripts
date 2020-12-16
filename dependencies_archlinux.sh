@@ -43,10 +43,10 @@ if ! which btrfs &> /dev/null; then
 fi;
 
 # Install debootstrap
-if ! which debootstrap &> /dev/null; then
-	logLine "Installing dependency debootstrap"
-	pacman -Sy --noconfirm debootstrap &> /dev/null
-fi;
+#if ! which debootstrap &> /dev/null; then
+#	logLine "Installing dependency debootstrap"
+#	pacman -Sy --noconfirm debootstrap &> /dev/null
+#fi;
 
 # Install genfstab
 if ! which genfstab &> /dev/null; then
