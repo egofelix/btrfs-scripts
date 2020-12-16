@@ -168,7 +168,7 @@ grub-install
 grub-mkconfig -o /boot/grub/grub.cfg
 EOF
 chmod +x /tmp/mnt/root/chroot.sh;
-chroot /tmp/mnt/root /chroot.sh;
+chroot /tmp/mnt/root /chroot.sh &> /dev/null;
 
 # Finish
 logLine "Your system is ready! Type reboot to boot it.";
