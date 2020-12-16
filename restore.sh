@@ -93,8 +93,23 @@ if [ $? -ne 0 ]; then
 	exit;
 fi;
 
-# Detect SUBVOLUMES in backup
-SUBVOLUMES=""
+# Mount rootfs
+logLine "Mounting..."
+mkdir -p /tmp/mnt/root
+if ! runCmd mount -o subvol=/root-data ${PART_SYSTEM} /tmp/mnt/root; then echo "Failed to Mount Subvolume ROOT-DATA at /tmp/mnt/root"; exit; fi;
+mkdir -p /tmp/mnt/root/boot
+if ! runCmd mount ${PART_BOOT} /tmp/mnt/root/boot; then echo "Failed to mount BOOT-Partition"; exit; fi;
+
+mkdir -p /tmp/mnt/root/.snapshots
+if ! runCmd mount -o subvol=/snapshots ${PART_SYSTEM} /tmp/mnt/root/.snapshots; then echo "Failed to Mount Snapshot-Volume at /tmp/mnt/root/.snapshots"; exit; fi;
+
+if isEfiSystem; then
+	mkdir -p /tmp/mnt/root/boot/efi
+	if ! runCmd mount ${PART_EFI} /tmp/mnt/root/boot/efi; then echo "Failed to mount BOOT-Partition"; exit; fi;
+fi;
+
+# Now check fstab for additional volumes
+
 
 # Finish
 #logLine "Your system is ready! Type reboot to boot it.";
