@@ -19,7 +19,7 @@ if [[ -z "${SNAPTARGET}" ]]; then
 	exit;
 fi;
 
-SUBVOLUMES=`LANG=C btrfs subvol list ${SNAPSOURCE}/ | awk '{print $9}'`
+SUBVOLUMES=`LANG=C ls ${SNAPSOURCE}/`
 if [[ -z "${SUBVOLUMES}" ]]; then
 	logLine "Nothing to transfer";
 	exit;
