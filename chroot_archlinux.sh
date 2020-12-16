@@ -35,7 +35,7 @@ if isTrue "${CRYPTED}"; then
 	
 	# Setup Grub for Cryptsetup
 	echo "GRUB_ENABLE_CRYPTODISK=y" >> /tmp/mnt/root/etc/default/grub
-	REPLACEMENT='GRUB_CMDLINE_LINUX="cryptdevice=/dev/sda3:cryptsystem"'
+	REPLACEMENT='GRUB_CMDLINE_LINUX="cryptdevice=PARTLABEL=system:cryptsystem"'
 	
 	sed -i "s;GRUB_CMDLINE_LINUX=.*;${REPLACEMENT};g" /tmp/mnt/root/etc/default/grub
 fi;
