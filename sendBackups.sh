@@ -72,13 +72,16 @@ do
 		# Copy it
 		logLine "Copying backup \"${volName}_${subvolName}\" (Incremental)";
 		btrfs send -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName} | btrfs -v receive ${SNAPTARGET}/${volName}
-		echo btrfs send -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName}  btrfs -v receive ${SNAPTARGET}/${volName}
+		#echo btrfs send -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName}  btrfs -v receive ${SNAPTARGET}/${volName}
 		
 		# Check Result
 		if [ $? -ne 0 ]; then
 			logLine "Failed to copy snapshot..."
 			exit;
 		fi;
+		
+		# Remember this subvolume as previos
+		PREVIOUSSUBVOLUME=${subvolName}
 	done;
 	
 	#logLine "Copying snapshot ${subvolName}..."
