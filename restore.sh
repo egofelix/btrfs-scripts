@@ -112,9 +112,11 @@ fi;
 SUBVOLUMEMOUNTPOINTS=$(cat /tmp/mnt/root/etc/fstab | grep -o 'LABEL=system.*btrfs.*subvol=.*' | awk '{print $2}' | grep -v '\/\.' | grep -v '^\/$')
 for subvol in ${SUBVOLUMEMOUNTPOINTS}
 do
+	VOLNAME="${subvol//[\/]/-}"
+	VOLNAME=${VOLNAME:1}
 	SUBVOLNAME=$(cat /tmp/mnt/root/etc/fstab | grep "${subvol}" | grep -P -o 'subvol\=[^,\s\/]+' | awk -F'=' '{print $2}')
 	
-	logLine "Restoring ${subvol} to ${SUBVOLNAME}...";
+	logLine "Restoring ${VOLNAME} to ${SUBVOLNAME}...";
 done;
 
 
