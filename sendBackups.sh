@@ -71,7 +71,8 @@ do
 		
 		# Copy it
 		logLine "Copying backup \"${volName}_${subvolName}\" (Incremental)";
-		btrfs send -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName} | btrfs receive ${SNAPTARGET}/${volName}
+		echo btrfs send -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName}
+		btrfs send -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName} | btrfs -v receive ${SNAPTARGET}/${volName}
 		#echo btrfs send -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName}  btrfs -v receive ${SNAPTARGET}/${volName}
 		
 		# Check Result
