@@ -159,7 +159,6 @@ fi;
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 for pkg in $(pacman -Qqe); do pacman -S --noconfirm $pkg; done
-pacman -Sy --noconfirm linux linux-firmware grub efibootmgr btrfs-progs openssh cryptsetup
 mkinitcpio -P
 grub-install
 grub-mkconfig -o /boot/grub/grub.cfg
