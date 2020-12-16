@@ -166,6 +166,9 @@ mkinitcpio -P
 grub-install
 grub-mkconfig -o /boot/grub/grub.cfg
 EOF
+echo "Test"
+cat /tmp/mnt/root/chroot.sh
+echo "Test"
 chroot /tmp/mnt/root /chroot.sh &> /dev/null
 
 # Finish
