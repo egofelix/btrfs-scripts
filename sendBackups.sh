@@ -71,7 +71,7 @@ do
 		
 		# Copy it
 		logLine "Copying backup \"${volName}_${subvolName}\" (Incremental)";
-		btrfs send -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName} | btrfs receive ${SNAPTARGET}/${volName}
+		btrfs send -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName} | btrfs -v receive ${SNAPTARGET}/${volName}
 		
 		# Check Result
 		if [ $? -ne 0 ]; then
