@@ -117,6 +117,22 @@ do
 	SUBVOLNAME=$(cat /tmp/mnt/root/etc/fstab | grep "${subvol}" | grep -P -o 'subvol\=[^,\s\/]+' | awk -F'=' '{print $2}')
 	
 	logLine "Restoring ${VOLNAME} to ${SUBVOLNAME}...";
+	mkdir /tmp/mnt/disks/system/snapshots/${VOLNAME}
+	LATESTBACKUP=$(ls ${SNAPSOURCE}${subvol} | sort | tail -1)
+	btrfs send ${SNAPSOURCE}${subvol}/${LATESTBACKUP} | btrfs receive /tmp/mnt/disks/system/snapshots/${VOLNAME}
+	# Check Result
+	if [ $? -ne 0 ]; then
+		logLine "Failed to restore ${VOLNAME}-Volume..."
+		exit;
+	fi;
+
+	# Restore root-data
+	btrfs subvol snapshot /tmp/mnt/disks/system/snapshots/${VOLNAME}/${LATESTBACKUP} /tmp/mnt/disks/system/${SUBVOLNAME}
+	# Check Result
+	if [ $? -ne 0 ]; then
+		logLine "Failed to restore ${VOLNAME}-Volume..."
+		exit;
+	fi;
 done;
 
 
