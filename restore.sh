@@ -84,6 +84,15 @@ if [ $? -ne 0 ]; then
 	logLine "Failed to restore ROOT-Volume..."
 	exit;
 fi;
+
+# Restore root-data
+btrfs subvol snapshot /tmp/mnt/disks/system/snapshots/root/${LATESTBACKUP} /tmp/mnt/disks/system/root-data
+# Check Result
+if [ $? -ne 0 ]; then
+	logLine "Failed to restore ROOT-Volume..."
+	exit;
+fi;
+
 # Detect SUBVOLUMES in backup
 SUBVOLUMES=""
 
