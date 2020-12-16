@@ -52,12 +52,17 @@ do
 		mkdir -p ${SNAPTARGET}/${volName};
 	fi;
 	
-	# Full backup?
+	# If first subvolume does not exist send it full!
 	if [[ ! -d "${SNAPTARGET}/${volName}/${FIRSTSUBVOLUME}" ]]; then
 		logLine "Copying backup \"${FIRSTSUBVOLUME}\" (NON Incremental)";
 		btrfs send ${SNAPSOURCE}/${volName}/${FIRSTSUBVOLUME} | btrfs receive ${SNAPTARGET}/${volName}
 	fi;
 	
+	# Now loop over othersubvolumes
+	for subvolName in ${OTHERSUBVOLUMES}
+	do
+		logLine "Debug ${subvolName}";
+	done;
 	#logLine "Copying snapshot ${subvolName}..."
 	#btrfs send ${SNAPSOURCE}/${subvolName} | btrfs receive -v ${SNAPTARGET}/
 	
