@@ -62,7 +62,7 @@ do
 		if [[ ! -d "${SNAPTARGET}/${volName}/${subvolName}" ]]; then	
 			# Copy it
 			logLine "Copying backup \"${volName}_${subvolName}\" (Incremental)";
-			btrfs send -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName} &> /dev/null | btrfs receive ${SNAPTARGET}/${volName} &> /dev/null
+			btrfs send -q -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName} | btrfs receive ${SNAPTARGET}/${volName} &> /dev/null
 		
 			# Check Result
 			if [ $? -ne 0 ]; then
