@@ -66,6 +66,7 @@ do
 		# Check if this subvolume is backuped already
 		if [[ -d "${SNAPTARGET}/${volName}/${subvolName}" ]]; then
 			logLine "Skipping backup \"${volName}_${subvolName}\" (Incremental)";
+			PREVIOUSSUBVOLUME=${subvolName}
 			continue;
 		fi;
 		
