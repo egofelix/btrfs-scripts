@@ -138,8 +138,25 @@ do
 	if ! runCmd mount -o subvol=/${SUBVOLNAME,,} ${PART_SYSTEM} /tmp/mnt/root/${subvol}; then echo "Failed to Mount Subvolume ${SUBVOLNAME^^} at /tmp/mnt/root/${subvol}"; exit; fi;
 done;
 
-# Do chroot and reinstall grub to fix new created /boot and /boot/efi
+# Prepare CHRoot
+if ! runCmd mkdir -p /tmp/mnt/root/tmp; then logLine "Error preparing chroot"; exit; fi;
+if ! runCmd mount -t tmpfs tmpfs /tmp/mnt/root/tmp; then logLine "Error preparing chroot"; exit; fi;
+if ! runCmd mount -t proc proc /tmp/mnt/root/proc; then logLine "Error preparing chroot"; exit; fi;
+if ! runCmd mount -t sysfs sys /tmp/mnt/root/sys; then logLine "Error preparing chroot"; exit; fi;
+if ! runCmd mount -t devtmpfs dev /tmp/mnt/root/dev; then logLine "Error preparing chroot"; exit; fi;
+if ! runCmd mount -t devpts devpts /tmp/mnt/root/dev/pts; then logLine "Error preparing chroot"; exit; fi;
+if isEfiSystem; then
+	if ! runCmd mount -t efivarfs efivarfs /tmp/mnt/root/sys/firmware/efi/efivars; then logLine "Error preparing chroot"; exit; fi;
+fi;
 
+# Reinstall grub
+cat > /tmp/mnt/root/chroot.sh <<- EOF
+#!/bin/bash
+mkinitcpio -P
+grub-install
+grub-mkconfig -o /boot/grub/grub.cfg
+EOF
+chroot /tmp/mnt/root /chroot.sh &> /dev/null
 
 # Finish
-#logLine "Your system is ready! Type reboot to boot it.";
+logLine "Your system is ready! Type reboot to boot it.";
