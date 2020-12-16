@@ -16,7 +16,20 @@ if [[ -z "${SNAPDIR}" ]]; then
 	exit;
 fi;
 
+SUBVOLUMES=`LANG=C mount | grep -o 'on .* type btrfs' | grep -v 'on \/\.snapshots' | awk '{print $2}'`
+if [[ -z "${SUBVOLUMES}" ]]; then
+	logLine "No subvolumes found";
+	exit;
+fi;
+
 logLine "Target Directory: ${SNAPDIR}";
+
+for subvolName in ${SUBVOLUMES}
+do
+	SNAPNAME="${subvolName//[\/]/-}"
+	echo ${SNAPNAME}
+	echo btrfs subvolume snapshot -r ${subvolName} ${SNAPDIR}/${SNAPNAME}
+done;
 
 # Finish
 logLine "Backup done.";
