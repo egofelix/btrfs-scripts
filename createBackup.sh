@@ -16,7 +16,7 @@ if [[ -z "${SNAPDIR}" ]]; then
 	exit;
 fi;
 
-SUBVOLUMES=`LANG=C mount | grep -o '/dev/mapper/cryptsystem on .* type btrfs' | grep -v 'on \/\.snapshots' | awk '{print $3}'`
+SUBVOLUMES=`LANG=C mount | grep -o '/dev/mapper/cryptsystem on .* type btrfs' | grep -v 'on \/\.snapshots' | grep -v 'lib.*docker' | awk '{print $3}'`
 if [[ -z "${SUBVOLUMES}" ]]; then
 	logLine "No subvolumes found";
 	exit;
