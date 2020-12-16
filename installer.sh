@@ -231,31 +231,8 @@ elif [[ "${DISTRO^^}" == "ARCHLINUX" ]]; then
 	source "${BASH_SOURCE%/*}/chroot_archlinux.sh"
 fi;
 
-
-#chroot /tmp/mnt/root /bin/bash
-#echo -e "root\nroot" | passwd root
-#pacman -Sy --noconfirm grub efibootmgr btrfs-progs cryptsetup nano
-#echo cryptsystem PARTLABEL=system none luks > /etc/crypttab
-#echo cryptsystem PARTLABEL=system none luks > /etc/crypttab.initramfs
-##Enable HOOKS (keyboard keymap encrypt)
-#nano /etc/mkinitcpio.conf
-# echo "GRUB_ENABLE_CRYPTODISK=y" >> /etc/default/grub
-# #ADD 
-# GRUB_CMDLINE_LINUX="cryptdevice=/dev/sda3:cryptsystem"
-##Rebuild initramfs
-#mkinitcpio -P
-#grub-install
-#grub-mkconfig -o /boot/grub/grub.cfg
-
-#umount -R /tmp/mnt/root
-
-
-#cryptsetup benchmark
-
-#echo "btrfs" >> /etc/initramfs-tools/modules
-#mkinitcpio -P
-
-
-
 # Cleanup
-#source "${BASH_SOURCE%/*}/cleanup.sh"
+#source "${BASH_SOURCE%/*}/cleanup.sh";
+
+# Finish
+logLine "Your system is ready!";
