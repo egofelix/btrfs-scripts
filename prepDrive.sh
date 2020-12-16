@@ -1,6 +1,6 @@
 #!/bin/bash
 # Format drives
-logLine "Partitioning ROOT-Drive..."
+logLine "Partitioning ${DRIVE_ROOT}..."
 
 if isEfiSystem; then
 	logLine "Using EFI partition scheme...";
@@ -15,7 +15,7 @@ EOM
 
 	# Check Result
 	if [ $? -ne 0 ]; then
-		logLine "Failed to partition the root drive! Aborting"
+		logLine "Failed to partition the drive! Aborting"
 		exit
 	fi;
 	
@@ -56,13 +56,13 @@ sleep 1
 
 # Format EFI-Partition
 if [[ ! -z "${PART_EFI}" ]]; then
-    logLine "Formatting EFI-Partition...";
+    logLine "Formatting EFI-Partition (${PART_EFI})...";
     if ! runCmd mkfs.vfat -F32 ${PART_EFI}; then logLine "Failed to Format EFI-Partition."; exit; fi;
     if ! runCmd fatlabel ${PART_EFI} EFI; then logLine "Failed to label EFI-Partition."; exit; fi;
 fi;
 
 # Format BOOT-Partition
-logLine "Formatting BOOT-Partition...";
+logLine "Formatting BOOT-Partition (${PART_BOOT})...";
 if ! runCmd mkfs.ext2 -F -L boot ${PART_BOOT}; then echo "Failed to format BOOT-Partition"; exit; fi;
 
 # Encrypt SYSTEM-Partition
@@ -72,7 +72,7 @@ if isTrue "${CRYPTED}"; then
 		if ! runCmd dd if=/dev/urandom of=/tmp/crypto.key bs=1024 count=1; then echo "Failed to generate Crypto-KEY"; exit; fi;
 	fi;
 	
-	logLine "Encrypting SYSTEM-Partition...";
+	logLine "Encrypting SYSTEM-Partition (${PART_SYSTEM})...";
 	if ! runCmd cryptsetup --batch-mode luksFormat --type luks2 --cipher aes-xts-plain64 --key-size 512 --hash sha512 --pbkdf argon2i --sector-size 512 --use-urandom -d /tmp/crypto.key ${PART_SYSTEM}; then echo "Failed to cryptformat SYSTEM-Partiton"; exit; fi;
 	if ! runCmd cryptsetup --batch-mode open ${PART_SYSTEM} cryptsystem -d /tmp/crypto.key; then echo "Failed to open CRYPTSYSTEM-Partition"; exit; fi;
 	
