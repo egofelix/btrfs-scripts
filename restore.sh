@@ -160,13 +160,15 @@ cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 for package in \$(pacman -Qqe);
 do
+  echo Reinstalling \$package;
   pacman -S --noconfirm \$package;
 done;
 mkinitcpio -P
 grub-install
 grub-mkconfig -o /boot/grub/grub.cfg
 EOF
-chroot /tmp/mnt/root /chroot.sh &> /dev/null
+chmod +x /tmp/mnt/root/chroot.sh;
+chroot /tmp/mnt/root /chroot.sh;
 
 # Finish
 logLine "Your system is ready! Type reboot to boot it.";
