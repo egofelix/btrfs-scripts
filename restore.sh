@@ -126,14 +126,19 @@ do
 		exit;
 	fi;
 
-	# Restore root-data
+	# Restore data
 	btrfs subvol snapshot /tmp/mnt/disks/system/snapshots/${VOLNAME}/${LATESTBACKUP} /tmp/mnt/disks/system/${SUBVOLNAME}
 	# Check Result
 	if [ $? -ne 0 ]; then
 		logLine "Failed to restore ${VOLNAME}-Volume..."
 		exit;
 	fi;
+	
+	# Mount it for later use
+	if ! runCmd mount -o subvol=/${SUBVOLNAME,,} ${PART_SYSTEM} /tmp/mnt/root/${subvol}; then echo "Failed to Mount Subvolume ${SUBVOLNAME^^} at /tmp/mnt/root/${subvol}"; exit; fi;
 done;
+
+# Do chroot and reinstall grub to fix new created /boot and /boot/efi
 
 
 # Finish
