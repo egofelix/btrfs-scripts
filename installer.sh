@@ -239,4 +239,4 @@ fi;
 #source "${BASH_SOURCE%/*}/cleanup.sh";
 
 # Finish
-logLine "Your system is ready!";
+logLine "Your system is ready! Type reboot to boot it.";
