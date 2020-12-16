@@ -27,6 +27,7 @@ fi;
 
 logLine "Source Directory: ${SNAPSOURCE}";
 logLine "Target Directory: ${SNAPTARGET}";
+logLine "Snapshots: ${SUBVOLUMES}";
 for subvolName in ${SUBVOLUMES}
 do
 	logLine "Copying snapshot ${subvolName}..."
