@@ -64,24 +64,21 @@ do
 	for subvolName in ${OTHERSUBVOLUMES}
 	do
 		# Check if this subvolume is backuped already
-		if [[ -d "${SNAPTARGET}/${volName}/${subvolName}" ]]; then
-			logLine "Skipping backup \"${volName}_${subvolName}\" (Incremental)";
-			PREVIOUSSUBVOLUME=${subvolName}
-			continue;
-		fi;
+		if [[ ! -d "${SNAPTARGET}/${volName}/${subvolName}" ]]; then	
+			# Copy it
+			logLine "Copying backup \"${volName}_${subvolName}\" (Incremental)";
+			btrfs send -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName} | btrfs receive ${SNAPTARGET}/${volName}
 		
-		# Copy it
-		logLine "Copying backup \"${volName}_${subvolName}\" (Incremental)";
-		btrfs send -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName} | btrfs receive ${SNAPTARGET}/${volName}
-		
-		# Check Result
-		if [ $? -ne 0 ]; then
-			logLine "Failed to copy snapshot..."
-			exit;
+			# Check Result
+			if [ $? -ne 0 ]; then
+				logLine "Failed to copy snapshot..."
+				exit;
+			fi;
 		fi;
 		
 		# Remove previous subvolume as it is not needed here anymore!
 		btrfs subvolume delete ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME}
+		
 		# Check Result
 		if [ $? -ne 0 ]; then
 			logLine "Failed to cleanup snapshot..."
