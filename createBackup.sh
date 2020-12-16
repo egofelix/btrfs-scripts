@@ -27,6 +27,11 @@ logLine "Target Directory: ${SNAPDIR}";
 for subvolName in ${SUBVOLUMES}
 do
 	SNAPNAME="${subvolName//[\/]/-}"
+	
+	# Remove first char
+	SNAPNAME="${SNAPNAME:1}"
+	if [[ -z "${SNAPNAME}" ]]; then SNAPNAME="root"; fi;
+	
 	echo ${SNAPNAME}
 	echo btrfs subvolume snapshot -r ${subvolName} ${SNAPDIR}/${SNAPNAME}
 done;
