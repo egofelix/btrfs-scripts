@@ -7,7 +7,7 @@ set -uo pipefail
 source "${BASH_SOURCE%/*}/functions.sh"
 
 # Current time
-STAMP=`date -u +"%Y-%m-%d-%H-%M-%S"`
+STAMP=`date -u +"%Y-%m-%d_%H-%M-%S"`
 
 # Search snapshot volume
 SNAPDIR=`LANG=C mount | grep snapshots | grep -o 'on /\..* type btrfs' | awk '{print $2}'`
@@ -22,6 +22,8 @@ if [[ -z "${SUBVOLUMES}" ]]; then
 	exit;
 fi;
 
+#ls /.snapshots/ | sort | head -n -1
+
 logLine "Target Directory: ${SNAPDIR}";
 
 for subvolName in ${SUBVOLUMES}
@@ -32,7 +34,7 @@ do
 	SNAPNAME="${SNAPNAME:1}"
 	if [[ -z "${SNAPNAME}" ]]; then SNAPNAME="root"; fi;
 	
-	SNAPNAME="${SNAPNAME}-${STAMP}"
+	SNAPNAME="${SNAPNAME}_${STAMP}"
 	
 	logLine "Creating Snapshot ${SNAPNAME}"
 	if ! runCmd btrfs subvolume snapshot -r ${subvolName} ${SNAPDIR}/${SNAPNAME}; then

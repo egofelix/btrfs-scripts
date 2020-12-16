@@ -19,7 +19,7 @@ if [[ -z "${SNAPTARGET}" ]]; then
 	exit;
 fi;
 
-SUBVOLUMES=`LANG=C ls ${SNAPSOURCE}/`
+SUBVOLUMES=`LANG=C ls ${SNAPSOURCE}/ | sort`
 if [[ -z "${SUBVOLUMES}" ]]; then
 	logLine "Nothing to transfer";
 	exit;
