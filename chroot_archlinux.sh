@@ -11,12 +11,12 @@ EOF
 if isTrue "${CRYPTED}"; then
 	cat >> /tmp/mnt/root/chroot.sh <<- EOF
 # install grub
-pacman -Sy --noconfirm linux linux-firmware grub efibootmgr btrfs-progs cryptsetup
+pacman -Sy --noconfirm linux linux-firmware grub efibootmgr btrfs-progs openssh cryptsetup
 EOF
 else
 	cat >> /tmp/mnt/root/chroot.sh <<- EOF
 # install grub
-pacman -Sy --noconfirm linux linux-firmware grub efibootmgr btrfs-progs
+pacman -Sy --noconfirm linux linux-firmware grub efibootmgr btrfs-progs openssh
 EOF
 fi;
 
@@ -24,10 +24,13 @@ fi;
 chmod +x /tmp/mnt/root/chroot.sh
 chroot /tmp/mnt/root /chroot.sh &> /dev/null
 
+# Remove unneccesarry hooks
+HOOKS="HOOKS=($(source /etc/mkinitcpio.conf && HOOKS=(${HOOKS[@]/archiso_shutdown}) && HOOKS=(${HOOKS[@]/archiso_pxe_common}) && HOOKS=(${HOOKS[@]/archiso_pxe_nbd}) && HOOKS=(${HOOKS[@]/archiso_pxe_nfs}) && HOOKS=(${HOOKS[@]/archiso_pxe_http}) && HOOKS=(${HOOKS[@]/archiso_kms}) && HOOKS=(${HOOKS[@]/archiso_loop_mnt}) && HOOKS=(${HOOKS[@]/archiso}) && HOOKS=(${HOOKS[@]/archiso}) && HOOKS=(${HOOKS[@]/memdisk}) && echo ${HOOKS[@]} | xargs echo -n))"
+sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
+
 # Setup crypto
 if isTrue "${CRYPTED}"; then
 	echo cryptsystem PARTLABEL=system none luks > /tmp/mnt/root/etc/crypttab
-	echo cryptsystem PARTLABEL=system none luks > /tmp/mnt/root/etc/crypttab.initramfs
 	
 	# Add hooks for cryptsetup to mkinitcpio.conf
 	HOOKS="HOOKS=($(source /etc/mkinitcpio.conf && if [[ ${HOOKS[@]} != *"keyboard"* ]]; then HOOKS+=(keyboard); fi && if [[ ${HOOKS[@]} != *"keymap"* ]]; then HOOKS+=(keymap); fi && if [[ ${HOOKS[@]} != *"encrypt"* ]]; then HOOKS+=(encrypt); fi && echo ${HOOKS[@]} | xargs echo -n))"
@@ -54,6 +57,7 @@ cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 systemctl enable systemd-networkd
 systemctl enable systemd-resolved
+systemctl enable sshd
 EOF
 chroot /tmp/mnt/root /chroot.sh &> /dev/null
 cat > /tmp/mnt/root/etc/systemd/network/en.network <<- EOM
