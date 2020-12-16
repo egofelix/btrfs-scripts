@@ -43,7 +43,7 @@ source "${BASH_SOURCE%/*}/prepDrive.sh"
 
 # Create Subvolumes
 logLine "Creating BTRFS-Subvolumes on SYSTEM-Partition...";
-if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/snapshots; then echo "Failed to create btrfs SNAPSHOTS-Volume on ${partName^^}-Partition"; exit; fi;
+if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/snapshots; then echo "Failed to create btrfs SNAPSHOTS-Volume"; exit; fi;
 if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/root-data; then echo "Failed to create btrfs ROOT-DATA-Volume"; exit; fi;
 for subvolName in ${SUBVOLUMES}
 do

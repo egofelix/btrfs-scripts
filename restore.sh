@@ -73,13 +73,12 @@ fi
 source "${BASH_SOURCE%/*}/prepDrive.sh"
 
 # Create system snapshot volume
-mkdir -p /tmp/mnt/root/.snapshots
-if ! runCmd mount -o subvol=/snapshots ${PART_SYSTEM} /tmp/mnt/root/.snapshots; then echo "Failed to Mount Snapshot-Volume at /tmp/mnt/root/.snapshots"; exit; fi;
-mkdir -p /tmp/mnt/root/.snapshots/root
+if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/snapshots; then echo "Failed to create btrfs SNAPSHOTS-Volume"; exit; fi;
+mkdir /tmp/mnt/disks/system/snapshots/root
 
 # Restore root first
 LATESTBACKUP=$(ls ${SNAPSOURCE}/root | sort | tail -1)
-btrfs send ${SNAPSOURCE}/root/${LATESTBACKUP} | btrfs receive /tmp/mnt/root/.snapshots/root
+btrfs send ${SNAPSOURCE}/root/${LATESTBACKUP} | btrfs receive /tmp/mnt/disks/system/snapshots/root
 # Check Result
 if [ $? -ne 0 ]; then
 	logLine "Failed to restore ROOT-Volume..."
