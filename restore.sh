@@ -176,5 +176,12 @@ EOF
 chmod +x /tmp/mnt/root/chroot.sh;
 chroot /tmp/mnt/root /chroot.sh &> /dev/null;
 
+# Remove chroot file
+rm -f /tmp/mnt/root/chroot.sh
+
+# Resotre resolv.conf
+rm -f /tmp/mnt/root/etc/resolv.conf
+ln -s /run/systemd/resolve/stub-resolv.conf /tmp/mnt/root/etc/resolv.conf
+
 # Finish
 logLine "Your system is ready! Type reboot to boot it.";
