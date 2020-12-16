@@ -124,7 +124,7 @@ do
 	echo "Latest"
 	LATESTBACKUP=$(ls ${SNAPSOURCE}${subvol} | sort | tail -1)
 	echo "Latest done"
-	btrfs send ${SNAPSOURCE}${subvol}/${LATESTBACKUP} | btrfs receive /tmp/mnt/disks/system/snapshots/${VOLNAME}
+	btrfs send ${SNAPSOURCE}/${VOLNAME,,}/${LATESTBACKUP} | btrfs receive /tmp/mnt/disks/system/snapshots/${VOLNAME}
 	# Check Result
 	if [ $? -ne 0 ]; then
 		logLine "Failed to restore ${VOLNAME}-Volume..."
