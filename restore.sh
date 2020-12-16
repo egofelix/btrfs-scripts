@@ -65,6 +65,10 @@ fi
 # Prepare drive
 source "${BASH_SOURCE%/*}/prepDrive.sh"
 
+# Create system snapshot volume
+mkdir -p /tmp/mnt/root/.snapshots
+if ! runCmd mount -o subvol=/snapshots ${PART_SYSTEM} /tmp/mnt/root/.snapshots; then echo "Failed to Mount Snapshot-Volume at /tmp/mnt/root/.snapshots"; exit; fi;
+
 # Restore root first
 LATESTBACKUP=$(ls ${SNAPSOURCE}/root | sort | tail -1)
 
