@@ -36,10 +36,9 @@ do
 		continue;
 	fi;
 	
-	SUBVOLUMECOUNT=$(ls /.snapshots/home/ | sort | wc -l)
+	SUBVOLUMECOUNT=$(LANG=C ls ${SNAPSOURCE}/${volName}/ | sort | wc -l)
 	FIRSTSUBVOLUME=$(LANG=C ls ${SNAPSOURCE}/${volName}/ | sort | head -1)
-	LASTSUBVOLUME=$(LANG=C ls ${SNAPSOURCE}/${volName}/ | sort | tail -1)
-	OTHERSUBVOLUMES=$(LANG=C ls ${SNAPSOURCE}/${volName}/ | sort | tail -n +2 | head -n -1)
+	OTHERSUBVOLUMES=$(LANG=C ls ${SNAPSOURCE}/${volName}/ | sort | tail -n +2)
 	
 	if [[ "${FIRSTSUBVOLUME}" == "${LASTSUBVOLUME}" ]]; then
 		logLine "Only one Subvolume found!";
@@ -58,11 +57,14 @@ do
 		btrfs send ${SNAPSOURCE}/${volName}/${FIRSTSUBVOLUME} | btrfs receive ${SNAPTARGET}/${volName}
 	fi;
 	
+	PREVIOUSSUBVOLUME=${FIRSTSUBVOLUME}
+	
 	# Now loop over othersubvolumes
 	for subvolName in ${OTHERSUBVOLUMES}
 	do
 		logLine "Debug ${subvolName}";
 	done;
+	
 	#logLine "Copying snapshot ${subvolName}..."
 	#btrfs send ${SNAPSOURCE}/${subvolName} | btrfs receive -v ${SNAPTARGET}/
 	
