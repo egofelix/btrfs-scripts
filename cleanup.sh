@@ -12,3 +12,4 @@ umount -fR /tmp/mnt/backup &> /dev/null || true
 rm -rf /tmp/mnt &> /dev/null || true
 
 cryptsetup close cryptsystem &> /dev/null || true
+cryptsetup close cryptbackup &> /dev/null || true

@@ -155,7 +155,7 @@ if isTrue "${CRYPTED}"; then
 	if ! runCmd cp /tmp/crypto.header /tmp/mnt/root/etc/; then logLine "Failed to copy crypto.header"; exit; fi;
 fi;
 
-# Reinstall necessary packages
+# Reinstall necessary packages and reinstallg grub
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 for pkg in $(pacman -Qqe); do
