@@ -41,7 +41,7 @@ do
 	LASTSUBVOLUME=$(LANG=C ls ${SNAPSOURCE}/${volName}/ | sort | tail -1)
 	OTHERSUBVOLUMES=$(LANG=C ls ${SNAPSOURCE}/${volName}/ | sort | tail -n +2 | head -n -1)
 	
-	if [[ "${FIRSTSUBVOLUME}" -eq "${LASTSUBVOLUME}" ]]; then
+	if [[ "${FIRSTSUBVOLUME}" == "${LASTSUBVOLUME}" ]]; then
 		logLine "Only one Subvolume found!";
 		#continue;
 	fi;
