@@ -158,7 +158,7 @@ fi;
 # Reinstall necessary packages and reinstallg grub
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
-for package in $(pacman -Qqe);
+for package in \$(pacman -Qqe);
 do
   pacman -S --noconfirm \$package;
 done;
