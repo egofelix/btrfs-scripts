@@ -54,7 +54,7 @@ do
 	
 	# If first subvolume does not exist send it full!
 	if [[ ! -d "${SNAPTARGET}/${volName}/${FIRSTSUBVOLUME}" ]]; then
-		logLine "Copying backup \"${FIRSTSUBVOLUME}\" (NON Incremental)";
+		logLine "Copying backup \"${volName}_${FIRSTSUBVOLUME}\" (NON Incremental)";
 		btrfs send ${SNAPSOURCE}/${volName}/${FIRSTSUBVOLUME} | btrfs receive ${SNAPTARGET}/${volName}
 	fi;
 	
@@ -65,12 +65,12 @@ do
 	do
 		# Check if this subvolume is backuped already
 		if [[ -d "${SNAPTARGET}/${volName}/${subvolName}" ]]; then
-			logLine "Skipping backup \"${subvolName}\" (Incremental)";
+			logLine "Skipping backup \"${volName}_${subvolName}\" (Incremental)";
 			continue;
 		fi;
 		
 		# Copy it
-		logLine "Copying backup \"${subvolName}\" (Incremental)";
+		logLine "Copying backup \"${volName}_${subvolName}\" (Incremental)";
 		btrfs send -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName} | btrfs receive ${SNAPTARGET}/${volName}
 		
 		# Check Result
