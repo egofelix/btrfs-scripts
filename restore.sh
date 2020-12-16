@@ -20,3 +20,4 @@ if [[ -z "${SNAPSOURCE}" ]]; then
 	mount /dev/disk/by-label/backup /tmp/mnt/backup;
 fi;
 
+logLine "Backup Source: ${SNAPSOURCE}";
