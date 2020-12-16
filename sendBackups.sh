@@ -41,11 +41,6 @@ do
 	OTHERSUBVOLUMES=$(LANG=C ls ${SNAPSOURCE}/${volName}/ | sort | tail -n +2)
 	LASTSUBVOLUME=$(LANG=C ls ${SNAPSOURCE}/${volName}/ | sort | tail -1)
 	
-	if [[ "${FIRSTSUBVOLUME}" == "${LASTSUBVOLUME}" ]]; then
-		logLine "Only one Subvolume found!";
-		#continue;
-	fi;
-	
 	# Create Directory for this volume
 	if [[ ! -d "${SNAPTARGET}/${volName}" ]]; then
 		#logLine "Creating Directory...";
@@ -77,7 +72,7 @@ do
 		fi;
 		
 		# Remove previous subvolume as it is not needed here anymore!
-		btrfs subvolume delete ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME}
+		btrfs subvolume delete ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} &> /dev/null
 		
 		# Check Result
 		if [ $? -ne 0 ]; then
@@ -85,27 +80,9 @@ do
 			exit;
 		fi;
 		
-		# Remember this subvolume as previos
+		# Remember this subvolume as previos so we can send the next following backup as incremental
 		PREVIOUSSUBVOLUME=${subvolName}
 	done;
-	
-	# Cleanup
-	
-	#logLine "Copying snapshot ${subvolName}..."
-	#btrfs send ${SNAPSOURCE}/${subvolName} | btrfs receive -v ${SNAPTARGET}/
-	
-	# Check Result
-	#if [ $? -ne 0 ]; then
-	#	logLine "Failed to copy snapshot..."
-	#	
-	#	# Cleanup possible broken snapshot
-	#	btrfs subvol del ${SNAPTARGET}/${subvolName} &> /dev/null
-	#	
-	#	exit
-	#fi;
-	
-	#logLine "Removing original snapshot..."
-	#btrfs subvol del ${SNAPSOURCE}/${subvolName}
 done;
 
 # Finish
