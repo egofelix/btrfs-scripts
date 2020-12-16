@@ -41,6 +41,13 @@ if [[ -z "${SNAPSOURCE}" ]]; then
 	exit;
 fi;
 
+# Check root volumes
+SUBVOLUMES=$(LANG=C ls ${SNAPSOURCE}/root/)
+if [[ -z "${SUBVOLUMES}" ]]; then
+	logLine "No Backup for ROOT-Volume found!.";
+	exit;
+fi;
+
 DRIVE_ROOT="/dev/sda";
 
 logLine "Backup Source: ${SNAPSOURCE}";
@@ -62,16 +69,22 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit;   
 fi
 
-# Prepare drive
-source "${BASH_SOURCE%/*}/prepDrive.sh"
-
 # Create system snapshot volume
 mkdir -p /tmp/mnt/root/.snapshots
 if ! runCmd mount -o subvol=/snapshots ${PART_SYSTEM} /tmp/mnt/root/.snapshots; then echo "Failed to Mount Snapshot-Volume at /tmp/mnt/root/.snapshots"; exit; fi;
+mkdir -p /tmp/mnt/root/.snapshots/root
+
+# Prepare drive
+source "${BASH_SOURCE%/*}/prepDrive.sh"
 
 # Restore root first
 LATESTBACKUP=$(ls ${SNAPSOURCE}/root | sort | tail -1)
-
+btrfs send ${SNAPSOURCE}/root/${LATESTBACKUP} | btrfs receive /tmp/mnt/root/.snapshots/root
+# Check Result
+if [ $? -ne 0 ]; then
+	logLine "Failed to restore ROOT-Volume..."
+	exit;
+fi;
 # Detect SUBVOLUMES in backup
 SUBVOLUMES=""
 

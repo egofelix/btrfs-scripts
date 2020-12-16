@@ -31,7 +31,7 @@ logLine "Snapshots: ${VOLUMES}";
 for volName in ${VOLUMES}
 do
 	SUBVOLUMES=$(LANG=C ls ${SNAPSOURCE}/${volName}/)
-	if [[ -z "${VOLUMES}" ]]; then
+	if [[ -z "${SUBVOLUMES}" ]]; then
 		logLine "Nothing to transfer on Volume ${volName}";
 		continue;
 	fi;
