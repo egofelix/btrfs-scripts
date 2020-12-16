@@ -121,10 +121,8 @@ do
 	echo mkdir /tmp/mnt/disks/system/snapshots/${VOLNAME}
 	mkdir /tmp/mnt/disks/system/snapshots/${VOLNAME}
 	
-	echo "Latest"
 	LATESTBACKUP=$(ls ${SNAPSOURCE}/${VOLNAME} | sort | tail -1)
-	echo "Latest done"
-	btrfs send ${SNAPSOURCE}/${VOLNAME}/${LATESTBACKUP} | btrfs -q receive /tmp/mnt/disks/system/snapshots/${VOLNAME}
+	btrfs -q send ${SNAPSOURCE}/${VOLNAME}/${LATESTBACKUP} | btrfs -q receive /tmp/mnt/disks/system/snapshots/${VOLNAME}
 	# Check Result
 	if [ $? -ne 0 ]; then
 		logLine "Failed to restore ${VOLNAME}-Volume..."
@@ -132,7 +130,7 @@ do
 	fi;
 
 	# Restore data
-	btrfs subvol snapshot /tmp/mnt/disks/system/snapshots/${VOLNAME}/${LATESTBACKUP} /tmp/mnt/disks/system/${SUBVOLNAME}
+	btrfs -q subvol snapshot /tmp/mnt/disks/system/snapshots/${VOLNAME}/${LATESTBACKUP} /tmp/mnt/disks/system/${SUBVOLNAME}
 	# Check Result
 	if [ $? -ne 0 ]; then
 		logLine "Failed to restore ${VOLNAME}-Volume..."
