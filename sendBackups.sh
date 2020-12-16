@@ -30,20 +30,20 @@ logLine "Target Directory: ${SNAPTARGET}";
 for subvolName in ${SUBVOLUMES}
 do
 	logLine "Copying snapshot ${subvolName}..."
-	btrfs send /${SNAPSOURCE}/${subvolName} | btrfs receive -v ${SNAPTARGET}/
+	btrfs send ${SNAPSOURCE}/${subvolName} | btrfs receive -v ${SNAPTARGET}/
 	
 	# Check Result
 	if [ $? -ne 0 ]; then
 		logLine "Failed to copy snapshot..."
 		
 		# Cleanup possible broken snapshot
-		btrfs subvol del /${SNAPTARGET}/${subvolName} &> /dev/null
+		btrfs subvol del ${SNAPTARGET}/${subvolName} &> /dev/null
 		
 		exit
 	fi;
 	
 	logLine "Removing original snapshot..."
-	btrfs subvol del /${SNAPSOURCE}/${subvolName}
+	btrfs subvol del ${SNAPSOURCE}/${subvolName}
 done;
 
 # Finish
