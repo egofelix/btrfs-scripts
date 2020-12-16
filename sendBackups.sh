@@ -55,7 +55,7 @@ do
 	# Full backup?
 	if [[ ! -d "${SNAPTARGET}/${volName}/${FIRSTSUBVOLUME}" ]]; then
 		logLine "Copying backup \"${FIRSTSUBVOLUME}\" (NON Incremental)";
-		btrfs send ${SNAPSOURCE}/${subvolName}/${FIRSTSUBVOLUME} | btrfs receive -v ${SNAPTARGET}/${volName}/${FIRSTSUBVOLUME}
+		btrfs send ${SNAPSOURCE}/${volName}/${FIRSTSUBVOLUME} | btrfs receive -v ${SNAPTARGET}/${volName}/${FIRSTSUBVOLUME}
 	fi;
 	
 	#logLine "Copying snapshot ${subvolName}..."
