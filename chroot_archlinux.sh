@@ -72,6 +72,8 @@ EOF
 chroot /tmp/mnt/root /chroot.sh &> /dev/null
 
 # Setup Network
+rm -f /tmp/mnt/root/etc/network/interfaces
+rm -f /tmp/mnt/root/etc/network/interfaces.d/*
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 systemctl enable systemd-networkd
@@ -97,5 +99,6 @@ EOM
 # Resotre resolv.conf
 rm -f /tmp/mnt/root/etc/resolv.conf
 ln -s /run/systemd/resolve/stub-resolv.conf /tmp/mnt/root/etc/resolv.conf
-rm -f /tmp/mnt/root/etc/network/interfaces
-rm -f /tmp/mnt/root/etc/network/interfaces.d/*
+
+# Remove chroot file
+rm -f /tmp/mnt/root/chroot.sh
