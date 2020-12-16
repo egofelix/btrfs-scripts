@@ -51,4 +51,5 @@ do
 done;
 
 # Finish
+sync
 logLine "Backup done.";

@@ -86,4 +86,5 @@ do
 done;
 
 # Finish
+sync
 logLine "Backup transfer done.";
