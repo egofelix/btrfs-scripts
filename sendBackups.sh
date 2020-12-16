@@ -49,7 +49,7 @@ do
 	
 	# If first subvolume does not exist send it full!
 	if [[ ! -d "${SNAPTARGET}/${volName}/${FIRSTSUBVOLUME}" ]]; then
-		logLine "Copying backup \"${volName}_${FIRSTSUBVOLUME}\" (NON Incremental)";
+		logLine "Copying backup \"${volName}_${FIRSTSUBVOLUME}\" (Full)";
 		btrfs send ${SNAPSOURCE}/${volName}/${FIRSTSUBVOLUME} | btrfs receive ${SNAPTARGET}/${volName}
 	fi;
 	

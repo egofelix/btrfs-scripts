@@ -38,7 +38,6 @@ do
 	
 	# Create Directory for this volume
 	if [[ ! -d "${SNAPDIR}/${SNAPNAME}" ]]; then
-		#logLine "Creating Directory...";
 		mkdir -p ${SNAPDIR}/${SNAPNAME};
 	fi;
 	
