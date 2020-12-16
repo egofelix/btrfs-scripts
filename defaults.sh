@@ -7,11 +7,16 @@ if [[ -z ${CRYPTEDPASSWORD:-} ]]; then
 	export CRYPTEDPASSWORD="test1234";
 fi;
 
-export SUBVOLUMES="home var srv usr opt";
-export DISTRO="ARCHLINUX";
+if [[ -z ${SUBVOLUMES:-} ]]; then
+	export SUBVOLUMES="home var srv usr opt";
+fi;
 
-if [[ -z ${TIMEZONE:-} ]]; then
-	export TIMEZONE="Europe/Berlin";
+if [[ -z ${DISTRO:-} ]]; then
+	export DISTRO="ARCHLINUX";
+fi;
+
+if [[ -z ${TZ:-} ]]; then
+	export TZ="Europe/Berlin";
 fi;
 
 if [[ -z ${KEYMAP:-} ]]; then

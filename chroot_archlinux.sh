@@ -56,7 +56,7 @@ cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 locale-gen
 EOF
-echo "timedatectl set-timezone ${TIMEZONE}" >> /tmp/mnt/root/chroot.sh;
+echo "timedatectl set-timezone ${TZ}" >> /tmp/mnt/root/chroot.sh;
 echo "localectl set-keymap ${KEYMAP}" >> /tmp/mnt/root/chroot.sh;
 
 chroot /tmp/mnt/root /chroot.sh &> /dev/null
