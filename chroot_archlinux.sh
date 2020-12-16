@@ -24,7 +24,7 @@ fi;
 chmod +x /tmp/mnt/root/chroot.sh
 chroot /tmp/mnt/root /chroot.sh &> /dev/null
 
-# Remove unneccesarry hooks
+# Remove unneccesarry hooks from mkinitcpio.conf
 HOOKS="HOOKS=($(source /etc/mkinitcpio.conf && HOOKS=(${HOOKS[@]/archiso_shutdown}) && HOOKS=(${HOOKS[@]/archiso_pxe_common}) && HOOKS=(${HOOKS[@]/archiso_pxe_nbd}) && HOOKS=(${HOOKS[@]/archiso_pxe_nfs}) && HOOKS=(${HOOKS[@]/archiso_pxe_http}) && HOOKS=(${HOOKS[@]/archiso_kms}) && HOOKS=(${HOOKS[@]/archiso_loop_mnt}) && HOOKS=(${HOOKS[@]/archiso}) && HOOKS=(${HOOKS[@]/archiso}) && HOOKS=(${HOOKS[@]/memdisk}) && echo ${HOOKS[@]} | xargs echo -n))"
 sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
 
