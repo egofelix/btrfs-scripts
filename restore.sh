@@ -109,7 +109,7 @@ if isEfiSystem; then
 fi;
 
 # Now check fstab for additional volumes
-SUBVOLUMEMOUNTPOINTS=$(cat /tmp/mnt/root/etc/fstab | grep -o 'LABEL=system.*btrfs.*subvol=.*' | awk '{print $2}' | grep -v '\/\.' | grep -v '^\/$')
+SUBVOLUMEMOUNTPOINTS=$(cat /tmp/mnt/root/etc/fstab | grep -o 'LABEL=system.*btrfs.*subvol=.*' | awk '{print $2}' | grep -v '\/\.' | grep -v '^\/$' | sort)
 for subvol in ${SUBVOLUMEMOUNTPOINTS}
 do
 	VOLNAME="${subvol//[\/]/-}"
