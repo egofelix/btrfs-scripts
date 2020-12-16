@@ -72,10 +72,7 @@ do
 		
 		# Copy it
 		logLine "Copying backup \"${volName}_${subvolName}\" (Incremental)";
-		echo btrfs send -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName}
-		btrfs send -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName} | btrfs -v receive ${SNAPTARGET}/${volName}
-		#echo btrfs send -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName}  btrfs -v receive ${SNAPTARGET}/${volName}
-		echo btrfs send -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName}
+		btrfs send -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName} | btrfs receive ${SNAPTARGET}/${volName}
 		
 		# Check Result
 		if [ $? -ne 0 ]; then
@@ -84,6 +81,12 @@ do
 		fi;
 		
 		# Remove previous subvolume as it is not needed here anymore!
+		btrfs subvolume delete ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME}
+		# Check Result
+		if [ $? -ne 0 ]; then
+			logLine "Failed to cleanup snapshot..."
+			exit;
+		fi;
 		
 		# Remember this subvolume as previos
 		PREVIOUSSUBVOLUME=${subvolName}
