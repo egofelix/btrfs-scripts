@@ -62,11 +62,14 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit;   
 fi
 
-# Detect SUBVOLUMES in backup
-SUBVOLUMES=""
-
 # Prepare drive
 source "${BASH_SOURCE%/*}/prepDrive.sh"
+
+# Restore root first
+LATESTBACKUP=$(ls ${SNAPSOURCE}/root | sort | tail -1)
+
+# Detect SUBVOLUMES in backup
+SUBVOLUMES=""
 
 # Finish
 #logLine "Your system is ready! Type reboot to boot it.";

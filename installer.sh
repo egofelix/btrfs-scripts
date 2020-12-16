@@ -41,6 +41,35 @@ fi
 # Prepare drive
 source "${BASH_SOURCE%/*}/prepDrive.sh"
 
+# Create Subvolumes
+logLine "Creating BTRFS-Subvolumes on SYSTEM-Partition...";
+if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/snapshots; then echo "Failed to create btrfs SNAPSHOTS-Volume on ${partName^^}-Partition"; exit; fi;
+if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/root-data; then echo "Failed to create btrfs ROOT-DATA-Volume"; exit; fi;
+for subvolName in ${SUBVOLUMES}
+do
+	if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/${subvolName,,}-data; then echo "Failed to create btrfs ${subvolName^^}-DATA-Volume"; exit; fi;
+done;
+	
+# Mount Subvolumes
+logLine "Mounting..."
+mkdir -p /tmp/mnt/root
+if ! runCmd mount -o subvol=/root-data ${PART_SYSTEM} /tmp/mnt/root; then echo "Failed to Mount Subvolume ROOT-DATA at /tmp/mnt/root"; exit; fi;
+mkdir -p /tmp/mnt/root/boot
+if ! runCmd mount ${PART_BOOT} /tmp/mnt/root/boot; then echo "Failed to mount BOOT-Partition"; exit; fi;
+
+mkdir -p /tmp/mnt/root/.snapshots
+if ! runCmd mount -o subvol=/snapshots ${PART_SYSTEM} /tmp/mnt/root/.snapshots; then echo "Failed to Mount Snapshot-Volume at /tmp/mnt/root/.snapshots"; exit; fi;
+
+if isEfiSystem; then
+	mkdir -p /tmp/mnt/root/boot/efi
+	if ! runCmd mount ${PART_EFI} /tmp/mnt/root/boot/efi; then echo "Failed to mount BOOT-Partition"; exit; fi;
+fi;
+for subvolName in ${SUBVOLUMES}
+do
+	mkdir -p /tmp/mnt/root/${subvolName,,}
+	if ! runCmd mount -o subvol=/${subvolName,,}-data ${PART_SYSTEM} /tmp/mnt/root/${subvolName,,}; then echo "Failed to Mount Subvolume ${subvolName^^}-DATA at /tmp/mnt/root/${subvolName,,}"; exit; fi;
+done;
+
 # Install base system
 logLine "Installing Base-System..."
 if [[ "${DISTRO^^}" == "DEBIAN" ]]; then
