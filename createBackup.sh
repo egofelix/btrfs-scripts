@@ -44,13 +44,11 @@ do
 	
 	#SNAPNAME="${SNAPNAME}_${STAMP}"
 	
-	logLine "Creating Snapshot ${SNAPNAME}"
+	logLine "Creating Snapshot ${SNAPDIR}/${SNAPNAME}/${STAMP}"
 	if ! runCmd btrfs subvolume snapshot -r ${subvolName} ${SNAPDIR}/${SNAPNAME}/${STAMP}; then
 		logLine "Failed!";
 		exit;
 	fi;
-	
-	logLine "Snapshot created";
 done;
 
 # Finish
