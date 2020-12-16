@@ -32,6 +32,8 @@ do
 	SNAPNAME="${SNAPNAME:1}"
 	if [[ -z "${SNAPNAME}" ]]; then SNAPNAME="root"; fi;
 	
+	SNAPNAME="${SNAPNAME}-${STAMP}"
+	
 	echo ${SNAPNAME}
 	echo btrfs subvolume snapshot -r ${subvolName} ${SNAPDIR}/${SNAPNAME}
 done;
