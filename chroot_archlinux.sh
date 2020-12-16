@@ -43,6 +43,19 @@ if isTrue "${CRYPTED}"; then
 	sed -i "s;GRUB_CMDLINE_LINUX=.*;${REPLACEMENT};g" /tmp/mnt/root/etc/default/grub
 fi;
 
+# Setup locale
+sed -i '/de_DE.UTF-8/s/^#//' /tmp/mnt/root/etc/locale.gen
+sed -i '/en_US.UTF-8/s/^#//' /tmp/mnt/root/etc/locale.gen
+cat > /tmp/mnt/root/chroot.sh <<- EOF
+#!/bin/bash
+locale-gen
+EOF
+chroot /tmp/mnt/root /chroot.sh &> /dev/null
+
+# Setup sshd
+sed -i 's/^#PermitRootLogin .*/PermitRootLogin yes/' /tmp/mnt/root/etc/ssh/sshd_config
+sed -i 's/^PermitRootLogin .*/PermitRootLogin yes/' /tmp/mnt/root/etc/ssh/sshd_config
+
 # Install grub
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
@@ -77,6 +90,6 @@ EOM
 
 # Resotre resolv.conf
 rm -f /tmp/mnt/root/etc/resolv.conf
-ln -s /tmp/mnt/root/run/systemd/resolve/stub-resolv.conf /tmp/mnt/root/etc/resolv.conf
+ln -s /run/systemd/resolve/stub-resolv.conf /tmp/mnt/root/etc/resolv.conf
 rm -f /tmp/mnt/root/etc/network/interfaces
 rm -f /tmp/mnt/root/etc/network/interfaces.d/*
