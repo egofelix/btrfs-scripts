@@ -34,6 +34,11 @@ if [[ -z "${SNAPSOURCE}" ]]; then
 	
 	logLine "Automounting backup drive";
 	mount /dev/disk/by-label/backup /tmp/mnt/backup;
+	SNAPSOURCE=$(LANG=C mount | grep -v '/dev/mapper/cryptsystem on .* type btrfs' | grep 'type btrfs' | grep -o 'on .* type btrfs' | awk '{print $2}')
+fi;
+if [[ -z "${SNAPSOURCE}" ]]; then
+	logLine "Cannot find backup directory, please attach backup drive.";
+	exit;
 fi;
 
 DRIVE_ROOT="/dev/sda";
