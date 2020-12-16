@@ -141,6 +141,9 @@ do
 	if ! runCmd mount -o subvol=/${SUBVOLNAME,,} ${PART_SYSTEM} /tmp/mnt/root/${subvol}; then echo "Failed to Mount Subvolume ${SUBVOLNAME^^} at /tmp/mnt/root/${subvol}"; exit; fi;
 done;
 
+# Message
+logLine "Backups restored, reinstalling all packages and boot manager..."
+
 # Prepare CHRoot
 if ! runCmd mkdir -p /tmp/mnt/root/tmp; then logLine "Error preparing chroot"; exit; fi;
 if ! runCmd mount -t tmpfs tmpfs /tmp/mnt/root/tmp; then logLine "Error preparing chroot"; exit; fi;
