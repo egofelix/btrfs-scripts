@@ -141,6 +141,10 @@ if isTrue "${CRYPTED}"; then
 	if ! runCmd cryptsetup --batch-mode luksFormat --type luks2 --cipher aes-xts-plain64 --key-size 512 --hash sha512 --pbkdf argon2i --sector-size 512 --use-urandom -d /tmp/crypto.key ${PART_SYSTEM}; then echo "Failed to cryptformat SYSTEM-Partiton"; exit; fi;
 	if ! runCmd cryptsetup --batch-mode open ${PART_SYSTEM} cryptsystem -d /tmp/crypto.key; then echo "Failed to open CRYPTSYSTEM-Partition"; exit; fi;
 	
+	# Backup luks header
+	rm -f /tmp/crypto.header &> /dev/null
+	if ! runCmd cryptsetup luksHeaderBackup ${PART_SYSTEM} --header-backup-file /tmp/crypto.header; then logLine "Failed to Backup LUKS-Header"; exit; fi;
+	
 	# Add Password
 	echo ${CRYPTEDPASSWORD} | cryptsetup --batch-mode luksAddKey /dev/sda3 -d /tmp/crypto.key; 
 	if [ $? -ne 0 ]; then logLine "Failed to add password to SYSTEM-Partition"; exit; fi;
@@ -216,6 +220,7 @@ if ! runCmd cp /etc/resolv.conf /tmp/mnt/root/etc/resolv.conf; then logLine "Err
 
 if isTrue "${CRYPTED}"; then
 	if ! runCmd cp /tmp/crypto.key /tmp/mnt/root/etc/; then logLine "Failed to copy crypto.key"; exit; fi;
+	if ! runCmd cp /tmp/crypto.header /tmp/mnt/root/etc/; then logLine "Failed to copy crypto.header"; exit; fi;
 fi;
 
 # Run installer
