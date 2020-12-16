@@ -114,7 +114,7 @@ for subvol in ${SUBVOLUMEMOUNTPOINTS}
 do
 	VOLNAME="${subvol//[\/]/-}"
 	VOLNAME=${VOLNAME:1}
-	SUBVOLNAME=$(cat /tmp/mnt/root/etc/fstab | grep "${subvol}" | grep -P -o 'subvol\=[^,\s\/]+' | awk -F'=' '{print $2}')
+	SUBVOLNAME="${VOLNAME,,}-data"
 	
 	logLine "Restoring ${VOLNAME} to ${SUBVOLNAME}...";
 	mkdir /tmp/mnt/disks/system/snapshots/${VOLNAME}
