@@ -57,6 +57,9 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit;   
 fi
 
+# Detect SUBVOLUMES in backup
+SUBVOLUMES=""
+
 # Prepare drive
 source "${BASH_SOURCE%/*}/prepDrive.sh"
 
