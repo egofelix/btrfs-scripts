@@ -149,6 +149,12 @@ if isEfiSystem; then
 	if ! runCmd mount -t efivarfs efivarfs /tmp/mnt/root/sys/firmware/efi/efivars; then logLine "Error preparing chroot"; exit; fi;
 fi;
 
+# Reinstall new crypto keys and backup header
+if isTrue "${CRYPTED}"; then
+	if ! runCmd cp /tmp/crypto.key /tmp/mnt/root/etc/; then logLine "Failed to copy crypto.key"; exit; fi;
+	if ! runCmd cp /tmp/crypto.header /tmp/mnt/root/etc/; then logLine "Failed to copy crypto.header"; exit; fi;
+fi;
+
 # Reinstall grub
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
