@@ -7,5 +7,5 @@ if [[ -z ${CRYPTEDPASSWORD:-} ]]; then
 	export CRYPTEDPASSWORD="test1234";
 fi;
 
-export SUBVOLUMES="home var";
+export SUBVOLUMES="home var srv usr";
 export DISTRO="ARCHLINUX";

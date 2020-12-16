@@ -28,6 +28,12 @@ chroot /tmp/mnt/root /chroot.sh &> /dev/null
 #HOOKS="HOOKS=($(source /etc/mkinitcpio.conf && HOOKS=(${HOOKS[@]/archiso_shutdown}) && HOOKS=(${HOOKS[@]/archiso_pxe_common}) && HOOKS=(${HOOKS[@]/archiso_pxe_nbd}) && HOOKS=(${HOOKS[@]/archiso_pxe_nfs}) && HOOKS=(${HOOKS[@]/archiso_pxe_http}) && HOOKS=(${HOOKS[@]/archiso_kms}) && HOOKS=(${HOOKS[@]/archiso_loop_mnt}) && HOOKS=(${HOOKS[@]/archiso}) && HOOKS=(${HOOKS[@]/archiso}) && HOOKS=(${HOOKS[@]/memdisk}) && echo ${HOOKS[@]} | xargs echo -n))"
 #sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
 
+if [[ ${SUBVOLUMES} == *"usr"* ]]; then
+	# Add usr hook to mkinitcpio.conf
+	HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && if [[ ${HOOKS[@]} != *"usr"* ]]; then HOOKS+=(usr); fi && echo ${HOOKS[@]} | xargs echo -n))"
+	sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
+fi;
+
 # Setup crypto
 if isTrue "${CRYPTED}"; then
 	echo cryptsystem PARTLABEL=system none luks > /tmp/mnt/root/etc/crypttab
