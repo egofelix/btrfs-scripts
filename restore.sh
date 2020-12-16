@@ -160,7 +160,7 @@ cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 for package in $(pacman -Qqe);
 do
-  pacman -S --noconfirm $package;
+  pacman -S --noconfirm \$package;
 done;
 mkinitcpio -P
 grub-install
