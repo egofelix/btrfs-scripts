@@ -63,7 +63,21 @@ do
 	# Now loop over othersubvolumes
 	for subvolName in ${OTHERSUBVOLUMES}
 	do
-		logLine "Debug ${subvolName}";
+		# Check if this subvolume is backuped already
+		if [[ -d "${SNAPTARGET}/${volName}/${subvolName}" ]]; then
+			logLine "Skipping backup \"${subvolName}\" (Incremental)";
+			continue;
+		fi;
+		
+		# Copy it
+		logLine "Copying backup \"${subvolName}\" (Incremental)";
+		btrfs send -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName} | btrfs receive ${SNAPTARGET}/${volName}
+		
+		# Check Result
+		if [ $? -ne 0 ]; then
+			logLine "Failed to copy snapshot..."
+			exit;
+		fi;
 	done;
 	
 	#logLine "Copying snapshot ${subvolName}..."
