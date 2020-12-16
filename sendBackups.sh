@@ -15,6 +15,15 @@ fi;
 
 SNAPTARGET=$(LANG=C mount | grep -v '/dev/mapper/cryptsystem on .* type btrfs' | grep 'type btrfs' | grep -o 'on .* type btrfs' | awk '{print $2}')
 if [[ -z "${SNAPTARGET}" ]]; then
+	if [[ -e /dev/disk/by-label/backup ]]; then
+		mkdir -p /tmp/backup;
+	
+		logLine "Automounting backup drive";
+		mount /dev/disk/by-label/backup /tmp/backup;
+		SNAPTARGET=$(LANG=C mount | grep -v '/dev/mapper/cryptsystem on .* type btrfs' | grep 'type btrfs' | grep -o 'on .* type btrfs' | awk '{print $2}')
+	fi;
+fi;
+if [[ -z "${SNAPTARGET}" ]]; then
 	logLine "No Backup target found";
 	exit;
 fi;
