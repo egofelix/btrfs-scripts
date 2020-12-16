@@ -158,8 +158,9 @@ fi;
 # Reinstall necessary packages and reinstallg grub
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
-for pkg in $(pacman -Qqe); do
-  pacman -S --noconfirm $pkg;
+for package in $(pacman -Qqe);
+do
+  pacman -S --noconfirm $package;
 done;
 mkinitcpio -P
 grub-install
