@@ -32,12 +32,20 @@ do
 	
 	# Remove first char
 	SNAPNAME="${SNAPNAME:1}"
-	if [[ -z "${SNAPNAME}" ]]; then SNAPNAME="root"; fi;
+	if [[ -z "${SNAPNAME}" ]]; then
+		SNAPNAME="root";
+	fi;
 	
-	SNAPNAME="${SNAPNAME}_${STAMP}"
+	# Create Directory for this volume
+	if [[ ! -d "$DIR" ]]; then
+		#logLine "Creating Directory...";
+		mkdir -p ${SNAPDIR}/${SNAPNAME};
+	fi;
+	
+	#SNAPNAME="${SNAPNAME}_${STAMP}"
 	
 	logLine "Creating Snapshot ${SNAPNAME}"
-	if ! runCmd btrfs subvolume snapshot -r ${subvolName} ${SNAPDIR}/${SNAPNAME}; then
+	if ! runCmd btrfs subvolume snapshot -r ${subvolName} ${SNAPDIR}/${SNAPNAME}/${STAMP}; then
 		logLine "Failed!";
 		exit;
 	fi;
