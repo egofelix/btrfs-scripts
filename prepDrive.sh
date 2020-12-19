@@ -47,7 +47,7 @@ EOM
 	PART_SYSTEM_NUM="2"
 fi;
 
-if ! runCmd parted ${DRIVE_ROOT} resizepart ${PART_SYSTEM_NUM} 100%; then logLine "Failed to expand ROOT-Partition"; exit; fi;
+if ! runCmd parted -s ${DRIVE_ROOT} resizepart ${PART_SYSTEM_NUM} 100%; then logLine "Failed to expand ROOT-Partition"; exit; fi;
 
 # Sync drives
 sleep 1
