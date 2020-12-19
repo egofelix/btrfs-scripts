@@ -27,3 +27,11 @@ if [[ -z ${DRIVE_ROOT:-} ]]; then
 		exit;
 	fi;
 fi;
+
+if [[ -z ${BIOSTYPE:-} ]]; then
+  if isEfiSystem; then
+	BIOSTYPE="EFI";
+  else
+	BIOSTYPE="BIOS";
+  fi;
+fi;

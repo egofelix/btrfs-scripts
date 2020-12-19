@@ -2,7 +2,7 @@
 # Format drives
 logLine "Partitioning ${DRIVE_ROOT}..."
 
-if isEfiSystem; then
+if [[ "${BIOSTYPE}" == "EFI" ]]; then
 	logLine "Using EFI partition scheme...";
 	sfdisk -q ${DRIVE_ROOT} &> /dev/null <<- EOM
 label: gpt

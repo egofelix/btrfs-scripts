@@ -38,7 +38,7 @@ fi;
 
 # Install btrfs-progs
 if ! which btrfs &> /dev/null; then
-	logLine "Installing dependency cryptsetup"
+	logLine "Installing dependency btrfs"
 	pacman -Sy --noconfirm btrfs-progs &> /dev/null
 fi;
 
