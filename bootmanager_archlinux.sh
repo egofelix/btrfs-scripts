@@ -8,6 +8,52 @@ yes n | pacman -S --noconfirm uboot-cubietruck uboot-tools
 mkinitcpio -P
 EOF
 	chroot /tmp/mnt/root /chroot.sh &> /dev/null
+	
+	# Setup boot.txt for seperated boot partition
+	cp /tmp/mnt/root/boot/boot.txt /tmp/mnt/root/boot/boot.txt.org
+	if isTrue "${CRYPTED}"; then
+		cat > /tmp/mnt/root/boot/boot.txt <<- EOF
+# After modifying, run ./mkscr
+
+setenv bootpart 1;
+setenv bootargs cryptdevice=PARTLABEL=system:cryptsystem root=/dev/mapper/cryptsystem rw rootwait console=ttyAMA0,115200 console=tty1;
+
+if load ${devtype} ${devnum}:${bootpart} ${kernel_addr_r} /zImage; then
+  if load ${devtype} ${devnum}:${bootpart} ${fdt_addr_r} /dtbs/${fdtfile}; then
+    if load ${devtype} ${devnum}:${bootpart} ${ramdisk_addr_r} /initramfs-linux.img; then
+      bootz ${kernel_addr_r} ${ramdisk_addr_r}:${filesize} ${fdt_addr_r};
+    else
+      bootz ${kernel_addr_r} - ${fdt_addr_r};
+    fi;
+  fi;
+fi	
+EOF
+	else
+		cat > /tmp/mnt/root/boot/boot.txt <<- EOF
+# After modifying, run ./mkscr
+
+setenv bootpart 1;
+setenv bootargs console=${console} root=PARTLABEL=system rw rootwait;
+
+if load ${devtype} ${devnum}:${bootpart} ${kernel_addr_r} /zImage; then
+  if load ${devtype} ${devnum}:${bootpart} ${fdt_addr_r} /dtbs/${fdtfile}; then
+    if load ${devtype} ${devnum}:${bootpart} ${ramdisk_addr_r} /initramfs-linux.img; then
+      bootz ${kernel_addr_r} ${ramdisk_addr_r}:${filesize} ${fdt_addr_r};
+    else
+      bootz ${kernel_addr_r} - ${fdt_addr_r};
+    fi;
+  fi;
+fi	
+EOF
+	fi;
+
+	# Recompile boot.txt -> boot.scr
+	cat > /tmp/mnt/root/chroot.sh <<- EOF
+#!/bin/bash
+cd /boot
+./mkscr
+EOF
+	chroot /tmp/mnt/root /chroot.sh &> /dev/null
 else
     # Install Grub
 	cat > /tmp/mnt/root/chroot.sh <<- EOF
