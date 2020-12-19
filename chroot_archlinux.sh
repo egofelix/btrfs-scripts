@@ -1,41 +1,37 @@
 #!/bin/bash
 
 # create script
+
+# Install Kernel
+if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
+	cat > /tmp/mnt/root/chroot.sh <<- EOF
+# install grub
+pacman -Sy --noconfirm linux-armv7
+EOF
+else
+	cat > /tmp/mnt/root/chroot.sh <<- EOF
+# install grub
+pacman -Sy --noconfirm linux
+EOF
+fi;
+chmod +x /tmp/mnt/root/chroot.sh
+chroot /tmp/mnt/root /chroot.sh;
+
+# Install default packages
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 
 # Set root password
 echo -e "root\nroot" | passwd root
-EOF
 
-if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
-	if isTrue "${CRYPTED}"; then
-		cat >> /tmp/mnt/root/chroot.sh <<- EOF
-# install grub
-pacman -Sy --noconfirm linux-armv7 linux-firmware btrfs-progs openssh cryptsetup uboot-cubietruck uboot-tools
+# Needed Packages
+pacman -S --noconfirm btrfs-progs openssh linux-firmware
 EOF
-	else
-		cat >> /tmp/mnt/root/chroot.sh <<- EOF
-# install grub
-pacman -Sy --noconfirm linux-armv7 linux-firmware btrfs-progs openssh uboot-cubietruck uboot-tools
+if isTrue "${CRYPTED}"; then
+	cat >> /tmp/mnt/root/chroot.sh <<- EOF
+pacman -Sy --noconfirm cryptsetup
 EOF
-	fi;
-else
-	if isTrue "${CRYPTED}"; then
-		cat >> /tmp/mnt/root/chroot.sh <<- EOF
-# install grub
-pacman -Sy --noconfirm linux linux-firmware grub efibootmgr btrfs-progs openssh cryptsetup
-EOF
-	else
-		cat >> /tmp/mnt/root/chroot.sh <<- EOF
-# install grub
-pacman -Sy --noconfirm linux linux-firmware grub efibootmgr btrfs-progs openssh
-EOF
-	fi;
 fi;
-
-# Run script
-chmod +x /tmp/mnt/root/chroot.sh
 chroot /tmp/mnt/root /chroot.sh;
 
 # Remove unneccesarry hooks from mkinitcpio.conf
@@ -55,17 +51,6 @@ if isTrue "${CRYPTED}"; then
 	# Add hooks for cryptsetup to mkinitcpio.conf
 	HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && if [[ ${HOOKS[@]} != *"keyboard"* ]]; then HOOKS+=(keyboard); fi && if [[ ${HOOKS[@]} != *"keymap"* ]]; then HOOKS+=(keymap); fi && if [[ ${HOOKS[@]} != *"encrypt"* ]]; then HOOKS+=(encrypt); fi && echo ${HOOKS[@]} | xargs echo -n))"
 	sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
-	
-	if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
-		# Todo Fix /boot/boot.txt here and call ./mkscr
-		echo "bootmgr"
-	else
-		# Setup Grub for Cryptsetup
-		echo "GRUB_ENABLE_CRYPTODISK=y" >> /tmp/mnt/root/etc/default/grub
-		REPLACEMENT='GRUB_CMDLINE_LINUX="cryptdevice=PARTLABEL=system:cryptsystem"'
-	
-		sed -i "s;GRUB_CMDLINE_LINUX=.*;${REPLACEMENT};g" /tmp/mnt/root/etc/default/grub
-	fi;
 fi;
 
 # Setup locale
@@ -85,18 +70,7 @@ sed -i 's/^#PermitRootLogin .*/PermitRootLogin yes/' /tmp/mnt/root/etc/ssh/sshd_
 sed -i 's/^PermitRootLogin .*/PermitRootLogin yes/' /tmp/mnt/root/etc/ssh/sshd_config
 
 # Install bootmanager
-if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
-	# Nothing to do here
-	echo "No grub is sinstalled, uboot is beeing used";
-else
-	cat > /tmp/mnt/root/chroot.sh <<- EOF
-#!/bin/bash
-mkinitcpio -P
-grub-install
-grub-mkconfig -o /boot/grub/grub.cfg
-EOF
-	chroot /tmp/mnt/root /chroot.sh &> /dev/null
-fi;
+source "${BASH_SOURCE%/*}/bootmanager_debian.sh"
 
 # Setup Network
 rm -f /tmp/mnt/root/etc/network/interfaces
