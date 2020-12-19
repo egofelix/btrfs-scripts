@@ -19,12 +19,12 @@ EOF
 setenv bootpart 1;
 setenv bootargs cryptdevice=PARTLABEL=system:cryptsystem root=/dev/mapper/cryptsystem rw rootwait console=ttyAMA0,115200 console=tty1;
 
-if load ${devtype} ${devnum}:${bootpart} ${kernel_addr_r} /zImage; then
-  if load ${devtype} ${devnum}:${bootpart} ${fdt_addr_r} /dtbs/${fdtfile}; then
-    if load ${devtype} ${devnum}:${bootpart} ${ramdisk_addr_r} /initramfs-linux.img; then
-      bootz ${kernel_addr_r} ${ramdisk_addr_r}:${filesize} ${fdt_addr_r};
+if load \${devtype} \${devnum}:\${bootpart} \${kernel_addr_r} /zImage; then
+  if load \${devtype} \${devnum}:\${bootpart} \${fdt_addr_r} /dtbs/\${fdtfile}; then
+    if load \${devtype} \${devnum}:\${bootpart} \${ramdisk_addr_r} /initramfs-linux.img; then
+      bootz \${kernel_addr_r} \${ramdisk_addr_r}:\${filesize} \${fdt_addr_r};
     else
-      bootz ${kernel_addr_r} - ${fdt_addr_r};
+      bootz \${kernel_addr_r} - \${fdt_addr_r};
     fi;
   fi;
 fi	
@@ -36,12 +36,12 @@ EOF
 setenv bootpart 1;
 setenv bootargs console=${console} root=PARTLABEL=system rw rootwait;
 
-if load ${devtype} ${devnum}:${bootpart} ${kernel_addr_r} /zImage; then
-  if load ${devtype} ${devnum}:${bootpart} ${fdt_addr_r} /dtbs/${fdtfile}; then
-    if load ${devtype} ${devnum}:${bootpart} ${ramdisk_addr_r} /initramfs-linux.img; then
-      bootz ${kernel_addr_r} ${ramdisk_addr_r}:${filesize} ${fdt_addr_r};
+if load \${devtype} \${devnum}:\${bootpart} \${kernel_addr_r} /zImage; then
+  if load \${devtype} \${devnum}:\${bootpart} \${fdt_addr_r} /dtbs/\${fdtfile}; then
+    if load \${devtype} \${devnum}:\${bootpart} \${ramdisk_addr_r} /initramfs-linux.img; then
+      bootz \${kernel_addr_r} \${ramdisk_addr_r}:\${filesize} \${fdt_addr_r};
     else
-      bootz ${kernel_addr_r} - ${fdt_addr_r};
+      bootz \${kernel_addr_r} - \${fdt_addr_r};
     fi;
   fi;
 fi	
