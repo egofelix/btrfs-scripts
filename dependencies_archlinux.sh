@@ -42,12 +42,6 @@ if ! which btrfs &> /dev/null; then
 	pacman -Sy --noconfirm btrfs-progs &> /dev/null
 fi;
 
-# Install debootstrap
-#if ! which debootstrap &> /dev/null; then
-#	logLine "Installing dependency debootstrap"
-#	pacman -Sy --noconfirm debootstrap &> /dev/null
-#fi;
-
 # Install genfstab
 if ! which genfstab &> /dev/null; then
 	logLine "Installing dependency arch-install-scripts"
@@ -64,4 +58,12 @@ fi;
 if ! which sed &> /dev/null; then
 	logLine "Installing dependency sed"
 	pacman -Sy --noconfirm sed &> /dev/null
+fi;
+
+# Install debootstrap
+if [[ "${DISTRO^^}" == "DEBIAN" ]]; then
+  if ! which debootstrap &> /dev/null; then
+    logLine "Installing dependency debootstrap"
+    pacman -Sy --noconfirm debootstrap &> /dev/null
+  fi;
 fi;
