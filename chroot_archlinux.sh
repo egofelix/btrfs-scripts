@@ -29,7 +29,7 @@ pacman -S --noconfirm btrfs-progs openssh linux-firmware
 EOF
 if isTrue "${CRYPTED}"; then
 	cat >> /tmp/mnt/root/chroot.sh <<- EOF
-pacman -Sy --noconfirm cryptsetup
+pacman -S --noconfirm cryptsetup
 EOF
 fi;
 chroot /tmp/mnt/root /chroot.sh;
@@ -52,18 +52,6 @@ if isTrue "${CRYPTED}"; then
 	HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && if [[ ${HOOKS[@]} != *"keyboard"* ]]; then HOOKS+=(keyboard); fi && if [[ ${HOOKS[@]} != *"keymap"* ]]; then HOOKS+=(keymap); fi && if [[ ${HOOKS[@]} != *"encrypt"* ]]; then HOOKS+=(encrypt); fi && echo ${HOOKS[@]} | xargs echo -n))"
 	sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
 fi;
-
-# Setup locale
-sed -i '/de_DE.UTF-8/s/^#//' /tmp/mnt/root/etc/locale.gen
-sed -i '/en_US.UTF-8/s/^#//' /tmp/mnt/root/etc/locale.gen
-cat > /tmp/mnt/root/chroot.sh <<- EOF
-#!/bin/bash
-locale-gen
-EOF
-echo "timedatectl set-timezone ${TZ}" >> /tmp/mnt/root/chroot.sh;
-echo "localectl set-keymap ${KEYMAP}" >> /tmp/mnt/root/chroot.sh;
-
-chroot /tmp/mnt/root /chroot.sh &> /dev/null
 
 # Setup sshd
 sed -i 's/^#PermitRootLogin .*/PermitRootLogin yes/' /tmp/mnt/root/etc/ssh/sshd_config

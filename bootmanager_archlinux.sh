@@ -4,7 +4,7 @@ if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
     # Install uboot
 	cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
-pacman -S --noconfirm uboot-cubietruck uboot-tools
+yes n | pacman -S --noconfirm uboot-cubietruck uboot-tools
 mkinitcpio -P
 EOF
 	chroot /tmp/mnt/root /chroot.sh &> /dev/null
