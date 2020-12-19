@@ -36,7 +36,7 @@ fi;
 
 # Run script
 chmod +x /tmp/mnt/root/chroot.sh
-chroot /tmp/mnt/root /chroot.sh &> /dev/null
+chroot /tmp/mnt/root /chroot.sh;
 
 # Remove unneccesarry hooks from mkinitcpio.conf
 #HOOKS="HOOKS=($(source /etc/mkinitcpio.conf && HOOKS=(${HOOKS[@]/archiso_shutdown}) && HOOKS=(${HOOKS[@]/archiso_pxe_common}) && HOOKS=(${HOOKS[@]/archiso_pxe_nbd}) && HOOKS=(${HOOKS[@]/archiso_pxe_nfs}) && HOOKS=(${HOOKS[@]/archiso_pxe_http}) && HOOKS=(${HOOKS[@]/archiso_kms}) && HOOKS=(${HOOKS[@]/archiso_loop_mnt}) && HOOKS=(${HOOKS[@]/archiso}) && HOOKS=(${HOOKS[@]/archiso}) && HOOKS=(${HOOKS[@]/memdisk}) && echo ${HOOKS[@]} | xargs echo -n))"
@@ -58,6 +58,7 @@ if isTrue "${CRYPTED}"; then
 	
 	if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
 		# Todo Fix /boot/boot.txt here and call ./mkscr
+		echo "bootmgr"
 	else
 		# Setup Grub for Cryptsetup
 		echo "GRUB_ENABLE_CRYPTODISK=y" >> /tmp/mnt/root/etc/default/grub
@@ -83,7 +84,7 @@ chroot /tmp/mnt/root /chroot.sh &> /dev/null
 sed -i 's/^#PermitRootLogin .*/PermitRootLogin yes/' /tmp/mnt/root/etc/ssh/sshd_config
 sed -i 's/^PermitRootLogin .*/PermitRootLogin yes/' /tmp/mnt/root/etc/ssh/sshd_config
 
-# Install grub
+# Install bootmanager
 if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
 	# Nothing to do here
 	echo "No grub is sinstalled, uboot is beeing used";
