@@ -71,7 +71,8 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y -qq grub-efi
 grub-install --target=x86_64-efi --boot-directory=/boot --efi-directory=/boot/efi
 EOF
 fi;
-
+echo "update-initramfs -k all -u" >> /mnt/chroot.sh
+echo "grub-mkconfig -o /boot/grub/grub.cfg" >> /mnt/chroot.sh
 chroot /tmp/mnt/root /chroot.sh &> /dev/null
 
 # Setup Network
