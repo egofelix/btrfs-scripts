@@ -29,7 +29,9 @@ if [[ -z ${DRIVE_ROOT:-} ]]; then
 fi;
 
 if [[ -z ${BIOSTYPE:-} ]]; then
-  if isEfiSystem; then
+  if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
+    BIOSTYPE="EFI";
+  elif isEfiSystem; then
 	BIOSTYPE="EFI";
   else
 	BIOSTYPE="BIOS";

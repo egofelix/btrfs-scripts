@@ -73,7 +73,7 @@ do
 done;
 
 # Install base system
-logLine "Installing Base-System..."
+logLine "Installing Base-System (${DISTRO^^})..."
 if [[ "${DISTRO^^}" == "DEBIAN" ]]; then
 	if ! runCmd debootstrap stable /tmp/mnt/root http://ftp.de.debian.org/debian/; then echo "Failed to install Base-System"; exit; fi;
 elif [[ "${DISTRO^^}" == "ARCHLINUX" ]]; then
