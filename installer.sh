@@ -60,9 +60,11 @@ if ! runCmd mount ${PART_BOOT} /tmp/mnt/root/boot; then echo "Failed to mount BO
 mkdir -p /tmp/mnt/root/.snapshots
 if ! runCmd mount -o subvol=/snapshots ${PART_SYSTEM} /tmp/mnt/root/.snapshots; then echo "Failed to Mount Snapshot-Volume at /tmp/mnt/root/.snapshots"; exit; fi;
 
-if isEfiSystem; then
+if [[ "${BIOSTYPE}" == "EFI" ]]; then
 	mkdir -p /tmp/mnt/root/boot/efi
-	if ! runCmd mount ${PART_EFI} /tmp/mnt/root/boot/efi; then echo "Failed to mount BOOT-Partition"; exit; fi;
+	if isEfiSystem; then
+		if ! runCmd mount ${PART_EFI} /tmp/mnt/root/boot/efi; then echo "Failed to mount BOOT-Partition"; exit; fi;
+	fi;
 fi;
 for subvolName in ${SUBVOLUMES}
 do
