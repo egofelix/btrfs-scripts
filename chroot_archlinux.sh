@@ -56,11 +56,15 @@ if isTrue "${CRYPTED}"; then
 	HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && if [[ ${HOOKS[@]} != *"keyboard"* ]]; then HOOKS+=(keyboard); fi && if [[ ${HOOKS[@]} != *"keymap"* ]]; then HOOKS+=(keymap); fi && if [[ ${HOOKS[@]} != *"encrypt"* ]]; then HOOKS+=(encrypt); fi && echo ${HOOKS[@]} | xargs echo -n))"
 	sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
 	
-	# Setup Grub for Cryptsetup
-	echo "GRUB_ENABLE_CRYPTODISK=y" >> /tmp/mnt/root/etc/default/grub
-	REPLACEMENT='GRUB_CMDLINE_LINUX="cryptdevice=PARTLABEL=system:cryptsystem"'
+	if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
+		# Todo Fix /boot/boot.txt here and call ./mkscr
+	else
+		# Setup Grub for Cryptsetup
+		echo "GRUB_ENABLE_CRYPTODISK=y" >> /tmp/mnt/root/etc/default/grub
+		REPLACEMENT='GRUB_CMDLINE_LINUX="cryptdevice=PARTLABEL=system:cryptsystem"'
 	
-	sed -i "s;GRUB_CMDLINE_LINUX=.*;${REPLACEMENT};g" /tmp/mnt/root/etc/default/grub
+		sed -i "s;GRUB_CMDLINE_LINUX=.*;${REPLACEMENT};g" /tmp/mnt/root/etc/default/grub
+	fi;
 fi;
 
 # Setup locale
@@ -80,13 +84,18 @@ sed -i 's/^#PermitRootLogin .*/PermitRootLogin yes/' /tmp/mnt/root/etc/ssh/sshd_
 sed -i 's/^PermitRootLogin .*/PermitRootLogin yes/' /tmp/mnt/root/etc/ssh/sshd_config
 
 # Install grub
-cat > /tmp/mnt/root/chroot.sh <<- EOF
+if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
+	# Nothing to do here
+	echo "No grub is sinstalled, uboot is beeing used";
+else
+	cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 mkinitcpio -P
 grub-install
 grub-mkconfig -o /boot/grub/grub.cfg
 EOF
-chroot /tmp/mnt/root /chroot.sh &> /dev/null
+	chroot /tmp/mnt/root /chroot.sh &> /dev/null
+fi;
 
 # Setup Network
 rm -f /tmp/mnt/root/etc/network/interfaces
