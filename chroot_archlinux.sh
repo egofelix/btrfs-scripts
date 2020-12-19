@@ -8,16 +8,30 @@ cat > /tmp/mnt/root/chroot.sh <<- EOF
 echo -e "root\nroot" | passwd root
 EOF
 
-if isTrue "${CRYPTED}"; then
-	cat >> /tmp/mnt/root/chroot.sh <<- EOF
+if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
+	if isTrue "${CRYPTED}"; then
+		cat >> /tmp/mnt/root/chroot.sh <<- EOF
+# install grub
+pacman -Sy --noconfirm linux-armv7 linux-firmware btrfs-progs openssh cryptsetup uboot-cubietruck uboot-tools
+EOF
+	else
+		cat >> /tmp/mnt/root/chroot.sh <<- EOF
+# install grub
+pacman -Sy --noconfirm linux-armv7 linux-firmware btrfs-progs openssh uboot-cubietruck uboot-tools
+EOF
+	fi;
+else
+	if isTrue "${CRYPTED}"; then
+		cat >> /tmp/mnt/root/chroot.sh <<- EOF
 # install grub
 pacman -Sy --noconfirm linux linux-firmware grub efibootmgr btrfs-progs openssh cryptsetup
 EOF
-else
-	cat >> /tmp/mnt/root/chroot.sh <<- EOF
+	else
+		cat >> /tmp/mnt/root/chroot.sh <<- EOF
 # install grub
 pacman -Sy --noconfirm linux linux-firmware grub efibootmgr btrfs-progs openssh
 EOF
+	fi;
 fi;
 
 # Run script
