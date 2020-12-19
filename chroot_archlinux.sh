@@ -58,7 +58,7 @@ sed -i 's/^#PermitRootLogin .*/PermitRootLogin yes/' /tmp/mnt/root/etc/ssh/sshd_
 sed -i 's/^PermitRootLogin .*/PermitRootLogin yes/' /tmp/mnt/root/etc/ssh/sshd_config
 
 # Install bootmanager
-source "${BASH_SOURCE%/*}/bootmanager_debian.sh"
+source "${BASH_SOURCE%/*}/bootmanager_archlinux.sh"
 
 # Setup Network
 rm -f /tmp/mnt/root/etc/network/interfaces

@@ -1,6 +1,7 @@
 #!/bin/bash
-
 if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
+	logLine "Setting up Bootmanager (UBOOT)";
+
     # Install uboot
 	cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
@@ -55,6 +56,8 @@ cd /boot
 EOF
 	chroot /tmp/mnt/root /chroot.sh &> /dev/null
 else
+	logLine "Setting up Bootmanager (GRUB)";
+	
     # Install Grub
 	cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
