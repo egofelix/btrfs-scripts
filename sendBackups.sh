@@ -59,9 +59,13 @@ if [[ ${SNAPTARGET} = "ssh://"* ]]; then
 	fi;
 	
 	SSH_HOSTNAME="${SSH_PART}"
+	SSH_PATH=$(echo "${SNAPTARGET}" | awk -F'/' '{print $4-}')
+	SSH_PATH="/${SSH_PATH}"
+	
 	logLine "SSH-Host: ${SSH_HOSTNAME}"
 	logLine "SSH-Port: ${SSH_PORT}"
 	logLine "SSH-User: ${SSH_USERNAME}"
+	logLine "SSH-Path: ${SSH_PATH}"
 	exit
 	
 else
