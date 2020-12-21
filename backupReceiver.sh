@@ -84,6 +84,7 @@ if [[ "$1" = "create-volume-backup" ]]; then
   # Receive  
   echo "RECEIVER: Redirecting input to btrfs receive -v ${HOME}/$2"
   cat - < /dev/stdin
+  cat - <&0
   btrfs receive -v ${HOME}/$2 <&0
   if [ $? -ne 0 ]; then 
     # Remove broken backup
