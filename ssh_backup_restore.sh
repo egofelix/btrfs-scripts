@@ -125,6 +125,9 @@ fi;
 rm -f /tmp/mnt/root/etc/resolv.conf;
 source "${BASH_SOURCE%/*}/scripts/chroot_prepare.sh";
 
+# Reinstall Packages
+source "${BASH_SOURCE%/*}/scripts/restorepackages.sh";
+
 # Reinstall BootManager
 source "${BASH_SOURCE%/*}/scripts/bootmanager.sh";
 

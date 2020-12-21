@@ -1,6 +1,6 @@
 #!/bin/bash
 if [[ $(getSystemName) = "ARCHLINUX" ]]; then
-	source "${BASH_SOURCE%/*}/../systems/archlinux/chroot.sh"
+	source "${BASH_SOURCE%/*}/../systems/archlinux/restorepackages.sh"
 else
 	logLine "Unknown system detected... Aborting"
 	exit 1;
