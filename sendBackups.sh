@@ -74,6 +74,11 @@ if [[ ${SNAPTARGET} = "ssh://"* ]]; then
 		logLine "${TESTRESULT}";
 		exit;
 	fi;
+	
+	if [[ "${TESTRESULT}" != "success" ]]; then
+		logLine "Backup receiver not installed.";
+		exit;
+	fi;
 
 	echo "Test: ${TESTRESULT}"
 	exit
