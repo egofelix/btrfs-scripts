@@ -5,6 +5,12 @@ function isTrue {
 	return 1;
 }
 
+function isFalse {
+	if [[ "${1^^}" = "NO" ]]; then return 0; fi;
+	if [[ "${1^^}" = "FALSE" ]]; then return 0; fi;
+	return 1;
+}
+
 function logDebug {
 	if isTrue "${DEBUG:-}"; then
         echo $@

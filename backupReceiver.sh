@@ -33,7 +33,7 @@ if [[ "$1" = "check-volume-backup" ]]; then
   if [[ $3 = *"." ]]; then echo "Illegal character . detected in parameter backup."; exit 1;  fi;
   
   # Test and return
-  if [[ ! -d "${HOME}/$2/$3" ]]; then echo "false"; exit 1; fi;
+  if [[ ! -d "${HOME}/$2/$3" ]]; then echo "false"; exit 0; fi;
   echo "true"; exit 0;
 fi;
 
