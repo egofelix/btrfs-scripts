@@ -14,7 +14,7 @@ if [[ -z "${SSH_HOSTNAME:-}" ]]; then
   MY_DOMAIN=$(cat /proc/sys/kernel/hostname | cut -d'.' -f2-)
   
   # If we didnt detected a domain
-  if [[ -z ${MY_DOMAIN} ]]; then
+  if [[ -z "${MY_DOMAIN}" ]]; then
     logDebug "Unkown Domain, trying to detect Domain";
 	
     # If not try to get the dns server and make a reverse lookup to it
@@ -28,6 +28,7 @@ if [[ -z "${SSH_HOSTNAME:-}" ]]; then
 	  fi;
 	fi;
   fi;
+  logDebug "Detected Domain: ${MY_DOMAIN}";
 
   # Check DNS Records  
   RECORD_TO_CHECK="_${MY_HOSTNAME}._backup._ssh.${MY_DOMAIN}"
