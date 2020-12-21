@@ -69,7 +69,7 @@ if [[ ${SNAPTARGET} = "ssh://"* ]]; then
 	
 	# Test ssh
 	TESTRESULT=$(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME} "ls ${SSH_PATH}")
-	echo "Test: ${TESTRESULT}"
+	echo "Test: ${TESTRESULT} $?"
 	exit
 	
 else
