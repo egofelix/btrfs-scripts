@@ -110,11 +110,9 @@ do
 	if [ $? -ne 0 ]; then logLine "Failed to run ssh command: check-volume-backup "${volName}" "${FIRSTSUBVOLUME}"" exit 1; fi;
 	if isFalse ${SUBVOLUME_EXISTS}; then
 		logLine "Sending backup \"${volName}_${FIRSTSUBVOLUME}\" (Full)";
-		SENDRESULT=$(btrfs send ${SNAPSOURCE}/${volName}/${FIRSTSUBVOLUME} | ${SSH_CALL} create-volume-backup ${volName} ${FIRSTSUBVOLUME})	
+		SENDRESULT=$(btrfs send -q ${SNAPSOURCE}/${volName}/${FIRSTSUBVOLUME} | ${SSH_CALL} create-volume-backup ${volName} ${FIRSTSUBVOLUME})	
 		if [[ $? -ne 0 ]] || [[ "${SENDRESULT}" != "success" ]]; then logLine "Failed to send backup."; exit 1; fi;
 	fi;
-	
-	exit;
 	
 	PREVIOUSSUBVOLUME=${FIRSTSUBVOLUME}
 	
@@ -125,8 +123,7 @@ do
 		if [ $? -ne 0 ]; then logLine "Failed to run ssh command: check-volume-backup "${volName}" "${FIRSTSUBVOLUME}"" exit; fi;
 		if isFalse ${SUBVOLUME_EXISTS}; then
 			logLine "Sending backup \"${volName}_${subvolName}\" (Incremental)";
-			#echo btrfs send -q -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName} | ${SSH_CALL} create-volume-backup "${volName}" "${subvolName}";
-			SENDRESULT=$(btrfs send -q -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName} | ${SSH_CALL} create-volume-backup "${volName}" "${subvolName}";)
+			SENDRESULT=$(btrfs send -q -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName} | ${SSH_CALL} create-volume-backup ${volName} ${subvolName})	
 			if [[ $? -ne 0 ]] || [[ "${SENDRESULT}" != "success" ]]; then logLine "Failed to send backup."; exit 1; fi;
 		fi;
 		
