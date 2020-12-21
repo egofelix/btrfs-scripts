@@ -82,7 +82,9 @@ do
 		logLine "Unable to find Volume-Name for ${mountpoint}.";
 		exit 1;
 	fi;
+	
 	if [[ ${VOLUMENAME} = "@"* ]]; then
+		# TODO: Create empty mount here
 		logDebug "Skipping ${mountpoint} as it is an @ volume!";
 		continue;
 	fi;
@@ -94,10 +96,19 @@ do
 		logDebug "Failed to detect volume for ${mountpoint}";
 	fi;
 	
+	# Receive XXX-Volume
 	if ! runCmd mkdir /tmp/mnt/disks/system/snapshots/${VOLNAME,,}; then logLine "Failed to create snapshot directory for ${VOLNAME,,}."; exit 1; fi;
 	logLine "Receiving ${VOLNAME^^}-Snapshot...";
 	${SSH_CALL} "receive-volume-backup" "${VOLNAME,,}" "${RESTOREPOINT}" | btrfs receive -q /tmp/mnt/disks/system/snapshots/${VOLNAME,,}
 	if [[ $? -ne 0 ]]; then logLine "Failed to receive volume."; exit 1; fi;
+	
+	# Restore XXX-data from snapshot
+	logLine "Restoring ${VOLNAME^^}-Volume...";
+	btrfs subvol snapshot /tmp/mnt/disks/system/snapshots/${VOLNAME,,}/${RESTOREPOINT} /tmp/mnt/disks/system/${VOLNAME,,}-data > /dev/null
+	if [ $? -ne 0 ]; then logLine "Failed to restore ${VOLNAME^^}-Volume from ${VOLNAME^^}-Snapshot..."; exit 1; fi;
+	
+	# Mount it for later use
+	if ! runCmd mount -o subvol=${SUBVOLNAME,,} ${PART_SYSTEM} /tmp/mnt/root${mountpoint}; then echo "Failed to Mount Subvolume ${SUBVOLNAME^^} at /tmp/mnt/root${mountpoint}"; exit; fi;
 done;
 
 exit 0;
