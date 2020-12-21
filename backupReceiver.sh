@@ -77,6 +77,9 @@ if [[ "$1" = "create-volume-backup" ]]; then
   if [[ -d "${HOME}/$2/$3" ]]; then echo "backup already exists"; exit 0; fi;
   
   #btrfs receive ${HOME}/$2 <&0
+  
+  echo "Start Test";
+  
   cat <&0
   
   echo "Aborting for Test";
