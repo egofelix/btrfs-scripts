@@ -118,7 +118,7 @@ do
 		
 		#
 		#echo ${SSH_CALL} create-volume-backup "${volName}" "${FIRSTSUBVOLUME}";
-		SENDRESULT=$(cat /tmp/test.btrfs | ")
+		#SENDRESULT=$(cat /tmp/test.btrfs | )
 		if [[ $? -ne 0 ]] || [[ "${SENDRESULT}" != "success" ]]; then logLine "Failed to send backup."; exit 1; fi;
 		logLine "Send.";
 	fi;
