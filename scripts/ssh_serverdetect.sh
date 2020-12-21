@@ -31,7 +31,7 @@ if [[ -z "${SSH_HOSTNAME:-}" ]]; then
 		MY_DOMAIN=$(echo "${DNS_HOSTNAME}" | cut -d'.' -f2-)
 		
 		# Remove trailing .
-		MY_DOMAIN="$[MY_DOMAIN::-1}"
+		MY_DOMAIN="${MY_DOMAIN::-1}"
 	  fi;
 	fi;
   fi;
