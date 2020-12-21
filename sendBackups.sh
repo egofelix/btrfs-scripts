@@ -72,7 +72,7 @@ logLine "SSH-User: ${SSH_USERNAME}"
 logLine "SSH-Path: ${SSH_PATH}"
 
 # Test ssh
-TESTRESULT=$(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME} "test")
+TESTRESULT=$(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME} "testSshReceiver")
 if [ $? -ne 0 ]; then
 	logLine "SSH-Connection failed.";
 	logLine "${TESTRESULT}";
@@ -84,8 +84,6 @@ if [[ "${TESTRESULT}" != "success" ]]; then
 	logLine "Backup receiver not installed.";
 	exit;
 fi;
-
-
 
 echo "Test: ${TESTRESULT}"
 exit
