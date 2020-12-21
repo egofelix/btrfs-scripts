@@ -63,7 +63,7 @@ fi;
 logLine "Testing ssh access: ${SSH_USERNAME}@${SSH_HOSTNAME}:${SSH_PORT}...";
 
 # Test ssh
-SSH_CALL="ssh -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+export SSH_CALL="ssh -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
 TESTRESULT=$(${SSH_CALL} "testSshReceiver")
 if [[ $? -ne 0 ]]; then
 	logLine "SSH-Connection failed.";

@@ -48,7 +48,7 @@ if [[ "$1" = "create-volume-directory" ]]; then
   if [[ -z "$2" ]]; then echo "Usage: create-volume-directory volume"; exit 1; fi;
  
   # Check volume parameter
-  if [[ $2 = *"." ]]; then echo "Illegal character . detected in parameter volume."; exit 1;  fi;
+  if [[ $2 = *"."* ]]; then echo "Illegal character . detected in parameter volume."; exit 1;  fi;
   
   # Create directory
   if ! runCmd mkdir -p ${HOME}/$2; then echo "Error creating directory."; exit 1; fi;
@@ -60,10 +60,10 @@ if [[ "$1" = "check-volume-backup" ]]; then
   if [[ -z "$2" ]] || [[ -z "$3" ]]; then echo "Usage: check-volume-backup volume backup"; exit 1; fi;
   
   # Check volume parameter
-  if [[ $2 = *"." ]]; then echo "Illegal character . detected in parameter volume."; exit 1;  fi;
+  if [[ $2 = *"."* ]]; then echo "Illegal character . detected in parameter volume."; exit 1;  fi;
   
   # Check backup parameter
-  if [[ $3 = *"." ]]; then echo "Illegal character . detected in parameter backup."; exit 1;  fi;
+  if [[ $3 = *"."* ]]; then echo "Illegal character . detected in parameter backup."; exit 1;  fi;
   
   # Test and return
   if [[ ! -d "${HOME}/$2/$3" ]]; then echo "false"; exit 0; fi;
@@ -75,10 +75,10 @@ if [[ "$1" = "create-volume-backup" ]]; then
   if [[ -z "$2" ]] || [[ -z "$3" ]]; then echo "Usage: check-volume-backup volume backup"; exit 1; fi;
   
   # Check volume parameter
-  if [[ $2 = *"." ]]; then echo "Illegal character . detected in parameter volume."; exit 1;  fi;
+  if [[ $2 = *"."* ]]; then echo "Illegal character . detected in parameter volume."; exit 1;  fi;
   
   # Check backup parameter
-  if [[ $3 = *"." ]]; then echo "Illegal character . detected in parameter backup."; exit 1;  fi;
+  if [[ $3 = *"."* ]]; then echo "Illegal character . detected in parameter backup."; exit 1;  fi;
 
   if [[ -d "${HOME}/$2/$3" ]]; then echo "backup already exists"; exit 0; fi;
   
@@ -95,6 +95,26 @@ if [[ "$1" = "create-volume-backup" ]]; then
   
   # Backup received
   echo "success"; exit 0;
+fi;
+
+if [[ "$1" = "list-volumes" ]]; then
+  # Create directory
+  RESULT=$(ls ${HOME})
+  if [ $? -ne 0 ]; then echo "Error listing volumes."; exit 1; fi;
+  exit 0;
+fi;
+
+if [[ "$1" = "list-volume" ]]; then
+  # Check Argument Count
+  if [[ -z "$2" ]]; then echo "Usage: list-volume volume"; exit 1; fi;
+ 
+  # Check volume parameter
+  if [[ $2 = *"."* ]]; then echo "Illegal character . detected in parameter volume."; exit 1;  fi;
+  
+  # Create directory
+  RESULT=$(ls ${HOME}/$2)
+  if [ $? -ne 0 ]; then echo "Error listing volume $2."; exit 1; fi;
+  exit 0;
 fi;
 
 echo "Error";

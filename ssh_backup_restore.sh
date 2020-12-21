@@ -24,3 +24,12 @@ source "${BASH_SOURCE%/*}/scripts/drive_detect.sh"
 
 # Detect SSH-Server
 source "${BASH_SOURCE%/*}/scripts/ssh_serverdetect.sh"
+
+# Check root volumes
+echo "woooop";
+SUBVOLUMES=$(${SSH_CALL} "list-volume" "root")
+if [[ $? -ne 0 ]]; then
+  logLine "Unable to query root volume.";
+  logLine "${SUBVOLUMES}";
+  exit;
+fi;
