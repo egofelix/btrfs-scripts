@@ -43,4 +43,5 @@ if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ ! $REPLY =~ ^$ ]]; then
     exit;   
 fi
 
-echo ${RESTOREPOINT}
+# Prepare disk
+source "${BASH_SOURCE%/*}/scripts/drive_prepare.sh"
