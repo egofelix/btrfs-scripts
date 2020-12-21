@@ -127,21 +127,6 @@ do
 			if [[ $? -ne 0 ]] || [[ "${SENDRESULT}" != "success" ]]; then logLine "Failed to send backup. ${SENDRESULT}"; exit 1; fi;
 		fi;
 		
-	    exit;
-	
-		# Check if this subvolume is backuped already
-		if [[ ! -d "${SNAPTARGET}/${volName}/${subvolName}" ]]; then	
-			# Copy it
-			logLine "Copying backup \"${volName}_${subvolName}\" (Incremental)";
-			btrfs send -q -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName} | btrfs receive ${SNAPTARGET}/${volName} &> /dev/null
-		
-			# Check Result
-			if [ $? -ne 0 ]; then
-				logLine "Failed to copy snapshot..."
-				exit;
-			fi;
-		fi;
-		
 		# Remove previous subvolume as it is not needed here anymore!
 		btrfs subvolume delete ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} &> /dev/null
 		
