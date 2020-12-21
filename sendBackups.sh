@@ -66,6 +66,9 @@ if [[ ${SNAPTARGET} = "ssh://"* ]]; then
 	logLine "SSH-Port: ${SSH_PORT}"
 	logLine "SSH-User: ${SSH_USERNAME}"
 	logLine "SSH-Path: ${SSH_PATH}"
+	
+	# Test ssh
+	ssh -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME} "ls ${SSH_PATH}"
 	exit
 	
 else
