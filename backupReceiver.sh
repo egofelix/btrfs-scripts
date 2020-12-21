@@ -5,6 +5,7 @@ set -uo pipefail
 ## Load Functions
 source "${BASH_SOURCE%/*}/functions.sh"
 
+# We must have first parameter
 if [[ -z "$1" ]]; then
 	echo "Missing Home dir in first paramete";
 	exit 1;
@@ -13,12 +14,6 @@ fi;
 # Update home for this script
 HOME=$1
 shift 1;
-
-if [[ "$1" = "echo" ]]; then
-    echo "echo";
-	cat - <&0
-	exit 0;
-fi;
 
 # Test if home is on btrfs and @ mount
 MOUNTPOINT=$(findmnt -n -o SOURCE --target ${HOME})
@@ -35,6 +30,12 @@ if [[ -z "${MOUNTVOLUME}" ]]; then
 fi;
 if [[ ! ${MOUNTVOLUME} = *"@"* ]]; then
   echo "Could not backup to ${HOME} as this does not lie on a @ subvolume."; exit 1;
+fi;
+
+# We must have first parameter
+if [[ -z "$1" ]]; then
+	echo "Missing command";
+	exit 1;
 fi;
 
 # Main Commands
