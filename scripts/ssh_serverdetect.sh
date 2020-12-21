@@ -1,9 +1,5 @@
 #!/bin/bash
 if [[ -z "${SSH_HOSTNAME:-}" ]]; then
-  export SSH_HOSTNAME=""
-  export SSH_PORT="22"
-  export SSH_USERNAME=$(cat /proc/sys/kernel/hostname | awk -F'.' '{print $1}')
-  
   # Get info
   if [[ -z "${HOSTNAME:-}" ]]; then
     HOSTNAME=$(cat /proc/sys/kernel/hostname)
@@ -11,6 +7,9 @@ if [[ -z "${SSH_HOSTNAME:-}" ]]; then
   logDebug "Trying autodetection of SSH_HOSTNAME with current hostname: ${HOSTNAME}";  
   
   MY_HOSTNAME=$(echo "${HOSTNAME}" | awk -F'.' '{print $1}')
+  export SSH_HOSTNAME=""
+  export SSH_PORT="22"
+  export SSH_USERNAME="${MY_HOSTNAME}"
   MY_DOMAIN=""
   if [[ ${HOSTNAME} = *"."*"."* ]]; then
     MY_DOMAIN=$(echo "${HOSTNAME}" | cut -d'.' -f2-)
@@ -57,5 +56,5 @@ if [[ -z "${SSH_HOSTNAME:-}" ]]; then
   export SSH_PORT=$(echo ${DNS_RESULT} | awk '{print $3}');
   SSH_HOSTNAME=$(echo ${DNS_RESULT} | awk '{print $4}')
   export SSH_HOSTNAME="${SSH_HOSTNAME::-1}"
-  logLine "Autodetected Backup Server: ${SSH_HOSTNAME}:${SSH_PORT}";
+  logLine "Autodetected Backup Server: ${SSH_USERNAME}@${SSH_HOSTNAME}:${SSH_PORT}";
 fi;
