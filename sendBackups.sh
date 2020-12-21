@@ -106,6 +106,11 @@ do
 	if ! runCmd ${SSH_CALL} "create-volume-directory" "${volName}"; then echo "Failed to create volume directory at server."; exit 1; fi;
 	
 	echo "Haha";
+	
+	if ! runCmd ${SSH_CALL} check-volume-backup "${volName}" "${FIRSTSUBVOLUME}"; then
+		logLine "Copying backup \"${volName}_${FIRSTSUBVOLUME}\" (Full)";		
+	fi;
+	
 	exit;
 	
 	# If first subvolume does not exist send it full!
