@@ -63,7 +63,6 @@ else
   SSH_HOSTNAME="${SSH_PART}"
   SSH_PATH=$(echo "${SNAPTARGET}" | cut -d'/' -f4-)
   SSH_PATH="/${SSH_PATH}"
-
 fi;
 	
 # Test SSH
