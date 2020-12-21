@@ -67,7 +67,7 @@ else
 #!/bin/bash
 pacman -S --noconfirm grub efibootmgr
 EOF
-	chroot /tmp/mnt/root /chroot.shl
+	chroot /tmp/mnt/root /chroot.sh;
 
     if isTrue "${CRYPTED}"; then
 		# Setup Grub for Cryptsetup
