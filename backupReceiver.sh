@@ -10,14 +10,14 @@ if [[ -z "$1" ]]; then
 	exit 1;
 fi;
 
+# Update home for this script
+HOME=$1
+shift 1;
+
 if [[ "$1" = "echo" ]]; then
     echo "echo";
 	exit 0;
 fi;
-
-# Update home for this script
-HOME=$1
-shift 1;
 
 # Test if home is on btrfs and @ mount
 MOUNTPOINT=$(findmnt -n -o SOURCE --target ${HOME})
