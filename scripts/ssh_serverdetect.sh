@@ -27,7 +27,11 @@ if [[ -z "${SSH_HOSTNAME:-}" ]]; then
       DNS_HOSTNAME=$(dig @${DNSSERVER} -x ${DNSSERVER} +short)
 	  
 	  if [[ ! -z "${DNS_HOSTNAME}" ]]; then
+	    # Split
 		MY_DOMAIN=$(echo "${DNS_HOSTNAME}" | cut -d'.' -f2-)
+		
+		# Remove trailing .
+		MY_DOMAIN="$[MY_DOMAIN::-1}"
 	  fi;
 	fi;
   fi;
