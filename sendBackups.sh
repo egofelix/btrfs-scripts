@@ -36,10 +36,44 @@ fi;
 #fi;
 
 # No target?
-if [[ -z "${SNAPTARGET}" ]]; then
+if [[ -z "${SNAPTARGET:-}" ]]; then
 	logLine "No Backup target found";
 	exit;
 fi;
+
+if [[ ${SNAPTARGET} = "ssh://"* ]]; then
+	# Test SSH
+	SSH_PART=$(echo "${SNAPTARGET}" | awk -F'/' '{print $3}')
+	
+	SSH_PORT="22"
+	SSH_USERNAME="backup"
+	
+	if [[ ${SSH_PART} = *"@" ]]; then
+		SSH_USERNAME=$(echo "${SSH_PART}" | awk -F'@' '{print $1}')
+		SSH_PART=$(echo "${SSH_PART}" | awk -F'@' '{print $2}')
+	fi;
+	
+	if [[ ${SSH_PART} = *":" ]]; then
+		SSH_PORT=$(echo "${SSH_PART}" | awk -F':' '{print $2}')
+		SSH_PART=$(echo "${SSH_PART}" | awk -F'@' '{print $1}')
+	fi;
+	
+	SSH_HOSTNAME="${SSH_PART}"
+	logLine "SSH-Host: ${SSH_HOSTNAME}"
+	logLine "SSH-Port: ${SSH_PORT}"
+	logLine "SSH-User: ${SSH_USER}"
+	exit
+	
+else
+	# Test folder
+	CONTENT=$(ls ${SNAPTARGET})
+	if [ $? -ne 0 ]; then
+		logLine "Something is wrong with ${SNAPTARGET}. Aborting.";
+		exit;
+	fi;
+fi;
+
+
 
 logLine "Source Directory: ${SNAPSOURCE}";
 logLine "Target Directory: ${SNAPTARGET}";
