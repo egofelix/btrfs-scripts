@@ -4,7 +4,7 @@ set -uo pipefail
 ############### Main Script ################
 
 ## Load Functions
-source "${BASH_SOURCE%/*}/functions.sh"
+source "${BASH_SOURCE%/*}/includes/functions.sh"
 
 # Current time
 STAMP=`date -u +"%Y-%m-%d_%H-%M-%S"`

@@ -4,10 +4,10 @@ set -uo pipefail
 ############### Main Script ################
 
 ## Load Functions
-source "${BASH_SOURCE%/*}/functions.sh"
+source "${BASH_SOURCE%/*}/includes/functions.sh"
 
 # Load Variables
-source "${BASH_SOURCE%/*}/defaults.sh"
+source "${BASH_SOURCE%/*}/includes/defaults.sh"
 
 ## Script must be started as root
 if [ "$EUID" -ne 0 ]; then
@@ -16,11 +16,13 @@ if [ "$EUID" -ne 0 ]; then
 fi;
 
 # Install Dependencies
-source "${BASH_SOURCE%/*}/dependencies.sh"
-source "${BASH_SOURCE%/*}/cleanup.sh"
+source "${BASH_SOURCE%/*}/scripts/dependencies.sh"
+
+# Unmount possible earlier mounted stuff
+source "${BASH_SOURCE%/*}/scripts/unmount.sh"
 
 # Detect ROOT-Drive
-source "${BASH_SOURCE%/*}/detectRoot.sh"
+source "${BASH_SOURCE%/*}/scripts/drive_detect.sh"
 
 # Print INFO
 echo
@@ -39,7 +41,7 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 fi
 
 # Prepare drive
-source "${BASH_SOURCE%/*}/prepDrive.sh"
+source "${BASH_SOURCE%/*}/scripts/drive_prepare.sh"
 
 # Create Subvolumes
 logLine "Creating BTRFS-Subvolumes on SYSTEM-Partition...";
@@ -88,12 +90,8 @@ do
 done;
 
 # Install base system
-logLine "Installing Base-System (${DISTRO^^})..."
-if [[ "${DISTRO^^}" == "DEBIAN" ]]; then
-	if ! runCmd debootstrap stable /tmp/mnt/root http://ftp.de.debian.org/debian/; then echo "Failed to install Base-System"; exit; fi;
-elif [[ "${DISTRO^^}" == "ARCHLINUX" ]]; then
-	if ! runCmd pacstrap /tmp/mnt/root base; then echo "Failed to install Base-System"; exit; fi;
-fi;
+logLine "Installing Base-System (${DISTRO^^})...";
+source "${BASH_SOURCE%/*}/scripts/strap.sh";
 
 # Generate fstab
 genfstab -pL /tmp/mnt/root >> /tmp/mnt/root/etc/fstab;
@@ -105,32 +103,18 @@ if ! runCmd sed -i 's#^LABEL=system#/dev/mapper/cryptsystem#g' /tmp/mnt/root/etc
 if ! runCmd sed -i 's/,subvolid=[0-9]*//g' /tmp/mnt/root/etc/fstab; then echo "Failed to modify fstab"; exit; fi;
 if ! runCmd sed -i 's/,subvol=\/[^,]*//g' /tmp/mnt/root/etc/fstab; then echo "Failed to modify fstab"; exit; fi;
 
-# Prepare CHRoot
-if ! runCmd mkdir -p /tmp/mnt/root/tmp; then logLine "Error preparing chroot"; exit; fi;
-if ! runCmd mount -t tmpfs tmpfs /tmp/mnt/root/tmp; then logLine "Error preparing chroot"; exit; fi;
-if ! runCmd mount -t proc proc /tmp/mnt/root/proc; then logLine "Error preparing chroot"; exit; fi;
-if ! runCmd mount -t sysfs sys /tmp/mnt/root/sys; then logLine "Error preparing chroot"; exit; fi;
-if ! runCmd mount -t devtmpfs dev /tmp/mnt/root/dev; then logLine "Error preparing chroot"; exit; fi;
-if ! runCmd mount -t devpts devpts /tmp/mnt/root/dev/pts; then logLine "Error preparing chroot"; exit; fi;
-if isEfiSystem; then
-	if ! runCmd mount -t efivarfs efivarfs /tmp/mnt/root/sys/firmware/efi/efivars; then logLine "Error preparing chroot"; exit; fi;
-fi;
-
-# Install current resolv.conf
-if ! runCmd cp /etc/resolv.conf /tmp/mnt/root/etc/resolv.conf; then logLine "Error preparing chroot"; exit; fi;
-
+# Install CryptoKey
 if isTrue "${CRYPTED}"; then
 	if ! runCmd cp /tmp/crypto.key /tmp/mnt/root/etc/; then logLine "Failed to copy crypto.key"; exit; fi;
 	if ! runCmd cp /tmp/crypto.header /tmp/mnt/root/etc/; then logLine "Failed to copy crypto.header"; exit; fi;
 fi;
 
+# Prepare ChRoot
+source "${BASH_SOURCE%/*}/scripts/chroot_prepare.sh";
+
 # Run installer
 logLine "Setting up system...";
-if [[ "${DISTRO^^}" == "DEBIAN" ]]; then
-	source "${BASH_SOURCE%/*}/chroot_debian.sh"
-elif [[ "${DISTRO^^}" == "ARCHLINUX" ]]; then
-	source "${BASH_SOURCE%/*}/chroot_archlinux.sh"
-fi;
+source "${BASH_SOURCE%/*}/scripts/chroot.sh";
 
 # Cleanup
 #source "${BASH_SOURCE%/*}/cleanup.sh";

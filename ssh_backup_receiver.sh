@@ -3,7 +3,7 @@ set -uo pipefail
 
 ############### Main Script ################
 ## Load Functions
-source "${BASH_SOURCE%/*}/functions.sh"
+source "${BASH_SOURCE%/*}/includes/functions.sh"
 
 # We must have first parameter
 if [[ -z "$1" ]]; then

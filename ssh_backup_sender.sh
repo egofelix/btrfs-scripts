@@ -43,7 +43,7 @@ if [[ -z "${SNAPTARGET:-}" ]]; then
   SSH_PORT=$(echo ${DNS_RESULT} | awk '{print $3}');
   SSH_HOSTNAME=$(echo ${DNS_RESULT} | awk '{print $4}')
   SSH_HOSTNAME="${SSH_HOSTNAME::-1}"
-  logLine "Autodetected Backup Server";
+  logLine "Autodetected Backup Server: ${DNS_RESULT}";
 elif [[ ! ${SNAPTARGET} = "ssh://"* ]]; then
   logLine "Something is wrong with ${SNAPTARGET}. Aborting.";
   exit;
@@ -67,11 +67,9 @@ else
 fi;
 	
 # Test SSH
-
 logLine "SSH-Host: ${SSH_HOSTNAME}"
 logLine "SSH-Port: ${SSH_PORT}"
 logLine "SSH-User: ${SSH_USERNAME}"
-#logLine "SSH-Path: ${SSH_PATH}"
 
 # Test ssh
 SSH_CALL="ssh -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
