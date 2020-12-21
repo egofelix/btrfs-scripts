@@ -8,6 +8,8 @@ if [[ -z "${SSH_HOSTNAME:-}" ]]; then
   if [[ -z "${HOSTNAME:-}" ]]; then
     HOSTNAME=$(cat /proc/sys/kernel/hostname)
   fi;
+logDebug "Trying autodetection of SSH_HOSTNAME with current hostname: ${HOSTNAME}";  
+  
   MY_HOSTNAME=$(echo "${HOSTNAME}" | awk -F'.' '{print $1}')
   MY_DOMAIN=$(cat /proc/sys/kernel/hostname | cut -d'.' -f2-)
   
