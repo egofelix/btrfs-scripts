@@ -1,5 +1,5 @@
 #!/bin/bash
-set -uo pipefail
+#set -uo pipefail
 
 ############### Main Script ################
 ## Load Functions
