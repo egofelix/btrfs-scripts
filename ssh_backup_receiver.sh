@@ -112,7 +112,7 @@ if [[ "$1" = "list-volume" ]]; then
   if [[ $2 = *"."* ]]; then echo "Illegal character . detected in parameter volume."; exit 1;  fi;
   
   # Create directory
-  RESULT=$(ls ${HOME}/$2)
+  ls ${HOME}/$2
   if [ $? -ne 0 ]; then echo "Error listing volume $2."; exit 1; fi;
   exit 0;
 fi;
