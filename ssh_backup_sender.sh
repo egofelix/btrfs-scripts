@@ -4,7 +4,16 @@ set -uo pipefail
 ############### Main Script ################
 
 ## Load Functions
-source "${BASH_SOURCE%/*}/functions.sh"
+source "${BASH_SOURCE%/*}/includes/functions.sh"
+
+# Load Variables
+source "${BASH_SOURCE%/*}/includes/defaults.sh"
+
+## Script must be started as root
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root";
+  exit 1;
+fi;
 
 # Search snapshot volume
 SNAPSOURCE=$(LANG=C mount | grep '@snapshots' | grep -o 'on /\..* type btrfs' | awk '{print $2}')
@@ -20,70 +29,8 @@ if [[ -z "${VOLUMES}" ]]; then
 	exit;
 fi;
 
-SSH_PORT="22"
-SSH_USERNAME=$(cat /proc/sys/kernel/hostname | awk -F'.' '{print $1}')
-
-# No target?
-if [[ -z "${SNAPTARGET:-}" ]]; then
-  MY_HOSTNAME=$(cat /proc/sys/kernel/hostname | awk -F'.' '{print $1}')
-  MY_DOMAIN=$(cat /proc/sys/kernel/hostname | cut -d'.' -f2-)
-	
-  RECORD_TO_CHECK="_${MY_HOSTNAME}._backup._ssh.${MY_DOMAIN}"
-  DNS_RESULT=$(dig srv ${RECORD_TO_CHECK} +short)
-  if [[ -z "${DNS_RESULT}" ]]; then
-    RECORD_TO_CHECK="_backup._ssh.${MY_DOMAIN}"
-    DNS_RESULT=$(dig srv ${RECORD_TO_CHECK} +short)
-  fi;
-	
-  if [[ -z "${DNS_RESULT}" ]]; then
-	logLine "Could not autodetect backup server. Please provide SNAPTARGET";
-	exit;
-  fi;
-
-  SSH_PORT=$(echo ${DNS_RESULT} | awk '{print $3}');
-  SSH_HOSTNAME=$(echo ${DNS_RESULT} | awk '{print $4}')
-  SSH_HOSTNAME="${SSH_HOSTNAME::-1}"
-  logLine "Autodetected Backup Server: ${DNS_RESULT}";
-elif [[ ! ${SNAPTARGET} = "ssh://"* ]]; then
-  logLine "Something is wrong with ${SNAPTARGET}. Aborting.";
-  exit;
-else 
-  SSH_PART=$(echo "${SNAPTARGET}" | awk -F'/' '{print $3}')SSH_USERNAME=$(cat /proc/sys/kernel/hostname | awk -F'.' '{print $1}')
-
-  if [[ ${SSH_PART} = *"@"* ]]; then
-    SSH_USERNAME=$(echo "${SSH_PART}" | awk -F'@' '{print $1}')
-    SSH_PART=$(echo "${SSH_PART}" | awk -F'@' '{print $2}')
-  fi;
-
-  if [[ ${SSH_PART} = *":"* ]]; then
-    SSH_PORT=$(echo "${SSH_PART}" | awk -F':' '{print $2}')
-    SSH_PART=$(echo "${SSH_PART}" | awk -F'@' '{print $1}')
-  fi;
-
-  SSH_HOSTNAME="${SSH_PART}"
-  SSH_PATH=$(echo "${SNAPTARGET}" | cut -d'/' -f4-)
-  SSH_PATH="/${SSH_PATH}"
-fi;
-	
-# Test SSH
-logLine "SSH-Host: ${SSH_HOSTNAME}"
-logLine "SSH-Port: ${SSH_PORT}"
-logLine "SSH-User: ${SSH_USERNAME}"
-
-# Test ssh
-SSH_CALL="ssh -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
-TESTRESULT=$(${SSH_CALL} "testSshReceiver")
-if [[ $? -ne 0 ]]; then
-	logLine "SSH-Connection failed.";
-	logLine "${TESTRESULT}";
-	exit;
-fi;
-
-# Test must return success (This identifies the backup receiver is installed and setup in authorized_keys
-if [[ "${TESTRESULT}" != "success" ]]; then
-	logLine "Backup receiver not installed.";
-	exit;
-fi;
+# Detect SSH-Server
+source "${BASH_SOURCE%/*}/scripts/ssh_serverdetect.sh"
 
 logLine "Source Directory: ${SNAPSOURCE}";
 logLine "Volumes to backup: ${VOLUMES}";
