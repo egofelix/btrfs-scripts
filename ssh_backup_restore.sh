@@ -32,3 +32,5 @@ if [[ $? -ne 0 ]]; then
   logLine "${SUBVOLUMES}";
   exit;
 fi;
+
+echo ${SUBVOLUMES}
