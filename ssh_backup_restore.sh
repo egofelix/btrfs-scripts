@@ -52,6 +52,6 @@ if ! runCmd mkdir /tmp/mnt/disks/system/snapshots/root; then logLine "Failed to 
 
 # Receive ROOT-Volume
 RECEIVERESULT=$(${SSH_CALL} "receive-volume-backup" "root" "${RESTOREPOINT}" | btrfs receive -q /tmp/mnt/disks/system/snapshots/root)
-if [[ $? -ne 0 ]] || [[ "${RECEIVERESULT}" != "success" ]]; then logLine "Failed to receive volume. ${SENDRESULT}"; exit 1; fi;
+if [[ $? -ne 0 ]] || [[ "${RECEIVERESULT}" != "success" ]]; then logLine "Failed to receive volume. ${RECEIVERESULT}"; exit 1; fi;
 
 exit 0;
