@@ -62,12 +62,17 @@ fi;
 # Test SSH
 logLine "Testing ssh access: ${SSH_USERNAME}@${SSH_HOSTNAME}:${SSH_PORT}...";
 
-# Test ssh
+# Test ssh without key (User auth)
 export SSH_CALL="ssh -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
 TESTRESULT=$(${SSH_CALL} "testSshReceiver")
 if [[ $? -ne 0 ]]; then
+  # Try with local key
+  export SSH_CALL="ssh -o IdentityFile=/etc/ssh/ssh_host_ed25519_key -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+  TESTRESULT=$(${SSH_CALL} "testSshReceiver")
+  if [[ $? -ne 0 ]]; then
 	logLine "SSH-Connection failed.";
 	logLine "${TESTRESULT}";
 	logLine "${SSH_CALL}";
 	exit;
+  fi;
 fi;
