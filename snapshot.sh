@@ -29,6 +29,10 @@ do
 	# Set SNAPNAME
 	SNAPNAME="${subvolName}"
 	
+	if [[ "${SNAPNAME,,}" = "/var/lib/docker/"* ]]; then
+		continue;
+	fi;
+	
 	# Remove first char if it is a /
 	if [[ "${SNAPNAME}" = "/"* ]]; then
 		SNAPNAME="${SNAPNAME:1}"
