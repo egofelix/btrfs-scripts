@@ -33,4 +33,15 @@ if [[ $? -ne 0 ]]; then
   exit;
 fi;
 
+RESTOREPOINT=$(echo "${SUBVOLUMES}" | tail -n +1)
+echo ${RESTOREPOINT}
+
+# Get user confirmation
+read -p "Will restore ? (Any data on the drive will be ereased) [yN]: " -n 1 -r
+echo    # (optional) move to a new line
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Script canceled by user";
+    exit;   
+fi
+
 echo ${SUBVOLUMES}
