@@ -68,7 +68,7 @@ if [[ ${SNAPTARGET} = "ssh://"* ]]; then
 	logLine "SSH-Path: ${SSH_PATH}"
 	
 	# Test ssh
-	TESTRESULT=$(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME} "ls ${SSH_PATH}")
+	TESTRESULT=$(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME} "ls ${SSH_PATH} 2>&1")
 	if [ $? -ne 0 ]; then
 		logLine "SSH-Connection failed.";
 		exit;
