@@ -122,9 +122,10 @@ if isTrue "${CRYPTED}"; then
 fi;
 
 # Prepare ChRoot
-source "${BASH_SOURCE%/*}/scripts/chroot_prepare.sh"
+rm -f /tmp/mnt/root/etc/resolv.conf;
+source "${BASH_SOURCE%/*}/scripts/chroot_prepare.sh";
 
 # Reinstall BootManager
-source "${BASH_SOURCE%/*}/scripts/bootmanager.sh"
+source "${BASH_SOURCE%/*}/scripts/bootmanager.sh";
 
 exit 0;
