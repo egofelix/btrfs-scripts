@@ -28,8 +28,12 @@ for subvolName in ${SUBVOLUMES}
 do
 	SNAPNAME="${subvolName//[\/]/-}"
 	
-	# Remove first char
-	SNAPNAME="${SNAPNAME:1}"
+	# Remove first char if it is a /
+	if [[ ${SNAPNAME} = "/"* ]]; then
+		SNAPNAME="${SNAPNAME:1}"
+	fi;
+	
+	# If we have an empty name, we are at the root
 	if [[ -z "${SNAPNAME}" ]]; then
 		SNAPNAME="root";
 	fi;
@@ -39,8 +43,7 @@ do
 		mkdir -p ${SNAPDIR}/${SNAPNAME};
 	fi;
 	
-	#SNAPNAME="${SNAPNAME}_${STAMP}"
-	
+	# Create Snapshot
 	logLine "Creating Snapshot ${SNAPDIR}/${SNAPNAME}/${STAMP}"
 	if ! runCmd btrfs subvolume snapshot -r ${subvolName} ${SNAPDIR}/${SNAPNAME}/${STAMP}; then
 		logLine "Failed!";
