@@ -8,7 +8,7 @@ if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
 yes n | pacman -S --noconfirm uboot-cubietruck uboot-tools
 mkinitcpio -P
 EOF
-	chroot /tmp/mnt/root /chroot.sh &> /dev/null;
+	chroot /tmp/mnt/root /chroot.sh;
 	
 	# Setup boot.txt for seperated boot partition
 	if [ -f "/tmp/mnt/root/etc/boot.txt" ]; then
@@ -58,7 +58,7 @@ EOF
 cd /boot
 ./mkscr
 EOF
-	chroot /tmp/mnt/root /chroot.sh &> /dev/null;
+	chroot /tmp/mnt/root /chroot.sh;
 else
 	logLine "Setting up Bootmanager (GRUB)";
 	
@@ -67,7 +67,7 @@ else
 #!/bin/bash
 pacman -S --noconfirm grub efibootmgr
 EOF
-	chroot /tmp/mnt/root /chroot.sh &> /dev/null
+	chroot /tmp/mnt/root /chroot.shl
 
     if isTrue "${CRYPTED}"; then
 		# Setup Grub for Cryptsetup
@@ -84,5 +84,5 @@ mkinitcpio -P
 grub-install
 grub-mkconfig -o /boot/grub/grub.cfg
 EOF
-	chroot /tmp/mnt/root /chroot.sh &> /dev/null
+	chroot /tmp/mnt/root /chroot.sh;
 fi;
