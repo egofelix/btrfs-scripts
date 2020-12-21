@@ -51,6 +51,7 @@ if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/snapshots; then logLine
 if ! runCmd mkdir /tmp/mnt/disks/system/snapshots/root; then logLine "Failed to create root directory"; exit 1; fi;
 
 # Receive ROOT-Volume
-${SSH_CALL} "receive-volume-backup" "root" "${RESTOREPOINT}" | btrfs receive /tmp/mnt/disks/system/snapshots/root
+RECEIVERESULT=$(${SSH_CALL} "receive-volume-backup" "root" "${RESTOREPOINT}" | btrfs receive -q /tmp/mnt/disks/system/snapshots/root)
+if [[ $? -ne 0 ]] || [[ "${RECEIVERESULT}" != "success" ]]; then logLine "Failed to receive volume. ${SENDRESULT}"; exit 1; fi;
 
 exit 0;

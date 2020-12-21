@@ -133,6 +133,7 @@ if [[ "$1" = "receive-volume-backup" ]]; then
   # Send Backup
   btrfs send -q ${HOME}/$2/$3
   if [ $? -ne 0 ]; then echo "Error listing volumes."; exit 1; fi;
+  echo "success";
   exit 0;
 fi;
 
