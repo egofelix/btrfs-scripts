@@ -26,12 +26,16 @@ fi;
 logLine "Target Directory: ${SNAPDIR}";
 for subvolName in ${SUBVOLUMES}
 do
-	SNAPNAME="${subvolName//[\/]/-}"
+	# Set SNAPNAME
+	SNAPNAME="${subvolName}"
 	
 	# Remove first char if it is a /
-	if [[ ${SNAPNAME} = /* ]]; then
+	if [[ "${SNAPNAME}" = "/"* ]]; then
 		SNAPNAME="${SNAPNAME:1}"
 	fi;
+	
+	# Replace / with -
+	SNAPNAME="${SNAPNAME//[\/]/-}"
 	
 	# If we have an empty name, we are at the root
 	if [[ -z "${SNAPNAME}" ]]; then
