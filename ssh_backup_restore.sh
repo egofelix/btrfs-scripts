@@ -37,7 +37,7 @@ fi;
 RESTOREPOINT=$(echo "${SUBVOLUMES}" | head -1)
 read -p "Will restore ${RESTOREPOINT}. Is this ok? [Yn]: " -n 1 -r
 echo    # (optional) move to a new line
-if [[ ! $REPLY =~ ^[\sYy]$ ]]; then
+if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ ! $REPLY =~ ^$ ]]; then
     # TODO: Build selection here
     echo "Script canceled by user";
     exit;   
