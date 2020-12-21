@@ -76,7 +76,7 @@ if [[ "$1" = "create-volume-backup" ]]; then
 
   if [[ -d "${HOME}/$2/$3" ]]; then echo "backup already exists"; exit 0; fi;
   
-  btrfs receive ${HOME}/$2/$3
+  btrfs receive ${HOME}/$2
   if [ $? -ne 0 ]; then 
     # Remove broken backup
     btrfs subvol del ${HOME}/$2/$3
