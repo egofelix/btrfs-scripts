@@ -108,11 +108,6 @@ do
 	echo "Haha";
 	exit;
 	
-	if [[ ! -d "${SNAPTARGET}/${volName}" ]]; then
-		#logLine "Creating Directory...";
-		mkdir -p ${SNAPTARGET}/${volName};
-	fi;
-	
 	# If first subvolume does not exist send it full!
 	if [[ ! -d "${SNAPTARGET}/${volName}/${FIRSTSUBVOLUME}" ]]; then
 		logLine "Copying backup \"${volName}_${FIRSTSUBVOLUME}\" (Full)";
