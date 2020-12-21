@@ -108,7 +108,7 @@ do
 	if [ $? -ne 0 ]; then logLine "Failed to restore ${VOLNAME^^}-Volume from ${VOLNAME^^}-Snapshot..."; exit 1; fi;
 	
 	# Mount it for later use
-	if ! runCmd mount -o subvol=${SUBVOLNAME,,} ${PART_SYSTEM} /tmp/mnt/root${mountpoint}; then echo "Failed to Mount Subvolume ${SUBVOLNAME^^} at /tmp/mnt/root${mountpoint}"; exit; fi;
+	if ! runCmd mount -o subvol=${VOLNAME,,} ${PART_SYSTEM} /tmp/mnt/root${mountpoint}; then echo "Failed to Mount Subvolume ${VOLNAME^^} at /tmp/mnt/root${mountpoint}"; exit; fi;
 done;
 
 exit 0;
