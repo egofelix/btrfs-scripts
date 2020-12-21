@@ -131,7 +131,7 @@ if [[ "$1" = "receive-volume-backup" ]]; then
   if [[ ! -d "${HOME}/$2/$3" ]]; then echo "backup does not exists"; exit 0; fi;
 
   # Send Backup
-  btrfs send -q ${HOME}/$2/$3 > /dev/stdout
+  btrfs send -q ${HOME}/$2/$3
   if [ $? -ne 0 ]; then echo "Error listing volumes."; exit 1; fi;
   exit 0;
 fi;
