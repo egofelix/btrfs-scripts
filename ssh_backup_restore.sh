@@ -77,40 +77,54 @@ fi;
 BTRFSMOUNTPOINTS=$(cat /tmp/mnt/root/etc/fstab | grep -e '\sbtrfs\s.*subvol\=' | awk '{print $2}' | grep -v '^\/$' | sort)
 for mountpoint in ${BTRFSMOUNTPOINTS}
 do
-    VOLUMENAME=$(cat /tmp/mnt/root/etc/fstab | grep "${mountpoint}" | grep -o -P 'subvol\=[^\s]*' | awk -F'=' '{print $2}')
-	if [[ -z ${VOLUMENAME} ]]; then
-		logLine "Unable to find Volume-Name for ${mountpoint}.";
-		exit 1;
-	fi;
+  VOLUMENAME=$(cat /tmp/mnt/root/etc/fstab | grep "${mountpoint}" | grep -o -P 'subvol\=[^\s]*' | awk -F'=' '{print $2}')
+  if [[ -z ${VOLUMENAME} ]]; then
+    logLine "Unable to find Volume-Name for ${mountpoint}.";
+    exit 1;
+  fi;
+
+  if [[ ${VOLUMENAME} = "@"* ]]; then
+    logDebug "Creating empty volume for ${mountpoint} at ${VOLUMENAME}.";
+    if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/${VOLUMENAME}; then echo "Failed to create btrfs ${VOLUMENAME^^}-Volume"; exit; fi;
+    continue;
+  fi;
 	
-	if [[ ${VOLUMENAME} = "@"* ]]; then
-		# TODO: Create empty mount here
-		logDebug "Creating empty volume for ${mountpoint} at ${VOLUMENAME}.";
-		if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/${VOLUMENAME}; then echo "Failed to create btrfs ${VOLUMENAME^^}-Volume"; exit; fi;
-		continue;
-	fi;
+  # Double check volume name against fstab
+  VOLNAME="${mountpoint//[\/]/-}"
+  VOLNAME=${VOLNAME:1}
+  if [[ "${VOLNAME^^}-DATA" != "${VOLUMENAME^^}" ]]; then
+    logDebug "Failed to detect volume for ${mountpoint}. Volume Name Mismacht! \"${VOLNAME^^}-DATA\" != \"${VOLUMENAME^^}\"";
+    exit 1;
+  fi;
+
+  # Receive XXX-Volume
+  if ! runCmd mkdir /tmp/mnt/disks/system/snapshots/${VOLNAME,,}; then logLine "Failed to create snapshot directory for ${VOLNAME,,}."; exit 1; fi;
+  logLine "Receiving ${VOLNAME^^}-Snapshot...";
+  ${SSH_CALL} "receive-volume-backup" "${VOLNAME,,}" "${RESTOREPOINT}" | btrfs receive -q /tmp/mnt/disks/system/snapshots/${VOLNAME,,}
+  if [[ $? -ne 0 ]]; then logLine "Failed to receive volume."; exit 1; fi;
 	
-	#echo "${mountpoint} subvolume is ${VOLUMENAME}";
-	VOLNAME="${mountpoint//[\/]/-}"
-	VOLNAME=${VOLNAME:1}
-	if [[ "${VOLNAME^^}-DATA" != "${VOLUMENAME^^}" ]]; then
-		logDebug "Failed to detect volume for ${mountpoint}. Volume Name Mismacht! \"${VOLNAME^^}-DATA\" != \"${VOLUMENAME^^}\"";
-		exit 1;
-	fi;
+  # Restore XXX-data from snapshot
+  logLine "Restoring ${VOLNAME^^}-Volume...";
+  btrfs subvol snapshot /tmp/mnt/disks/system/snapshots/${VOLNAME,,}/${RESTOREPOINT} /tmp/mnt/disks/system/${VOLNAME,,}-data > /dev/null
+  if [ $? -ne 0 ]; then logLine "Failed to restore ${VOLNAME^^}-Volume from ${VOLNAME^^}-Snapshot..."; exit 1; fi;
 	
-	# Receive XXX-Volume
-	if ! runCmd mkdir /tmp/mnt/disks/system/snapshots/${VOLNAME,,}; then logLine "Failed to create snapshot directory for ${VOLNAME,,}."; exit 1; fi;
-	logLine "Receiving ${VOLNAME^^}-Snapshot...";
-	${SSH_CALL} "receive-volume-backup" "${VOLNAME,,}" "${RESTOREPOINT}" | btrfs receive -q /tmp/mnt/disks/system/snapshots/${VOLNAME,,}
-	if [[ $? -ne 0 ]]; then logLine "Failed to receive volume."; exit 1; fi;
-	
-	# Restore XXX-data from snapshot
-	logLine "Restoring ${VOLNAME^^}-Volume...";
-	btrfs subvol snapshot /tmp/mnt/disks/system/snapshots/${VOLNAME,,}/${RESTOREPOINT} /tmp/mnt/disks/system/${VOLNAME,,}-data > /dev/null
-	if [ $? -ne 0 ]; then logLine "Failed to restore ${VOLNAME^^}-Volume from ${VOLNAME^^}-Snapshot..."; exit 1; fi;
-	
-	# Mount it for later use
-	if ! runCmd mount -o subvol=${VOLNAME,,}-data ${PART_SYSTEM} /tmp/mnt/root${mountpoint}; then echo "Failed to Mount Subvolume ${VOLNAME^^} at /tmp/mnt/root${mountpoint}"; exit; fi;
+  # Mount it for later use
+  if ! runCmd mount -o subvol=${VOLNAME,,}-data ${PART_SYSTEM} /tmp/mnt/root${mountpoint}; then echo "Failed to Mount Subvolume ${VOLNAME^^} at /tmp/mnt/root${mountpoint}"; exit; fi;
 done;
+
+# Message
+logLine "Backups restored, finishing system restore...";
+
+# Reinstall new crypto keys and backup header
+if isTrue "${CRYPTED}"; then
+  if ! runCmd cp /tmp/crypto.key /tmp/mnt/root/etc/; then logLine "Failed to copy crypto.key"; exit; fi;
+  if ! runCmd cp /tmp/crypto.header /tmp/mnt/root/etc/; then logLine "Failed to copy crypto.header"; exit; fi;
+fi;
+
+# Prepare ChRoot
+source "${BASH_SOURCE%/*}/scripts/chroot_prepare.sh"
+
+# Reinstall BootManager
+source "${BASH_SOURCE%/*}/scripts/bootmanager.sh"
 
 exit 0;

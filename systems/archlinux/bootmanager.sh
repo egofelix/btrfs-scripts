@@ -8,7 +8,7 @@ if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
 yes n | pacman -S --noconfirm uboot-cubietruck uboot-tools
 mkinitcpio -P
 EOF
-	chroot /tmp/mnt/root /chroot.sh &> /dev/null
+	chroot /tmp/mnt/root /chroot.sh &> /dev/null;
 	
 	# Setup boot.txt for seperated boot partition
 	if [ -f "/tmp/mnt/root/etc/boot.txt" ]; then
@@ -58,7 +58,7 @@ EOF
 cd /boot
 ./mkscr
 EOF
-	chroot /tmp/mnt/root /chroot.sh &> /dev/null
+	chroot /tmp/mnt/root /chroot.sh &> /dev/null;
 else
 	logLine "Setting up Bootmanager (GRUB)";
 	
