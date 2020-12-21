@@ -72,7 +72,8 @@ logLine "SSH-User: ${SSH_USERNAME}"
 #logLine "SSH-Path: ${SSH_PATH}"
 
 # Test ssh
-TESTRESULT=$(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME} "testSshReceiver")
+SSH_CALL="ssh -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+TESTRESULT=$(${SSH_CALL} "testSshReceiver")
 if [ $? -ne 0 ]; then
 	logLine "SSH-Connection failed.";
 	logLine "${TESTRESULT}";
@@ -102,8 +103,9 @@ do
 	LASTSUBVOLUME=$(LANG=C ls ${SNAPSOURCE}/${volName}/ | sort | tail -1)
 	
 	# Create Directory for this volume
-	RESULT=$(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME} "create-volume-directory" "${volName}")
-	echo ${RESULT}
+	if ! runCmd ${SSH_CALL} "create-volume-directory" "${volName}"; then echo "Failed to create volume directory at server."; exit 1; fi;
+	
+	echo "Haha";
 	exit;
 	
 	if [[ ! -d "${SNAPTARGET}/${volName}" ]]; then
