@@ -41,57 +41,54 @@ if [[ -z "${SNAPTARGET:-}" ]]; then
 	exit;
 fi;
 
-if [[ ${SNAPTARGET} = "ssh://"* ]]; then
-	# Test SSH
-	SSH_PART=$(echo "${SNAPTARGET}" | awk -F'/' '{print $3}')
+if [[ ! ${SNAPTARGET} = "ssh://"* ]]; then
+	logLine "Something is wrong with ${SNAPTARGET}. Aborting.";
+	exit;
+fi;
 	
-	SSH_PORT="22"
-	SSH_USERNAME="backup"
-	
-	if [[ ${SSH_PART} = *"@"* ]]; then
-		SSH_USERNAME=$(echo "${SSH_PART}" | awk -F'@' '{print $1}')
-		SSH_PART=$(echo "${SSH_PART}" | awk -F'@' '{print $2}')
-	fi;
-	
-	if [[ ${SSH_PART} = *":"* ]]; then
-		SSH_PORT=$(echo "${SSH_PART}" | awk -F':' '{print $2}')
-		SSH_PART=$(echo "${SSH_PART}" | awk -F'@' '{print $1}')
-	fi;
-	
-	SSH_HOSTNAME="${SSH_PART}"
-	SSH_PATH=$(echo "${SNAPTARGET}" | cut -d'/' -f4-)
-	SSH_PATH="/${SSH_PATH}"
-	
-	logLine "SSH-Host: ${SSH_HOSTNAME}"
-	logLine "SSH-Port: ${SSH_PORT}"
-	logLine "SSH-User: ${SSH_USERNAME}"
-	logLine "SSH-Path: ${SSH_PATH}"
-	
-	# Test ssh
-	TESTRESULT=$(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME} "test")
-	if [ $? -ne 0 ]; then
-		logLine "SSH-Connection failed.";
-		logLine "${TESTRESULT}";
-		exit;
-	fi;
-	
-	if [[ "${TESTRESULT}" != "success" ]]; then
-		logLine "Backup receiver not installed.";
-		exit;
-	fi;
+# Test SSH
+SSH_PART=$(echo "${SNAPTARGET}" | awk -F'/' '{print $3}')
 
-	echo "Test: ${TESTRESULT}"
-	exit
-	
-else
-	# Test folder
-	CONTENT=$(ls ${SNAPTARGET})
-	if [ $? -ne 0 ]; then
-		logLine "Something is wrong with ${SNAPTARGET}. Aborting.";
-		exit;
-	fi;
+SSH_PORT="22"
+SSH_USERNAME="backup"
+
+if [[ ${SSH_PART} = *"@"* ]]; then
+	SSH_USERNAME=$(echo "${SSH_PART}" | awk -F'@' '{print $1}')
+	SSH_PART=$(echo "${SSH_PART}" | awk -F'@' '{print $2}')
 fi;
 
+if [[ ${SSH_PART} = *":"* ]]; then
+	SSH_PORT=$(echo "${SSH_PART}" | awk -F':' '{print $2}')
+	SSH_PART=$(echo "${SSH_PART}" | awk -F'@' '{print $1}')
+fi;
+
+SSH_HOSTNAME="${SSH_PART}"
+SSH_PATH=$(echo "${SNAPTARGET}" | cut -d'/' -f4-)
+SSH_PATH="/${SSH_PATH}"
+
+logLine "SSH-Host: ${SSH_HOSTNAME}"
+logLine "SSH-Port: ${SSH_PORT}"
+logLine "SSH-User: ${SSH_USERNAME}"
+logLine "SSH-Path: ${SSH_PATH}"
+
+# Test ssh
+TESTRESULT=$(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME} "test")
+if [ $? -ne 0 ]; then
+	logLine "SSH-Connection failed.";
+	logLine "${TESTRESULT}";
+	exit;
+fi;
+
+# Test must return success (This identifies the backup receiver is installed and setup in authorized_keys
+if [[ "${TESTRESULT}" != "success" ]]; then
+	logLine "Backup receiver not installed.";
+	exit;
+fi;
+
+
+
+echo "Test: ${TESTRESULT}"
+exit
 
 
 logLine "Source Directory: ${SNAPSOURCE}";
