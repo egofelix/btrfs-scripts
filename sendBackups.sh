@@ -20,42 +20,53 @@ if [[ -z "${VOLUMES}" ]]; then
 	exit;
 fi;
 
-# No target?
-if [[ -z "${SNAPTARGET:-}" ]]; then
-	MY_HOSTNAME=$(cat /proc/sys/kernel/hostname | awk -F'.' '{print $1}')
-	MY_DOMAIN=$(cat /proc/sys/kernel/hostname | cut -d'.' -f2-)
-	RECORD_TO_CHECK="${MY_HOSTNAME}.backup.${MY_DOMAIN}"
-	echo ${RECORD_TO_CHECK};
-
-
-	logLine "No Backup target found";
-	exit;
-fi;
-
-if [[ ! ${SNAPTARGET} = "ssh://"* ]]; then
-	logLine "Something is wrong with ${SNAPTARGET}. Aborting.";
-	exit;
-fi;
-	
-# Test SSH
-SSH_PART=$(echo "${SNAPTARGET}" | awk -F'/' '{print $3}')
-
 SSH_PORT="22"
 SSH_USERNAME=$(cat /proc/sys/kernel/hostname | awk -F'.' '{print $1}')
 
-if [[ ${SSH_PART} = *"@"* ]]; then
-	SSH_USERNAME=$(echo "${SSH_PART}" | awk -F'@' '{print $1}')
-	SSH_PART=$(echo "${SSH_PART}" | awk -F'@' '{print $2}')
-fi;
+# No target?
+if [[ -z "${SNAPTARGET:-}" ]]; then
+  MY_HOSTNAME=$(cat /proc/sys/kernel/hostname | awk -F'.' '{print $1}')
+  MY_DOMAIN=$(cat /proc/sys/kernel/hostname | cut -d'.' -f2-)
+	
+  RECORD_TO_CHECK="_${MY_HOSTNAME}._backup._ssh.${MY_DOMAIN}"
+  DNS_RESULT=$(dig srv ${RECORD_TO_CHECK} +short)
+  if [[ -z "${DNS_RESULT}" ]]; then
+    RECORD_TO_CHECK="_backup._ssh.${MY_DOMAIN}"
+    DNS_RESULT=$(dig srv ${RECORD_TO_CHECK} +short)
+  fi;
+	
+  if [[ -z "${DNS_RESULT}" ]]; then
+	logLine "Could not autodetect backup server. Please provide SNAPTARGET";
+	exit;
+  fi;
 
-if [[ ${SSH_PART} = *":"* ]]; then
-	SSH_PORT=$(echo "${SSH_PART}" | awk -F':' '{print $2}')
-	SSH_PART=$(echo "${SSH_PART}" | awk -F'@' '{print $1}')
-fi;
+  SSH_PORT=$(echo ${DNS_RESULT} | awk '{print $3}');
+  SSH_HOSTNAME=$(echo ${DNS_RESULT} | awk '{print $4}')
+  SSH_HOSTNAME="${SSH_HOSTNAME:-1}"
+  logLine "Autodetected Backup Server";
+elif [[ ! ${SNAPTARGET} = "ssh://"* ]]; then
+  logLine "Something is wrong with ${SNAPTARGET}. Aborting.";
+  exit;
+else 
+  SSH_PART=$(echo "${SNAPTARGET}" | awk -F'/' '{print $3}')SSH_USERNAME=$(cat /proc/sys/kernel/hostname | awk -F'.' '{print $1}')
 
-SSH_HOSTNAME="${SSH_PART}"
-SSH_PATH=$(echo "${SNAPTARGET}" | cut -d'/' -f4-)
-SSH_PATH="/${SSH_PATH}"
+  if [[ ${SSH_PART} = *"@"* ]]; then
+    SSH_USERNAME=$(echo "${SSH_PART}" | awk -F'@' '{print $1}')
+    SSH_PART=$(echo "${SSH_PART}" | awk -F'@' '{print $2}')
+  fi;
+
+  if [[ ${SSH_PART} = *":"* ]]; then
+    SSH_PORT=$(echo "${SSH_PART}" | awk -F':' '{print $2}')
+    SSH_PART=$(echo "${SSH_PART}" | awk -F'@' '{print $1}')
+  fi;
+
+  SSH_HOSTNAME="${SSH_PART}"
+  SSH_PATH=$(echo "${SNAPTARGET}" | cut -d'/' -f4-)
+  SSH_PATH="/${SSH_PATH}"
+
+fi;
+	
+# Test SSH
 
 logLine "SSH-Host: ${SSH_HOSTNAME}"
 logLine "SSH-Port: ${SSH_PORT}"
