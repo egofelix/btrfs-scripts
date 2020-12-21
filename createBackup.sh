@@ -10,22 +10,20 @@ source "${BASH_SOURCE%/*}/functions.sh"
 STAMP=`date -u +"%Y-%m-%d_%H-%M-%S"`
 
 # Search snapshot volume
-SNAPDIR=`LANG=C mount | grep snapshots | grep -o 'on /\..* type btrfs' | awk '{print $2}'`
+SNAPDIR=`LANG=C mount | grep '@snapshots' | grep -o 'on /\..* type btrfs' | awk '{print $2}'`
 if [[ -z "${SNAPDIR}" ]]; then
 	logLine "Cannot find snapshot directory";
 	exit;
 fi;
 
-SUBVOLUMES=`LANG=C mount | grep -o '/dev/mapper/cryptsystem on .* type btrfs' | grep -v 'on \/\.snapshots' | grep -v 'lib.*docker' | grep -v '\/swap' | awk '{print $3}'`
+# Search subvolumes (ignore subvolumes starting with @)
+SUBVOLUMES=`LANG=C mount | grep 'type btrfs' | grep -v -E 'subvol=[/]{0,1}@' | awk '{print $3}'`
 if [[ -z "${SUBVOLUMES}" ]]; then
 	logLine "No subvolumes found";
 	exit;
 fi;
 
-#ls /.snapshots/ | sort | head -n -1
-
 logLine "Target Directory: ${SNAPDIR}";
-
 for subvolName in ${SUBVOLUMES}
 do
 	SNAPNAME="${subvolName//[\/]/-}"
