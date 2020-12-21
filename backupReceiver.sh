@@ -6,6 +6,6 @@ set -uo pipefail
 ## Load Functions
 source "${BASH_SOURCE%/*}/functions.sh"
 
-echo "$SSH_ORIGINAL_COMMAND"
+echo "$@"
 echo "Bye"
 exit
