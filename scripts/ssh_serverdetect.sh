@@ -38,16 +38,19 @@ if [[ -z "${SSH_HOSTNAME:-}" ]]; then
   logDebug "Detected Domain: ${MY_DOMAIN}";
 
   # Check DNS Records  
+  
   RECORD_TO_CHECK="_${MY_HOSTNAME}._backup._ssh.${MY_DOMAIN}"
+  logDebug "Looking up SRV-Record: ${RECORD_TO_CHECK}";
   DNS_RESULT=$(dig srv ${RECORD_TO_CHECK} +short)
   if [[ -z "${DNS_RESULT}" ]]; then
     RECORD_TO_CHECK="_backup._ssh.${MY_DOMAIN}"
+	logDebug "Looking up SRV-Record: ${RECORD_TO_CHECK}";
     DNS_RESULT=$(dig srv ${RECORD_TO_CHECK} +short)
   fi;
 
   # Could not detect
   if [[ -z "${DNS_RESULT}" ]]; then
-	logLine "Could not autodetect backup server. Please provide SNAPTARGET";
+	logLine "Could not autodetect backup server. Please provide SSH_HOSTNAME or another HOSTNAME";
 	exit;
   fi;
 
