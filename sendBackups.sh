@@ -48,12 +48,12 @@ if [[ ${SNAPTARGET} = "ssh://"* ]]; then
 	SSH_PORT="22"
 	SSH_USERNAME="backup"
 	
-	if [[ ${SSH_PART} = *"@" ]]; then
+	if [[ ${SSH_PART} = *"@"* ]]; then
 		SSH_USERNAME=$(echo "${SSH_PART}" | awk -F'@' '{print $1}')
 		SSH_PART=$(echo "${SSH_PART}" | awk -F'@' '{print $2}')
 	fi;
 	
-	if [[ ${SSH_PART} = *":" ]]; then
+	if [[ ${SSH_PART} = *":"* ]]; then
 		SSH_PORT=$(echo "${SSH_PART}" | awk -F':' '{print $2}')
 		SSH_PART=$(echo "${SSH_PART}" | awk -F'@' '{print $1}')
 	fi;
