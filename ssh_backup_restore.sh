@@ -85,7 +85,8 @@ do
 	
 	if [[ ${VOLUMENAME} = "@"* ]]; then
 		# TODO: Create empty mount here
-		logDebug "Skipping ${mountpoint} as it is an @ volume!";
+		logDebug "Creating empty volume for ${mountpoint} at ${VOLUMENAME}.";
+		if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/${VOLUMENAME}; then echo "Failed to create btrfs ${VOLUMENAME^^}-Volume"; exit; fi;
 		continue;
 	fi;
 	
