@@ -35,7 +35,7 @@ fi;
 
 # Get user confirmation
 RESTOREPOINT=$(echo "${SUBVOLUMES}" | head -1)
-read -p "Will restore ${RESTOREPOINT}. Is this ok? [Yn]: " -n 1 -r
+read -p "Will restore ${RESTOREPOINT} to ${DRIVE_ROOT}. Is this ok? [Yn]: " -n 1 -r
 echo    # (optional) move to a new line
 if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ ! $REPLY =~ ^$ ]]; then
     # TODO: Build selection here
