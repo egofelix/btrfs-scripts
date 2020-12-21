@@ -8,6 +8,8 @@ if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
 yes n | pacman -S --noconfirm uboot-cubietruck uboot-tools
 mkinitcpio -P
 EOF
+    
+	chmod +x /tmp/mnt/root/chroot.sh;
 	chroot /tmp/mnt/root /chroot.sh;
 	
 	# Setup boot.txt for seperated boot partition
@@ -67,6 +69,8 @@ else
 #!/bin/bash
 pacman -S --noconfirm grub efibootmgr
 EOF
+    
+	chmod +x /tmp/mnt/root/chroot.sh;
 	chroot /tmp/mnt/root /chroot.sh;
 
     if isTrue "${CRYPTED}"; then
