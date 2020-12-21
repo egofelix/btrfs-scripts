@@ -17,10 +17,10 @@ fi;
 
 # Install Dependencies
 source "${BASH_SOURCE%/*}/scripts/dependencies.sh"
-source "${BASH_SOURCE%/*}/scripts/cleanup.sh"
+source "${BASH_SOURCE%/*}/scripts/unmount.sh"
 
 # Detect ROOT-Drive
 source "${BASH_SOURCE%/*}/scripts/drive_detect.sh"
 
 # Detect SSH-Server
-source "${BASH_SOURCE%/*}/script/ssh_serverdetect.sh"
+source "${BASH_SOURCE%/*}/scripts/ssh_serverdetect.sh"
