@@ -48,7 +48,7 @@ source "${BASH_SOURCE%/*}/scripts/drive_prepare.sh"
 
 # Create system snapshot volume
 if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/snapshots; then logLine "Failed to create btrfs SNAPSHOTS-Volume"; exit 1; fi;
-if ! runCmd mkdir /tmp/mnt/disks/system/snapshots/root; then logLine "Failed to create root directory"; exit 1; fi;
+if ! runCmd mkdir /tmp/mnt/disks/system/snapshots/root; then logLine "Failed to create snapshot directory for root."; exit 1; fi;
 
 # Receive ROOT-Volume
 logLine "Receiving ROOT-Snapshot...";
@@ -88,6 +88,16 @@ do
 	fi;
 	
 	echo "${mountpoint} subvolume is ${VOLUMENAME}";
+	VOLNAME="${mountpoint//[\/]/-}"
+	VOLNAME=${VOLNAME:1}
+	if [[ "${VOLNAME^^}-DATA" != "${VOLUMENAME^^}" ]]; then
+		logDebug "Failed to detect volume for ${mountpoint}";
+	fi;
+	
+	if ! runCmd mkdir /tmp/mnt/disks/system/snapshots/${VOLNAME,,}; then logLine "Failed to create snapshot directory for ${VOLNAME,,}."; exit 1; fi;
+	logLine "Receiving ${VOLNAME^^}-Snapshot...";
+	${SSH_CALL} "receive-volume-backup" "${VOLNAME,,}" "${RESTOREPOINT}" | btrfs receive -q /tmp/mnt/disks/system/snapshots/${VOLNAME,,}
+	if [[ $? -ne 0 ]]; then logLine "Failed to receive volume."; exit 1; fi;
 done;
 
 exit 0;
