@@ -16,6 +16,7 @@ shift 1;
 
 if [[ "$1" = "echo" ]]; then
     echo "echo";
+	cat /dev/stdin
 	exit 0;
 fi;
 
