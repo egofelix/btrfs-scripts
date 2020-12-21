@@ -24,7 +24,7 @@ fi;
 if [[ -z "${SNAPTARGET:-}" ]]; then
 	MY_HOSTNAME=$(cat /proc/sys/kernel/hostname | awk -F'.' '{print $1}')
 	MY_DOMAIN=$(cat /proc/sys/kernel/hostname | cut -d'.' -f2-)
-	RECORD_TO_CHECK="_${MY_HOSTNAME}._backup.${MY_DOMAIN}"
+	RECORD_TO_CHECK="${MY_HOSTNAME}.backup.${MY_DOMAIN}"
 	echo ${RECORD_TO_CHECK};
 
 
