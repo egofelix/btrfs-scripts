@@ -74,5 +74,20 @@ if isEfiSystem; then
 fi;
 
 # Now scan fstab as root is restored!
+BTRFSMOUNTPOINTS=$(cat /tmp/mnt/root/etc/fstab | grep -e '\sbtrfs\s.*subvol\=' | awk '{print $2}' | grep -v '^\/$')
+for mountpoint in ${BTRFSMOUNTPOINTS}
+do
+    VOLUMENAME=$(cat /tmp/mnt/root/etc/fstab | grep "${mountpoint}" | grep -o -P 'subvol\=[^\s]*' | awk -F'=' '{print $2}')
+	if [[ -z ${VOLUMENAME} ]]; then
+		logLine "Unable to find Volume-Name for ${mountpoint}.";
+		exit 1;
+	fi;
+	if [[ ${VOLUMENAME} = "@"* ]]; then
+		logDebug "Skipping ${mountpoint} as it is an @ volume!";
+		continue;
+	fi;
+	
+	echo "${mountpoint} subvolume is ${VOLUMENAME}";
+done;
 
 exit 0;
