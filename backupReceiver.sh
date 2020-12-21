@@ -2,13 +2,17 @@
 set -uo pipefail
 
 ############### Main Script ################
-
 ## Load Functions
 source "${BASH_SOURCE%/*}/functions.sh"
 
 if [[ -z "$1" ]]; then
 	echo "Missing Home dir in first paramete";
 	exit 1;
+fi;
+
+if [[ "$1" = "echo" ]]; then
+    echo "echo";
+	exit 0;
 fi;
 
 # Update home for this script
