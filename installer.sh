@@ -102,7 +102,7 @@ if [ $? -ne 0 ]; then
 	exit
 fi;
 if ! runCmd sed -i 's/,subvolid=[0-9]*//g' /tmp/mnt/root/etc/fstab; then echo "Failed to modify fstab"; exit; fi;
-
+if ! runCmd sed -i 's/,subvol=\/[^,]*//g' /tmp/mnt/root/etc/fstab; then echo "Failed to modify fstab"; exit; fi;
 
 # Prepare CHRoot
 if ! runCmd mkdir -p /tmp/mnt/root/tmp; then logLine "Error preparing chroot"; exit; fi;
