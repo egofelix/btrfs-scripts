@@ -22,7 +22,7 @@ if [[ "$1" = "create-volume-directory" ]]; then
   fi;
   
   # Create directory
-  if !runCmd mkdir -p ${HOME}/$2; then echo "Error creating directory."; exit 1; fi;
+  if ! runCmd mkdir -p ${HOME}/$2; then echo "Error creating directory."; exit 1; fi;
   echo "success"; exit 0;
 fi;
 
