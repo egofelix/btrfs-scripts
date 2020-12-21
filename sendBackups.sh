@@ -20,21 +20,6 @@ if [[ -z "${VOLUMES}" ]]; then
 	exit;
 fi;
 
-# Search for backup hdd
-#if [[ -z ${SNAPTARGET:-} ]]; then
-#	SNAPTARGET=$(LANG=C mount | grep -v '/dev/mapper/cryptsystem on .* type btrfs' | grep 'type btrfs' | grep -o 'on .* type btrfs' | awk '{print $2}')
-#
-#	if [[ -z "${SNAPTARGET}" ]]; then
-#		if [[ -e /dev/disk/by-label/backup ]]; then
-#			mkdir -p /tmp/backup;
-#	
-#			logLine "Automounting backup drive";
-#			mount /dev/disk/by-label/backup /tmp/backup;
-#			SNAPTARGET=$(LANG=C mount | grep -v '/dev/mapper/cryptsystem on .* type btrfs' | grep 'type btrfs' | grep -o 'on .* type btrfs' | awk '{print $2}')
-#		fi;
-#	fi;
-#fi;
-
 # No target?
 if [[ -z "${SNAPTARGET:-}" ]]; then
 	logLine "No Backup target found";
@@ -50,7 +35,7 @@ fi;
 SSH_PART=$(echo "${SNAPTARGET}" | awk -F'/' '{print $3}')
 
 SSH_PORT="22"
-SSH_USERNAME="backup"
+SSH_USERNAME=$(cat /proc/sys/kernel/hostname | awk -F'.' '{print $1}')
 
 if [[ ${SSH_PART} = *"@"* ]]; then
 	SSH_USERNAME=$(echo "${SSH_PART}" | awk -F'@' '{print $1}')
