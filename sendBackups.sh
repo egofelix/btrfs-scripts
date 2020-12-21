@@ -103,6 +103,7 @@ do
 	
 	# Create Directory for this volume
 	RESULT=$(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME} "enforce-volume" "${volName}")
+	echo ${RESULT}
 	exit;
 	
 	if [[ ! -d "${SNAPTARGET}/${volName}" ]]; then
