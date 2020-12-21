@@ -6,6 +6,7 @@ set -uo pipefail
 ## Load Functions
 source "${BASH_SOURCE%/*}/functions.sh"
 
+echo "Hi"
 echo "$@"
 echo "Bye"
 exit
