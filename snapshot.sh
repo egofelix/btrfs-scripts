@@ -6,6 +6,12 @@ set -uo pipefail
 ## Load Functions
 source "${BASH_SOURCE%/*}/includes/functions.sh"
 
+## Script must be started as root
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root";
+  exit 1;
+fi;
+
 # Current time
 STAMP=`date -u +"%Y-%m-%d_%H-%M-%S"`
 
