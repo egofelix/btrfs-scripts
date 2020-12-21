@@ -80,7 +80,7 @@ if [[ "$1" = "create-volume-backup" ]]; then
   
   echo "Start Test";
   
-  cat <&0
+  cat /dev/stdin
   
   echo "Aborting for Test";
   exit 3
