@@ -74,7 +74,7 @@ logLine "SSH-User: ${SSH_USERNAME}"
 # Test ssh
 SSH_CALL="ssh -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
 TESTRESULT=$(${SSH_CALL} "testSshReceiver")
-if [ $? -ne 0 ]; then
+if [[ $? -ne 0 ]]; then
 	logLine "SSH-Connection failed.";
 	logLine "${TESTRESULT}";
 	exit;
@@ -105,22 +105,14 @@ do
 	# Create Directory for this volume
 	if ! runCmd ${SSH_CALL} "create-volume-directory" "${volName}"; then echo "Failed to create volume directory at server."; exit 1; fi;
 	
-	echo "Haha";
-	
+	# Send FIRSTSUBVOLUME
 	SUBVOLUME_EXISTS=$(${SSH_CALL} check-volume-backup "${volName}" "${FIRSTSUBVOLUME}");
-	if [ $? -ne 0 ]; then logLine "Failed to run ssh command: check-volume-backup "${volName}" "${FIRSTSUBVOLUME}"" exit; fi;
+	if [ $? -ne 0 ]; then logLine "Failed to run ssh command: check-volume-backup "${volName}" "${FIRSTSUBVOLUME}"" exit 1; fi;
 	if isFalse ${SUBVOLUME_EXISTS}; then
 		logLine "Sending backup \"${volName}_${FIRSTSUBVOLUME}\" (Full)";
 		echo btrfs send ${SNAPSOURCE}/${volName}/${FIRSTSUBVOLUME} | ${SSH_CALL} create-volume-backup "${volName}" "${FIRSTSUBVOLUME}";
-		$(btrfs send ${SNAPSOURCE}/${volName}/${FIRSTSUBVOLUME} | ${SSH_CALL} create-volume-backup "${volName}" "${FIRSTSUBVOLUME}")
-	fi;
-	
-	exit;
-	
-	# If first subvolume does not exist send it full!
-	if [[ ! -d "${SNAPTARGET}/${volName}/${FIRSTSUBVOLUME}" ]]; then
-		logLine "Copying backup \"${volName}_${FIRSTSUBVOLUME}\" (Full)";
-		btrfs send ${SNAPSOURCE}/${volName}/${FIRSTSUBVOLUME} | btrfs receive ${SNAPTARGET}/${volName}
+		SENDRESULT=$(btrfs send ${SNAPSOURCE}/${volName}/${FIRSTSUBVOLUME} | ${SSH_CALL} create-volume-backup "${volName}" "${FIRSTSUBVOLUME}")
+		if [[ $? -ne 0 ]] || [[ "${SENDRESULT}" != "success" ]]; then logLine "Failed to send backup."; exit 1; fi;
 	fi;
 	
 	PREVIOUSSUBVOLUME=${FIRSTSUBVOLUME}
@@ -128,6 +120,17 @@ do
 	# Now loop over othersubvolumes
 	for subvolName in ${OTHERSUBVOLUMES}
 	do
+		SUBVOLUME_EXISTS=$(${SSH_CALL} check-volume-backup "${volName}" "${subvolName}");
+		if [ $? -ne 0 ]; then logLine "Failed to run ssh command: check-volume-backup "${volName}" "${FIRSTSUBVOLUME}"" exit; fi;
+		if isFalse ${SUBVOLUME_EXISTS}; then
+			logLine "Sending backup \"${volName}_${subvolName}\" (Incremental)";
+			echo btrfs send -q -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName} | ${SSH_CALL} create-volume-backup "${volName}" "${subvolName}";
+			SENDRESULT=$(btrfs send -q -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName} | ${SSH_CALL} create-volume-backup "${volName}" "${subvolName}";)
+			if [[ $? -ne 0 ]] || [[ "${SENDRESULT}" != "success" ]]; then logLine "Failed to send backup."; exit 1; fi;
+		fi;
+		
+	    exit;
+	
 		# Check if this subvolume is backuped already
 		if [[ ! -d "${SNAPTARGET}/${volName}/${subvolName}" ]]; then	
 			# Copy it
