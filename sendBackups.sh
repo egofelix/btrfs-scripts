@@ -7,30 +7,37 @@ set -uo pipefail
 source "${BASH_SOURCE%/*}/functions.sh"
 
 # Search snapshot volume
-SNAPSOURCE=$(LANG=C mount | grep snapshots | grep -o 'on /\..* type btrfs' | awk '{print $2}')
+SNAPSOURCE=$(LANG=C mount | grep '@snapshots' | grep -o 'on /\..* type btrfs' | awk '{print $2}')
 if [[ -z "${SNAPSOURCE}" ]]; then
 	logLine "Cannot find snapshot directory";
 	exit;
 fi;
 
-SNAPTARGET=$(LANG=C mount | grep -v '/dev/mapper/cryptsystem on .* type btrfs' | grep 'type btrfs' | grep -o 'on .* type btrfs' | awk '{print $2}')
-if [[ -z "${SNAPTARGET}" ]]; then
-	if [[ -e /dev/disk/by-label/backup ]]; then
-		mkdir -p /tmp/backup;
-	
-		logLine "Automounting backup drive";
-		mount /dev/disk/by-label/backup /tmp/backup;
-		SNAPTARGET=$(LANG=C mount | grep -v '/dev/mapper/cryptsystem on .* type btrfs' | grep 'type btrfs' | grep -o 'on .* type btrfs' | awk '{print $2}')
-	fi;
-fi;
-if [[ -z "${SNAPTARGET}" ]]; then
-	logLine "No Backup target found";
-	exit;
-fi;
-
+# Check if we have data in snapshot volume
 VOLUMES=$(LANG=C ls ${SNAPSOURCE}/ | sort)
 if [[ -z "${VOLUMES}" ]]; then
 	logLine "Nothing to transfer";
+	exit;
+fi;
+
+# Search for backup hdd
+#if [[ -z ${SNAPTARGET:-} ]]; then
+#	SNAPTARGET=$(LANG=C mount | grep -v '/dev/mapper/cryptsystem on .* type btrfs' | grep 'type btrfs' | grep -o 'on .* type btrfs' | awk '{print $2}')
+#
+#	if [[ -z "${SNAPTARGET}" ]]; then
+#		if [[ -e /dev/disk/by-label/backup ]]; then
+#			mkdir -p /tmp/backup;
+#	
+#			logLine "Automounting backup drive";
+#			mount /dev/disk/by-label/backup /tmp/backup;
+#			SNAPTARGET=$(LANG=C mount | grep -v '/dev/mapper/cryptsystem on .* type btrfs' | grep 'type btrfs' | grep -o 'on .* type btrfs' | awk '{print $2}')
+#		fi;
+#	fi;
+#fi;
+
+# No target?
+if [[ -z "${SNAPTARGET}" ]]; then
+	logLine "No Backup target found";
 	exit;
 fi;
 
