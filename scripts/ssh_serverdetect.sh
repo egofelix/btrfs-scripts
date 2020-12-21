@@ -8,13 +8,15 @@ if [[ -z "${SSH_HOSTNAME:-}" ]]; then
   if [[ -z "${HOSTNAME:-}" ]]; then
     HOSTNAME=$(cat /proc/sys/kernel/hostname)
   fi;
-logDebug "Trying autodetection of SSH_HOSTNAME with current hostname: ${HOSTNAME}";  
+  logDebug "Trying autodetection of SSH_HOSTNAME with current hostname: ${HOSTNAME}";  
   
   MY_HOSTNAME=$(echo "${HOSTNAME}" | awk -F'.' '{print $1}')
   MY_DOMAIN=$(cat /proc/sys/kernel/hostname | cut -d'.' -f2-)
   
   # If we didnt detected a domain
   if [[ -z ${MY_DOMAIN} ]]; then
+    logDebug "Unkown Domain, trying to detect Domain";
+	
     # If not try to get the dns server and make a reverse lookup to it
 	DNSSERVER=$(LANG=C systemd-resolve --status | grep 'Current DNS Server' | grep -o -E '[0-9\.]+')
 	
