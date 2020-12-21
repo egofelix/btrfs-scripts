@@ -6,6 +6,11 @@ set -uo pipefail
 ## Load Functions
 source "${BASH_SOURCE%/*}/functions.sh"
 
+if [[ "$1" = "test" ]]; then
+  echo "success"
+  exit
+fi;
+
 if [[ "$1" = "ls" ]]; then
   ls ${HOME}
   exit
