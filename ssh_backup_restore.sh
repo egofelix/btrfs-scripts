@@ -54,4 +54,17 @@ if ! runCmd mkdir /tmp/mnt/disks/system/snapshots/root; then logLine "Failed to 
 ${SSH_CALL} "receive-volume-backup" "root" "${RESTOREPOINT}" | btrfs receive -q /tmp/mnt/disks/system/snapshots/root
 if [[ $? -ne 0 ]]; then logLine "Failed to receive volume."; exit 1; fi;
 
+# Mount ROOT-Volume
+logLine "Mounting..."
+if ! runCmd mkdir -p /tmp/mnt/root; then echo "Failed to create root mount directory"; exit 1; fi;
+if ! runCmd mount -o subvol=/root-data ${PART_SYSTEM} /tmp/mnt/root; then echo "Failed to Mount Subvolume ROOT-DATA at /tmp/mnt/root"; exit 1; fi;
+if ! runCmd mkdir -p /tmp/mnt/root/boot; then echo "Failed to create boot directory"; exit 1; fi;
+if ! runCmd mount ${PART_BOOT} /tmp/mnt/root/boot; then echo "Failed to mount BOOT-Partition"; exit 1; fi;
+if ! runCmd mkdir -p /tmp/mnt/root/.snapshots; then echo "Failed to create snapshot mount point"; exit 1; fi;
+if ! runCmd mount -o subvol=/snapshots ${PART_SYSTEM} /tmp/mnt/root/.snapshots; then echo "Failed to Mount Snapshot-Volume at /tmp/mnt/root/.snapshots"; exit; fi;
+if isEfiSystem; then
+  if ! runCmd mkdir -p /tmp/mnt/root/boot/efi; then echo "Failed to create efi directory"; exit 1; fi;
+  if ! runCmd mount ${PART_EFI} /tmp/mnt/root/boot/efi; then echo "Failed to mount BOOT-Partition"; exit 1; fi;
+fi;
+
 exit 0;
