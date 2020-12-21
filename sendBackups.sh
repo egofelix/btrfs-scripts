@@ -72,8 +72,7 @@ if [[ "${TESTRESULT}" != "success" ]]; then
 fi;
 
 logLine "Source Directory: ${SNAPSOURCE}";
-logLine "Target Directory: ${SNAPTARGET}";
-logLine "Snapshots: ${VOLUMES}";
+logLine "Volumes to backup: ${VOLUMES}";
 for volName in ${VOLUMES}
 do
 	SUBVOLUMES=$(LANG=C ls ${SNAPSOURCE}/${volName}/)
