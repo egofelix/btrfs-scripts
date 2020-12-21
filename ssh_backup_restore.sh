@@ -56,7 +56,7 @@ ${SSH_CALL} "receive-volume-backup" "root" "${RESTOREPOINT}" | btrfs receive -q 
 if [[ $? -ne 0 ]]; then logLine "Failed to receive volume."; exit 1; fi;
 
 # Restore root-data from snapshot
-btrfs subvol snapshot /tmp/mnt/disks/system/snapshots/root/${RESTOREPOINT} /tmp/mnt/disks/system/root-data
+btrfs subvol -q snapshot /tmp/mnt/disks/system/snapshots/root/${RESTOREPOINT} /tmp/mnt/disks/system/root-data
 if [ $? -ne 0 ]; then logLine "Failed to restore ROOT-Volume from ROOT-Snapshot..."; exit 1; fi;
 
 # Mount ROOT-Volume
@@ -71,5 +71,7 @@ if isEfiSystem; then
   if ! runCmd mkdir -p /tmp/mnt/root/boot/efi; then echo "Failed to create efi directory"; exit 1; fi;
   if ! runCmd mount ${PART_EFI} /tmp/mnt/root/boot/efi; then echo "Failed to mount BOOT-Partition"; exit 1; fi;
 fi;
+
+# Now scan fstab as root is restored!
 
 exit 0;
