@@ -11,9 +11,12 @@ EOF
 	chroot /tmp/mnt/root /chroot.sh &> /dev/null
 	
 	# Setup boot.txt for seperated boot partition
-	cp /tmp/mnt/root/boot/boot.txt /tmp/mnt/root/boot/boot.txt.org
-	if isTrue "${CRYPTED}"; then
-		cat > /tmp/mnt/root/boot/boot.txt <<- EOF
+	if [ -f "/tmp/mnt/root/etc/boot.txt" ]; then
+		rm -f /tmp/mnt/root/boot/boot.txt
+		cp /tmp/mnt/root/etc/boot.txt /tmp/mnt/root/boot/boot.txt
+	else
+		if isTrue "${CRYPTED}"; then
+			cat > /tmp/mnt/root/boot/boot.txt <<- EOF
 # After modifying, run ./mkscr
 
 setenv bootpart 1;
@@ -21,16 +24,16 @@ setenv bootargs cryptdevice=PARTLABEL=system:cryptsystem root=/dev/mapper/crypts
 
 if load \${devtype} \${devnum}:\${bootpart} \${kernel_addr_r} /zImage; then
   if load \${devtype} \${devnum}:\${bootpart} \${fdt_addr_r} /dtbs/\${fdtfile}; then
-    if load \${devtype} \${devnum}:\${bootpart} \${ramdisk_addr_r} /initramfs-linux.img; then
-      bootz \${kernel_addr_r} \${ramdisk_addr_r}:\${filesize} \${fdt_addr_r};
-    else
-      bootz \${kernel_addr_r} - \${fdt_addr_r};
-    fi;
+	if load \${devtype} \${devnum}:\${bootpart} \${ramdisk_addr_r} /initramfs-linux.img; then
+	  bootz \${kernel_addr_r} \${ramdisk_addr_r}:\${filesize} \${fdt_addr_r};
+	else
+	  bootz \${kernel_addr_r} - \${fdt_addr_r};
+	fi;
   fi;
 fi	
 EOF
-	else
-		cat > /tmp/mnt/root/boot/boot.txt <<- EOF
+		else
+			cat > /tmp/mnt/root/boot/boot.txt <<- EOF
 # After modifying, run ./mkscr
 
 setenv bootpart 1;
@@ -46,6 +49,7 @@ if load \${devtype} \${devnum}:\${bootpart} \${kernel_addr_r} /zImage; then
   fi;
 fi	
 EOF
+		fi;
 	fi;
 
 	# Recompile boot.txt -> boot.scr
