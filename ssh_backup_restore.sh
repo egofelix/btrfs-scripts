@@ -12,7 +12,7 @@ source "${BASH_SOURCE%/*}/includes/defaults.sh"
 ## Script must be started as root
 if [ "$EUID" -ne 0 ]; then
   echo "Please run as root";
-  exit;
+  exit 1;
 fi;
 
 # Install Dependencies
@@ -30,7 +30,7 @@ SUBVOLUMES=$(${SSH_CALL} "list-volume" "root" | sort -r)
 if [[ $? -ne 0 ]]; then
   logLine "Unable to query root volume.";
   logLine "${SUBVOLUMES}";
-  exit;
+  exit 1;
 fi;
 
 # Get user confirmation
@@ -40,18 +40,17 @@ echo    # (optional) move to a new line
 if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ ! $REPLY =~ ^$ ]]; then
     # TODO: Build selection here
     logLine "Script canceled by user";
-    exit;   
+    exit 1;
 fi
 
 # Prepare disk
 source "${BASH_SOURCE%/*}/scripts/drive_prepare.sh"
 
 # Create system snapshot volume
-if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/snapshots; then logLine "Failed to create btrfs SNAPSHOTS-Volume"; exit; fi;
-if ! runCmd mkdir /tmp/mnt/disks/system/snapshots/root; then logLine "Failed to create root directory"; exit fi;
+if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/snapshots; then logLine "Failed to create btrfs SNAPSHOTS-Volume"; exit 1; fi;
+if ! runCmd mkdir /tmp/mnt/disks/system/snapshots/root; then logLine "Failed to create root directory"; exit 1; fi;
 
 # Receive ROOT-Volume
-echo ${SSH_CALL} "receive-volume" "root" "${RESTOREPOINT}"
-echo btrfs receive /tmp/mnt/disks/system/snapshots/root
+${SSH_CALL} "receive-volume" "root" "${RESTOREPOINT}" | btrfs receive /tmp/mnt/disks/system/snapshots/root
 
-#
+exit 0;
