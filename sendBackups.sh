@@ -61,7 +61,7 @@ if [[ ${SNAPTARGET} = "ssh://"* ]]; then
 	SSH_HOSTNAME="${SSH_PART}"
 	logLine "SSH-Host: ${SSH_HOSTNAME}"
 	logLine "SSH-Port: ${SSH_PORT}"
-	logLine "SSH-User: ${SSH_USER}"
+	logLine "SSH-User: ${SSH_USERNAME}"
 	exit
 	
 else
