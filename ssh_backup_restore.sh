@@ -73,8 +73,8 @@ if isEfiSystem; then
   if ! runCmd mount ${PART_EFI} /tmp/mnt/root/boot/efi; then echo "Failed to mount BOOT-Partition"; exit 1; fi;
 fi;
 
-# Now scan fstab as root is restored!
-BTRFSMOUNTPOINTS=$(cat /tmp/mnt/root/etc/fstab | grep -e '\sbtrfs\s.*subvol\=' | awk '{print $2}' | grep -v '^\/$')
+# Now scan fstab as root is restored! (Sort so we will mount "lowest" points first!)
+BTRFSMOUNTPOINTS=$(cat /tmp/mnt/root/etc/fstab | grep -e '\sbtrfs\s.*subvol\=' | awk '{print $2}' | grep -v '^\/$' | sort)
 for mountpoint in ${BTRFSMOUNTPOINTS}
 do
     VOLUMENAME=$(cat /tmp/mnt/root/etc/fstab | grep "${mountpoint}" | grep -o -P 'subvol\=[^\s]*' | awk -F'=' '{print $2}')
@@ -89,11 +89,12 @@ do
 		continue;
 	fi;
 	
-	echo "${mountpoint} subvolume is ${VOLUMENAME}";
+	#echo "${mountpoint} subvolume is ${VOLUMENAME}";
 	VOLNAME="${mountpoint//[\/]/-}"
 	VOLNAME=${VOLNAME:1}
 	if [[ "${VOLNAME^^}-DATA" != "${VOLUMENAME^^}" ]]; then
-		logDebug "Failed to detect volume for ${mountpoint}";
+		logDebug "Failed to detect volume for ${mountpoint}. Volume Name Mismacht! \"${VOLNAME^^}-DATA\" != \"${VOLUMENAME^^}\"";
+		exit 1;
 	fi;
 	
 	# Receive XXX-Volume
