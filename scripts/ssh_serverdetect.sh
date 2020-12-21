@@ -11,7 +11,10 @@ if [[ -z "${SSH_HOSTNAME:-}" ]]; then
   logDebug "Trying autodetection of SSH_HOSTNAME with current hostname: ${HOSTNAME}";  
   
   MY_HOSTNAME=$(echo "${HOSTNAME}" | awk -F'.' '{print $1}')
-  MY_DOMAIN=$(echo "${HOSTNAME}" | cut -d'.' -f2-)
+  MY_DOMAIN=""
+  if [[ ${HOSTNAME} = *"."*"."* ]]; then
+    MY_DOMAIN=$(echo "${HOSTNAME}" | cut -d'.' -f2-)
+  fi;
   
   # If we didnt detected a domain
   if [[ -z "${MY_DOMAIN}" ]]; then
