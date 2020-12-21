@@ -6,6 +6,33 @@ set -uo pipefail
 ## Load Functions
 source "${BASH_SOURCE%/*}/functions.sh"
 
+if [[ -z "$1" ]]; then
+	echo "Missing Home dir in first paramete";
+	exit 1;
+fi;
+
+# Update home for this script
+HOME=$1
+shift 1;
+
+# Test if home is on btrfs and @ mount
+MOUNTPOINT=$(findmnt -n -o SOURCE --target ${HOME})
+if [[ $? -ne 0 ]] || [[ -z "${MOUNTPOINT}" ]]; then 
+  echo "Could not find MOUNTPOINT for ${HOME}."; exit 1;
+fi;
+MOUNTDEVICE=$(echo "${MOUNTPOINT}" | awk -F'[' '{print $1}')
+if [[ -z "${MOUNTDEVICE}" ]]; then 
+  echo "Could not find MOUNTDEVICE for ${MOUNTPOINT}."; exit 1;
+fi;
+MOUNTVOLUME=$(echo "${MOUNTPOINT}" | awk -F'[' '{print $2}' | awk -F']' '{print $1}')
+if [[ -z "${MOUNTVOLUME}" ]]; then 
+  echo "Could not find MOUNTVOLUME for ${MOUNTPOINT}."; exit 1;
+fi;
+if [[ ! ${MOUNTVOLUME} = *"@"* ]]; then
+  echo "Could not backup to ${HOME} as this does not lie on a @ subvolume."; exit 1;
+fi;
+
+# Main Commands
 if [[ "$1" = "testSshReceiver" ]]; then
   echo "success"; exit 0;
 fi;
