@@ -57,5 +57,5 @@ if [[ -z "${SSH_HOSTNAME:-}" ]]; then
   export SSH_PORT=$(echo ${DNS_RESULT} | awk '{print $3}');
   SSH_HOSTNAME=$(echo ${DNS_RESULT} | awk '{print $4}')
   export SSH_HOSTNAME="${SSH_HOSTNAME::-1}"
-  logLine "Autodetected Backup Server: ${DNS_RESULT}";
+  logLine "Autodetected Backup Server: ${SSH_HOSTNAME}:${SSH_PORT}";
 fi;
