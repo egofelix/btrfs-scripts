@@ -110,7 +110,8 @@ do
 	SUBVOLUME_EXISTS=$(${SSH_CALL} check-volume-backup "${volName}" "${FIRSTSUBVOLUME}");
 	if [ $? -ne 0 ]; then logLine "Failed to run ssh command: check-volume-backup "${volName}" "${FIRSTSUBVOLUME}"" exit; fi;
 	if isFalse ${SUBVOLUME_EXISTS}; then
-		logLine "Copying backup \"${volName}_${FIRSTSUBVOLUME}\" (Full)";		
+		logLine "Sending backup \"${volName}_${FIRSTSUBVOLUME}\" (Full)";
+		$(btrfs send ${SNAPSOURCE}/${volName}/${FIRSTSUBVOLUME} | ${SSH_CALL} create-volume-backup "${volName}" "${FIRSTSUBVOLUME}")
 	fi;
 	
 	exit;

@@ -37,5 +37,31 @@ if [[ "$1" = "check-volume-backup" ]]; then
   echo "true"; exit 0;
 fi;
 
+if [[ "$1" = "create-volume-backup" ]]; then
+  # Check Argument Count
+  if [[ -z "$2" ]] || [[ -z "$3" ]]; then echo "Usage: check-volume-backup volume backup"; exit 1; fi;
+  
+  # Check volume parameter
+  if [[ $2 = *"." ]]; then echo "Illegal character . detected in parameter volume."; exit 1;  fi;
+  
+  # Check backup parameter
+  if [[ $3 = *"." ]]; then echo "Illegal character . detected in parameter backup."; exit 1;  fi;
+
+  if [[ -d "${HOME}/$2/$3" ]]; then echo "backup already exists"; exit 0; fi;
+  
+  btrfs receive ${HOME}/$2/$3
+  if [ $? -ne 0 ]; then 
+    # Remove broken backup
+    btrfs subvol del ${HOME}/$2/$3
+	
+	# Return error
+    echo "backup receive failed";
+	exit 1;
+  fi;
+  
+  # Backup received
+  echo "success"; exit 0;
+fi;
+
 echo "Error";
 exit 1;
