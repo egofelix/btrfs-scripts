@@ -1,2 +1,2 @@
 #!/bin/bash
-source "${BASH_SOURCE%/*}/functions/*.sh"
+for f in ${BASH_SOURCE%/*}/functions/*.sh; do source $f; done
