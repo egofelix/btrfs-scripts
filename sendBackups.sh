@@ -112,9 +112,9 @@ do
 		logLine "Sending backup \"${volName}_${FIRSTSUBVOLUME}\" (Full)";
 		
 		echo "btrfs send ${SNAPSOURCE}/${volName}/${FIRSTSUBVOLUME}"
-		echo ${SSH_CALL} create-volume-backup "${volName}" "${FIRSTSUBVOLUME}";
+		echo ${SSH_CALL} create-volume-backup ${volName} ${FIRSTSUBVOLUME};
 		
-		btrfs send ${SNAPSOURCE}/${volName}/${FIRSTSUBVOLUME} | ${SSH_CALL} create-volume-backup "${volName}" "${FIRSTSUBVOLUME}
+		btrfs send ${SNAPSOURCE}/${volName}/${FIRSTSUBVOLUME} | ${SSH_CALL} create-volume-backup ${volName} ${FIRSTSUBVOLUME}
 		
 		#
 		#echo ${SSH_CALL} create-volume-backup "${volName}" "${FIRSTSUBVOLUME}";
