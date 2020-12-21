@@ -29,7 +29,7 @@ do
 	SNAPNAME="${subvolName//[\/]/-}"
 	
 	# Remove first char if it is a /
-	if [[ ${SNAPNAME} = "/"* ]]; then
+	if [[ "${SNAPNAME}" = "/"* ]]; then
 		SNAPNAME="${SNAPNAME:1}"
 	fi;
 	
