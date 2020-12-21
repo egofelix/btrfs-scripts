@@ -111,6 +111,7 @@ do
 	if [ $? -ne 0 ]; then logLine "Failed to run ssh command: check-volume-backup "${volName}" "${FIRSTSUBVOLUME}"" exit; fi;
 	if isFalse ${SUBVOLUME_EXISTS}; then
 		logLine "Sending backup \"${volName}_${FIRSTSUBVOLUME}\" (Full)";
+		echo btrfs send ${SNAPSOURCE}/${volName}/${FIRSTSUBVOLUME} | ${SSH_CALL} create-volume-backup "${volName}" "${FIRSTSUBVOLUME}";
 		$(btrfs send ${SNAPSOURCE}/${volName}/${FIRSTSUBVOLUME} | ${SSH_CALL} create-volume-backup "${volName}" "${FIRSTSUBVOLUME}")
 	fi;
 	
