@@ -68,5 +68,6 @@ TESTRESULT=$(${SSH_CALL} "testSshReceiver")
 if [[ $? -ne 0 ]]; then
 	logLine "SSH-Connection failed.";
 	logLine "${TESTRESULT}";
+	logLine "${SSH_CALL}";
 	exit;
 fi;
