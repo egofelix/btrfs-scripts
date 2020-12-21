@@ -8,4 +8,4 @@ do
 done;
 EOF
 chmod +x /tmp/mnt/root/chroot.sh;
-chroot /tmp/mnt/root /chroot.sh &> /dev/null;
+chroot /tmp/mnt/root /chroot.sh;
