@@ -51,5 +51,4 @@ if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/snapshots; then logLine
 if ! runCmd mkdir /tmp/mnt/disks/system/snapshots/root; then logLine "Failed to create root directory"; exit fi;
 
 # Receive ROOT-Volume
-LATESTBACKUP=$(ls ${SNAPSOURCE}/root | sort | tail -1)
 ${SSH_CALL} "receive-volume" "root" "${RESTOREPOINT}" | btrfs receive /tmp/mnt/disks/system/snapshots/root
