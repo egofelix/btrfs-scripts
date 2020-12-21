@@ -6,6 +6,12 @@ set -uo pipefail
 ## Load Functions
 source "${BASH_SOURCE%/*}/functions.sh"
 
+if [[ "$1" = "ls" ]]; then
+  ls ${HOME}
+  exit
+fi;
+
+
 echo "Hi"
 echo "$@"
 echo "Your Home: ${HOME}"
