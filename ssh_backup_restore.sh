@@ -39,9 +39,17 @@ read -p "Will restore ${RESTOREPOINT} to ${DRIVE_ROOT}. Is this ok? [Yn]: " -n 1
 echo    # (optional) move to a new line
 if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ ! $REPLY =~ ^$ ]]; then
     # TODO: Build selection here
-    echo "Script canceled by user";
+    logLine "Script canceled by user";
     exit;   
 fi
 
 # Prepare disk
 source "${BASH_SOURCE%/*}/scripts/drive_prepare.sh"
+
+# Create system snapshot volume
+if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/snapshots; then logLine "Failed to create btrfs SNAPSHOTS-Volume"; exit; fi;
+if ! runCmd mkdir /tmp/mnt/disks/system/snapshots/root; then logLine "Failed to create root directory"; exit fi;
+
+# Receive ROOT-Volume
+LATESTBACKUP=$(ls ${SNAPSOURCE}/root | sort | tail -1)
+${SSH_CALL} "receive-volume" "root" "${RESTOREPOINT}" | btrfs receive /tmp/mnt/disks/system/snapshots/root

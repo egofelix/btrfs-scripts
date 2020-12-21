@@ -117,5 +117,24 @@ if [[ "$1" = "list-volume" ]]; then
   exit 0;
 fi;
 
+if [[ "$1" = "receive-volume-backup" ]]; then
+  # Check Argument Count
+  if [[ -z "$2" ]] || [[ -z "$3" ]]; then echo "Usage: receive-volume-backup volume backup"; exit 1; fi;
+  
+  # Check volume parameter
+  if [[ $2 = *"."* ]]; then echo "Illegal character . detected in parameter volume."; exit 1;  fi;
+  
+  # Check backup parameter
+  if [[ $3 = *"."* ]]; then echo "Illegal character . detected in parameter backup."; exit 1;  fi;
+
+  # Check if backup exists
+  if [[ ! -d "${HOME}/$2/$3" ]]; then echo "backup does not exists"; exit 0; fi;
+
+  # Send Backup
+  btrfs send -q ${HOME}/$2/$3 > /dev/stdout
+  if [ $? -ne 0 ]; then echo "Error listing volumes."; exit 1; fi;
+  exit 0;
+fi;
+
 echo "Error";
 exit 1;
