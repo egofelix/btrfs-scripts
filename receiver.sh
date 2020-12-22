@@ -43,44 +43,48 @@ if [[ "$1" = "testSshReceiver" ]]; then
   echo "success"; exit 0;
 fi;
 
-if [[ "$1" = "create-volume-directory" ]]; then
+# create-volume ensures that the directory exists
+if [[ "$1" = "create-volume" ]]; then
   # Check Argument Count
-  if [[ -z "$2" ]]; then echo "Usage: create-volume-directory volume"; exit 1; fi;
+  if [[ -z "$2" ]]; then echo "Usage: create-volume <volume>"; exit 1; fi;
  
   # Check volume parameter
   if [[ $2 = *"."* ]]; then echo "Illegal character . detected in parameter volume."; exit 1;  fi;
   
   # Create directory
-  if ! runCmd mkdir -p ${HOME}/$2; then echo "Error creating directory."; exit 1; fi;
+  if ! runCmd mkdir -p ${HOME}/$2; then echo "Error creating volume directory."; exit 1; fi;
   echo "success"; exit 0;
 fi;
 
-if [[ "$1" = "check-volume-backup" ]]; then
+# check-volume checks if a snapshot exists
+if [[ "$1" = "check-volume" ]]; then
   # Check Argument Count
-  if [[ -z "$2" ]] || [[ -z "$3" ]]; then echo "Usage: check-volume-backup volume backup"; exit 1; fi;
+  if [[ -z "$2" ]] || [[ -z "$3" ]]; then echo "Usage: check-volume <volume> <name>"; exit 1; fi;
   
   # Check volume parameter
-  if [[ $2 = *"."* ]]; then echo "Illegal character . detected in parameter volume."; exit 1;  fi;
+  if [[ $2 = *"."* ]]; then echo "Illegal character . detected in parameter <volume>."; exit 1;  fi;
   
-  # Check backup parameter
-  if [[ $3 = *"."* ]]; then echo "Illegal character . detected in parameter backup."; exit 1;  fi;
+  # Check name parameter
+  if [[ $3 = *"."* ]]; then echo "Illegal character . detected in parameter <name>."; exit 1;  fi;
   
   # Test and return
   if [[ ! -d "${HOME}/$2/$3" ]]; then echo "false"; exit 0; fi;
   echo "true"; exit 0;
 fi;
 
-if [[ "$1" = "create-volume-backup" ]]; then
+# receive-volume will receive a snapshot
+if [[ "$1" = "receive-volume" ]]; then
   # Check Argument Count
-  if [[ -z "$2" ]] || [[ -z "$3" ]]; then echo "Usage: check-volume-backup volume backup"; exit 1; fi;
+  if [[ -z "$2" ]] || [[ -z "$3" ]]; then echo "Usage: receive-volume <volume> <name>"; exit 1; fi;
   
   # Check volume parameter
-  if [[ $2 = *"."* ]]; then echo "Illegal character . detected in parameter volume."; exit 1;  fi;
+  if [[ $2 = *"."* ]]; then echo "Illegal character . detected in parameter <volume>."; exit 1; fi;
   
-  # Check backup parameter
-  if [[ $3 = *"."* ]]; then echo "Illegal character . detected in parameter backup."; exit 1;  fi;
+  # Check name parameter
+  if [[ $3 = *"."* ]]; then echo "Illegal character . detected in parameter <name>."; exit 1; fi;
 
-  if [[ -d "${HOME}/$2/$3" ]]; then echo "backup already exists"; exit 0; fi;
+  # Check if the snapshot exists already
+  if [[ -d "${HOME}/$2/$3" ]]; then echo "already exists"; exit 0; fi;
   
   # Receive  
   btrfs receive -q ${HOME}/$2 < /dev/stdin
@@ -89,7 +93,7 @@ if [[ "$1" = "create-volume-backup" ]]; then
     btrfs subvol del ${HOME}/$2/$3
 	
 	# Return error
-    echo "backup receive failed";
+    echo "receive failed";
 	exit 1;
   fi;
   

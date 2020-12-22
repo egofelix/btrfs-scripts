@@ -104,7 +104,16 @@ if [[ "${COMMAND,,}" = "send" ]]; then
 	
 	# Create Directory for this volume on the backup server
 	logDebug "Ensuring volume directory at server for \"${VOLUME}\"...";
-	if ! runCmd ${SSH_CALL} "create-volume-directory" "${VOLUME}"; then echo "Failed to create volume directory \"{VOLUME}\" at server."; exit 1; fi;
+	if ! runCmd ${SSH_CALL} "create-volume" "${VOLUME}"; then logError "Command 'create-volume \"{VOLUME}\"' failed."; exit 1; fi;
+	
+	# Send FIRSTSNAPSHOT
+	CHECKVOLUMERESULT=$(${SSH_CALL} check-volume "${VOLUME}" "${FIRSTSNAPSHOT}");
+	if [ $? -ne 0 ]; then logError "Command 'check-volume \"${VOLUME}\" \"${FIRSTSNAPSHOT}\"' failed: ${CHECKVOLUMERESULT}."; exit 1; fi;
+	if isFalse ${CHECKVOLUMERESULT}; then
+	  logLine "Sending backup \"${VOLUME}\"-\"${FIRSTSUBVOLUME}\"... (Full)";
+	  SENDRESULT=$(btrfs send -q ${SNAPSHOTSPATH}/${VOLUME}/${FIRSTSUBVOLUME} | ${SSH_CALL} receive-volume "${VOLUME}" "${FIRSTSUBVOLUME}")
+	  if [[ $? -ne 0 ]] || [[ "${SENDRESULT}" != "success" ]]; then logError "Command 'receive-volume \"${VOLUME}\" \"${FIRSTSUBVOLUME}\"' failed: ${SENDRESULT}"; exit 1; fi;
+	fi;
   done;
   exit 1;
 fi;
