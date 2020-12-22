@@ -99,7 +99,7 @@ if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@snapshots; then logLin
 for VOLUME in $(echo "${VOLUMES}" | sort)
 do
   if ! runCmd mkdir /tmp/mnt/disks/system/@snapshots/${VOLUME}; then logLine "Failed to create snapshot directory for volume \"${VOLUME}\"."; exit 1; fi;
-  ${SSH_CALL} "download-snapshot" "${VOLUME}" "${TARGETSNAPSHOT}" | btrfs receive -q /tmp/mnt/disks/system/snapshots/${VOLUME};
+  ${SSH_CALL} "download-snapshot" "${VOLUME}" "${TARGETSNAPSHOT}" | btrfs receive -q /tmp/mnt/disks/system/@snapshots/${VOLUME};
   if [[ $? -ne 0 ]]; then logLine "Failed to receive the snapshot for volume \"${VOLUME}\"."; exit 1; fi;
 done;
 
