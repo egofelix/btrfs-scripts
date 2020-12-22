@@ -77,7 +77,6 @@ STAMP=`date -u +"%Y-%m-%d_%H-%M-%S"`
 
 # Backup
 logLine "Target Directory: ${SNAPSHOTSPATH}";
-exit 2;
 for VOLUME in ${VOLUMES}
 do
 	VOLUME=$(removeLeadingChar "${VOLUME}" "/")
