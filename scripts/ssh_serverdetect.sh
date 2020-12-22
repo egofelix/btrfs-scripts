@@ -46,11 +46,15 @@ if isEmpty "${SSH_URI:-}"; then
   # Check DNS Records  
   RECORD_TO_CHECK="_${MY_HOSTNAME}._backup._ssh.${MY_DOMAIN}"
   logDebug "Looking up SRV-Record: ${RECORD_TO_CHECK}";
-  DNS_RESULT=$(dig srv ${RECORD_TO_CHECK} +short)
+  DNS_RESULT=$(dig srv ${RECORD_TO_CHECK} +short &> /dev/null)
+  if [[ $? -ne 0 ]]; then
+    logLine "autodetect not possible, consider installing bind-tools";
+  fi;
+  
   if [[ -z "${DNS_RESULT}" ]]; then
     RECORD_TO_CHECK="_backup._ssh.${MY_DOMAIN}"
 	logDebug "Looking up SRV-Record: ${RECORD_TO_CHECK}";
-    DNS_RESULT=$(dig srv ${RECORD_TO_CHECK} +short)
+    DNS_RESULT=$(dig srv ${RECORD_TO_CHECK} +short &> /dev/null)
   fi;
 
   # Could not detect
