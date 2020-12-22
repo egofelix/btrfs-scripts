@@ -91,7 +91,7 @@ if [[ "${COMMAND,,}" = "send" ]]; then
 	if [[ "${VOLUME}" = "@"* ]]; then logDebug "Skipping Volume ${VOLUME}"; continue; fi;
 	
 	# Check if there are any snapshots for this volume
-	SNAPSHOTS=$(LANG=C ls ${SNAPSHOTSPATH}/${volName}/)
+	SNAPSHOTS=$(LANG=C ls ${SNAPSHOTSPATH}/${VOLUME}/)
 	if [[ -z "${SNAPSHOTS}" ]]; then
        logLine "No snapshots available to transfer for volume \"${VOLUME}\".";
        continue;
