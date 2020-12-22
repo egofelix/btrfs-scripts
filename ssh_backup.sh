@@ -62,7 +62,7 @@ logDebug "SNAPSHOTSPATH: ${SNAPSHOTSPATH}";
 if isEmpty $(mount | grep "${SNAPSHOTSPATH}" | grep 'type btrfs'); then logError "Source \"${SNAPSHOTSPATH}\" must be a btrfs volume"; exit 1; fi;
 
 # Search volumes
-if isEmpty "${VOLUMES:-}"; then VOLUMES=$(LANG=C ls ${SNAPSHOTSPATH}/ | sort); fi;
+if isEmpty "${VOLUMES:-}"; then VOLUMES=$(LANG=C ls ${SNAPSHOTSPATH}/ | sort | uniq); fi;
 if isEmpty "${VOLUMES}"; then logError "Could not detect volumes to backup"; exit 1; fi;
 
 # Test if VOLUMES are btrfs subvol's
