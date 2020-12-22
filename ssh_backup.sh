@@ -49,10 +49,6 @@ done
 ## Script must be started as root
 if [[ "$EUID" -ne 0 ]]; then logError "Please run as root"; exit 1; fi;
 
-# Lockfile (Only one simultan instance is allowed)
-LOCKFILE="/var/lock/$(basename $BASH_SOURCE)"
-source "${BASH_SOURCE%/*}/includes/lockfile.sh";
-
 # Search snapshot volume
 if isEmpty "${SNAPSHOTSPATH:-}"; then SNAPSHOTSPATH=$(LANG=C mount | grep '@snapshots' | grep -o 'on /\..* type btrfs' | awk '{print $2}'); fi;
 if isEmpty "${SNAPSHOTSPATH:-}"; then logError "Cannot find snapshot directory"; exit 1; fi;
@@ -79,6 +75,10 @@ source "${BASH_SOURCE%/*}/scripts/ssh_serverdetect.sh"
 
 # Test Command
 if [[ "${COMMAND,,}" = "test" ]]; then logLine "Test passed"; exit 0; fi;
+
+# Lockfile (Only one simultan instance is allowed)
+LOCKFILE="/var/lock/$(basename $BASH_SOURCE)"
+source "${BASH_SOURCE%/*}/includes/lockfile.sh";
 
 # Send Command
 if [[ "${COMMAND,,}" = "send" ]]; then

@@ -148,13 +148,16 @@ cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$' | while read LI
   LINESUBVOL=$(echo "$LINE" | awk '{print $4}' | grep -o -P 'subvol\=[^\s\,\)]*' | awk -F'=' '{print $2}');
   
   if [[ "${LINEDEV}" == "/dev/mapper/cryptsystem" ]] || [[ "${LINEDEV}" == "LABEL=system" ]]; then
+    # Mount simple volume
     logDebug "Mounting ${LINESUBVOL} at ${LINEMOUNT}...";
     MOUNTRESULT=$(mount -o "subvol=${LINESUBVOL}" /dev/mapper/cryptsystem "/tmp/mnt/root${LINEMOUNT}");
 	if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
   elif [[ "${LINEMOUNT}" == "/boot" ]]; then
+    # Mount boot partition
     MOUNTRESULT=$(mount ${PART_BOOT} "/tmp/mnt/root${LINEMOUNT}");
 	if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
   elif [[ "${LINEMOUNT}" == "/boot/efi" ]]; then
+    # Mount efi partition
     if [[ -z "${PART_EFI}" ]]; then logWarn "Skipping efi partiton as we are restoring to bios"; continue; fi;
 	if ! runCmd mkdir /tmp/mnt/root${LINEMOUNT}; then logError "Failed to create efi directory."; exit 1; fi;
     MOUNTRESULT=$(mount ${PART_EFI} "/tmp/mnt/root${LINEMOUNT}");
@@ -168,7 +171,8 @@ cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$' | while read LI
 	if ! runCmd fallocate /tmp/mnt/root${LINEMOUNT} -l2g; then logError "Failed to fallocate 2G Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
 	if ! runCmd mkswap /tmp/mnt/root${LINEMOUNT}; then logError "Failed to mkswap for Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
   else
-    logLine "Skipping unknown mount ${LINEMOUNT}.";
+    # unknown, we skip it here
+    logWarn "Skipping unknown mount ${LINEMOUNT}.";
   fi;
 done;
 
