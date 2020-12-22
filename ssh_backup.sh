@@ -50,23 +50,20 @@ done
 if [ "$EUID" -ne 0 ]; then logError "Please run as root"; exit 1; fi;
 
 # Search snapshot volume
-if [[ -z ${SNAPSOURCE:-} ]]; then SNAPSOURCE=$(LANG=C mount | grep '@snapshots' | grep -o 'on /\..* type btrfs' | awk '{print $2}'); fi;
-if [[ -z "${SNAPSOURCE}" ]]; then logError "Cannot find snapshot directory"; exit 1; fi;
+if isEmpty "${SNAPSOURCE:-}"; then SNAPSOURCE=$(LANG=C mount | grep '@snapshots' | grep -o 'on /\..* type btrfs' | awk '{print $2}'); fi;
+if isEmpty "${SNAPSOURCE:-}"; then logError "Cannot find snapshot directory"; exit 1; fi;
 
 # Test if SNAPSOURCE is a btrfs subvol
 logDebug "SNAPSOURCE: ${SNAPSOURCE}";
 if ! isEmpty $(mount | grep "${SNAPSOURCE}" | grep 'type btrfs'); then logError "Source \"${SNAPSOURCE}\" must be a btrfs volume"; exit 1; fi;
 
+# Search volumes
+if isEmpty "${VOLUMES:-}"; then VOLUMES=$(LANG=C ls ${SNAPSOURCE}/ | sort); fi;
+if isEmpty "${VOLUMES}"; then logError "Could not detect volumes to backup"; exit 1; fi;
+logDebug "VOLUMES: ${VOLUMES}";
 
 
-
-exit 0;
-# Check if we have data in snapshot volume
-VOLUMES=$(LANG=C ls ${SNAPSOURCE}/ | sort)
-if [[ -z "${VOLUMES}" ]]; then
-	logLine "Nothing to transfer";
-	exit;
-fi;
+exit 1;
 
 # Detect SSH-Server
 source "${BASH_SOURCE%/*}/scripts/ssh_serverdetect.sh"
