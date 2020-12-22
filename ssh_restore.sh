@@ -123,6 +123,11 @@ done;
 if [[ -z "${FSTABPATH}" ]]; then logError "Could not locate /etc/fstab"; exit 1; fi;
 logDebug "FSTABPATH: ${FSTABPATH}";
 
+# Search for root subvolume in FSTAB
+ROOTVOLUME=$(cat "${FSTABPATH}" | grep -P '\/\s+btrfs.*subvol\=[^\s\,\)]*' | grep -o -P 'subvol\=[^\s\,\)]*' | awk -F'=' '{print $2}')
+if [[ -z "${ROOTVOLUME}" ]]; then logError "Could not detect root volume"; exit 1; fi;
+logDebug "ROOTVOLUME: ${ROOTVOLUME}";
+
 exit 1;
 
 # Check root volumes
