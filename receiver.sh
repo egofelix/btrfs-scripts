@@ -43,7 +43,7 @@ done
 function containsIllegalCharacter {
   logDebug "containsIllegalCharacter $1";
   local ILLEGALCHARACTERS=("." "$" "&" "(" ")" "{" "}" "[" "]" ";" "<" ">" "\`" "|" "*" "?" "\"" "'" "*")
-  for CHAR in ${ILLEGALCHARACTERS}
+  for CHAR in "${ILLEGALCHARACTERS[@]}"
   do
     logDebug "Testing ${CHAR}";
     if [[ "$1" == *"${CHAR}"* ]]; then 
@@ -52,6 +52,7 @@ function containsIllegalCharacter {
 	fi;
   done;
   
+  logDebug "Not Detected";
   return 1;
 }
 
