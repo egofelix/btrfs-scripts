@@ -104,4 +104,4 @@ done;
 
 # Finish
 sync
-logLine "Backup done.";
+logLine "Snapshots done.";
