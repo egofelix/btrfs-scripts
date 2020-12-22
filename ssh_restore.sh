@@ -53,7 +53,7 @@ source "${BASH_SOURCE%/*}/scripts/ssh_serverdetect.sh"
 VOLUMES=$(${SSH_CALL} "list-volumes" | sort);
 if [[ $? -ne 0 ]]; then logError "Unable to query volume: ${VOLUMES}."; exit 1; fi;
 
-
+logDebug "Detected volumes: ${VOLUMES}";
 
 
 exit 1;
