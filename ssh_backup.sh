@@ -15,7 +15,7 @@ QUIET="false";
 # Scan arguments
 while [[ "$#" -gt 0 ]]; do
   case $1 in
-    -s|--source) SNAPSOURCE=removeTrailingChar "$2" "/"; shift ;;
+    -s|--source) SNAPSOURCE=$(removeTrailingChar "$2" "/"); shift ;;
     -q|--quiet) QUIET="true"; ;;
 	--debug) DEBUG="true"; ;;
 	-c|--command) ACTION="$2"; shift ;;
