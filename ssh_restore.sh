@@ -146,8 +146,8 @@ while read LINE; do
   LINEFS=$(echo "$LINE" | awk '{print $3}');
   LINESUBVOL=$(echo "$LINE" | awk '{print $4}' | grep -o -P 'subvol\=[^\s\,\)]*');
   
-  if [[ "${LINEDEV}" == "/dev/mapper/cryptsystem" ]] && [[ "${LINEMOUNT}" == "/" ]]; then
-    logDebug "Mounting Root...";
+  if [[ "${LINEDEV}" == "/dev/mapper/cryptsystem" ]] || [[ "${LINEDEV}" == "LABEL=system" ]]; then
+    logDebug "Mounting ${LINESUBVOL} at ${LINEMOUNT}...";
     MOUNTRESULT=$(mount -o "subvol=${LINESUBVOL}" /dev/mapper/cryptsystem "/tmp/mnt/root${LINEMOUNT}");
 	if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
   fi;
