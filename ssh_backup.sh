@@ -74,6 +74,7 @@ source "${BASH_SOURCE%/*}/scripts/ssh_serverdetect.sh"
 # Run
 if [[ "${COMMAND,,}" = "check-latest" ]]; then
   for VOLUME in ${VOLUMES}; do
+    logDebug "Checking volume: ${VOLUME}...";
     CHECKRESULT=$(${SSH_CALL} "check-volume-directory" "${VOLUME}")
 	if [[ $? -ne 0 ]]; then logError "Could not check-volume \"${VOLUME}\": ${CHECKRESULT}."; exit 1; fi;
 	echo "${VOLUME}: ${CHECKRESULT}";
