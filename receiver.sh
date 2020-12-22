@@ -46,10 +46,6 @@ function containsIllegalCharacter {
 if isEmpty "${SNAPSHOTSPATH:-}"; then logError "<targetdirectory> must be provided."; exit 1; fi;
 if isEmpty "${COMMAND:-}"; then logError "<command> must be provided."; exit 1; fi;
 
-  echo "ls -lah "${SNAPSHOTSPATH}" | sort";
-  LISTRESULT=$(ls -lah "${SNAPSHOTSPATH}" | sort)
-  echo "${LISTRESULT}";
-
 # Test if SNAPSHOTSPATH is a btrfs subvol
 logDebug "SNAPSHOTSPATH: ${SNAPSHOTSPATH}";
 SNAPSHOTMOUNT=$(LANG=C findmnt -n -o SOURCE --target "${SNAPSHOTSPATH}")
@@ -70,7 +66,7 @@ COMMAND_NAME=$(echo "${COMMAND}" | awk '{print $1}')
 if [[ "$EUID" -ne 0 ]]; then logError "Please run as root"; exit 1; fi;
 
 # Lockfile (Only one simultan instance per SNAPSHOTSPATH is allowed)
-LOCKFILE="${SNAPSHOTSPATH}/$(basename $BASH_SOURCE)"
+LOCKFILE="${SNAPSHOTSPATH}/.$(basename $BASH_SOURCE)"
 source "${BASH_SOURCE%/*}/includes/lockfile.sh";
 
 # Command testreceiver
@@ -105,15 +101,9 @@ fi;
 # Command list-volumes
 if [[ "${COMMAND_NAME,,}" = "list-volumes" ]]; then
   # list directory
-  logDebug "Listing ${SNAPSHOTSPATH}..."
-  echo "ls -lah "${SNAPSHOTSPATH}" | sort";
-  LISTRESULT=$(ls -lah "${SNAPSHOTSPATH}" | sort)
-  if [[ $? -ne 0 ]]; then logError "listing volumes failed: ${LISTRESULT}."; exit 1; fi;
-  
-  logDebug "Listing done..."
-  echo "${LISTRESULT}";
-  echo "hää?";
-  exit 0;
+  RESULT=$(ls -lah "${SNAPSHOTSPATH}" | sort)
+  if [[ $? -ne 0 ]]; then logError "listing volumes failed: ${RESULT}."; exit 1; fi;
+  echo "${RESULT}"; exit 0;
 fi;
 
 # Command list-volume
