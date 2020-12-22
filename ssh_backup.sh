@@ -97,7 +97,7 @@ if [[ "${COMMAND,,}" = "send" ]]; then
 	
 	#SNAPSHOTCOUNT=$(LANG=C ls ${SNAPSHOTSPATH}/${VOLUME}/ | sort | wc -l)
 	FIRSTSNAPSHOT=$(LANG=C ls ${SNAPSHOTSPATH}/${VOLUME}/ | sort | head -1)
-	OTHERSNAPSHOTS=$(LANG=C ls ${SNAPSHOTSPATH}/${VOLUME}/ | sort | tail -n +2)
+	OTHERSNAPSHOTS=$(LANG=C ls ${SNAPSHOTSPATH}/${VOLUME}/ | sort | tail -n +2) # Includes last SNAPSHOT
 	LASTSNAPSHOT=$(LANG=C ls ${SNAPSHOTSPATH}/${VOLUME}/ | sort | tail -1)
 	logDebug "FIRSTSNAPSHOT: ${FIRSTSNAPSHOT}";
 	logDebug "LASTSNAPSHOT: ${LASTSNAPSHOT}";
