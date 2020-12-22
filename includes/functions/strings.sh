@@ -1,8 +1,6 @@
 #!/bin/bash
 function removeTrailingChar {
-  if [[ "${1}" = *"${2}" ]]; then
-    return "${1::-1}";
-  fi;
-  
-  return "${1}";
+  RESULT="${1}";
+  if [[ "${1}" = *"${2}" ]]; then RESULT="${RESULT::-1"}; fi;
+  return "${RESULT}";
 }
