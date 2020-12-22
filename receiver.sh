@@ -140,5 +140,5 @@ if [[ "$1" = "receive-volume-backup" ]]; then
   exit 0;
 fi;
 
-echo "Error";
+echo "Error in command $@";
 exit 1;
