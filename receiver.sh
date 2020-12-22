@@ -46,6 +46,10 @@ function containsIllegalCharacter {
 if isEmpty "${SNAPSHOTSPATH:-}"; then logError "<targetdirectory> must be provided."; exit 1; fi;
 if isEmpty "${COMMAND:-}"; then logError "<command> must be provided."; exit 1; fi;
 
+  echo "ls -lah "${SNAPSHOTSPATH}" | sort";
+  LISTRESULT=$(ls -lah "${SNAPSHOTSPATH}" | sort)
+  echo "${LISTRESULT}";
+
 # Test if SNAPSHOTSPATH is a btrfs subvol
 logDebug "SNAPSHOTSPATH: ${SNAPSHOTSPATH}";
 SNAPSHOTMOUNT=$(LANG=C findmnt -n -o SOURCE --target "${SNAPSHOTSPATH}")
