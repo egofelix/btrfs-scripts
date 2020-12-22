@@ -7,9 +7,9 @@ set -uo pipefail
 source "${BASH_SOURCE%/*}/includes/functions.sh"
 
 # Load Variables
-VOLUMES="";
 QUIET="false"; QUIETPS="";
 COMMAND=""
+SNAPSHOTSPATH=""
 
 # Scan arguments
 while [[ "$#" -gt 0 ]]; do
@@ -22,16 +22,8 @@ while [[ "$#" -gt 0 ]]; do
 	  SELFNAME=$(basename $BASH_SOURCE) 
 	  echo "Usage: ${SELFNAME} --target <targetdirectory> --command <command>]";
 	  echo "";
-	  echo "    ${SELFNAME}";
-	  echo "      Create snapshots of every mounted volume.";
-	  echo "";
-	  echo "    ${SELFNAME} --target /.snapshots";
-	  echo "      Create snapshots of every mounted volume in \"/.snapshorts\".";
-	  echo "";
-	  echo "    ${SELFNAME} --volume root-data --volume usr-data";
-	  echo "      Create a snapshot of volumes root-data and usr-data.";
-	  echo "";
-	  echo "If you ommit the <targetdirectory> then the script will try to locate it with the subvolume name @snapshots.";
+	  echo "    ${SELFNAME} --target /.backups/user --command testReceiver";
+	  echo "      Returns success if the receiver should be working.";
 	  echo "";
 	  exit 0;
 	  ;;
@@ -40,6 +32,7 @@ while [[ "$#" -gt 0 ]]; do
   shift
 done
 
+# Helper function
 function containsIllegalCharacter {
   local ILLEGALCHARACTERS=("." "$" "&" "(" ")" "{" "}" "[" "]" ";" "<" ">" "\`" "|" "*" "?" "\"" "'" "*")
   for CHAR in "${ILLEGALCHARACTERS[@]}"
@@ -48,6 +41,21 @@ function containsIllegalCharacter {
   done;
   return 1;
 }
+
+# Test if parameters has been provided
+if isEmpty "${SNAPSHOTSPATH:-}"; then logError "<targetdirectory> must be provided."; exit 1; fi;
+if isEmpty "${COMMAND:-}"; then logError "<command> must be provided."; exit 1; fi;
+
+# Test if SNAPSHOTSPATH is a btrfs subvol
+logDebug "SNAPSHOTSPATH: ${SNAPSHOTSPATH}";
+if isEmpty $(mount | grep "${SNAPSHOTSPATH}" | grep 'type btrfs'); then logError "Source \"${SNAPSHOTSPATH}\" must be a btrfs volume"; exit 1; fi;
+
+## Script must be started as root
+if [[ "$EUID" -ne 0 ]]; then logError "Please run as root"; exit 1; fi;
+
+# Lockfile (Only one simultan instance is allowed)
+LOCKFILE="/var/lock/$(basename $BASH_SOURCE)"
+source "${BASH_SOURCE%/*}/includes/lockfile.sh";
 
 if containsIllegalCharacter "${COMMAND}"; then logError "Illegal character detected in \"${COMMAND}\"."; exit 1; fi;
 
@@ -88,7 +96,7 @@ if [[ -z "$1" ]]; then
 fi;
 
 # Main Commands
-if [[ "$1" = "testSshReceiver" ]]; then
+if [[ "$1" = "testReceiver" ]]; then
   echo "success"; exit 0;
 fi;
 
