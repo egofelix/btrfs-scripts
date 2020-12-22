@@ -62,6 +62,7 @@ if [[ -z "${TARGETSNAPSHOT:-}" ]]; then
   do
     SNAPSHOTS=$(${SSH_CALL} "list-snapshots" "${VOLUME}");
     LASTSNAPSHOT=$(echo "${SNAPSHOTS}" | sort | tail -1);
+    logDebug "Latest Snapshot for volume \"${VOLUME}\" is: \"${LASTSNAPSHOT}\"";
 	TARGETSNAPSHOT=$(echo -e "${LASTSNAPSHOT}\n${TARGETSNAPSHOT:-}" | sort | tail -1);
   done;
 fi;
@@ -73,7 +74,6 @@ for VOLUME in $(echo "${VOLUMES}" | sort)
 do
   SNAPSHOTS=$(${SSH_CALL} "list-snapshots" "${VOLUME}");
   LASTSNAPSHOT=$(echo "${SNAPSHOTS}" | sort | tail -1);
-  logDebug "Latest Snapshot for volume \"${VOLUME}\" is: \"${LASTSNAPSHOT}\"";
    
   if [[ -z "${TARGETSNAPSHOT}" ]]; then
     TARGETSNAPSHOT="${LASTSNAPSHOT}"; 
