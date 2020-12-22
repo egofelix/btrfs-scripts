@@ -6,9 +6,11 @@ function removeTrailingChar {
 }
 
 function isEmpty {
-  logDebug "called isEmpty with \"${1:-}\".";
   if [[ -z "${1:-}" ]]; then 
+    logDebug "isEmpty with \"${1:-}\": 0.";
     return 0; 
   fi;
+  
+  logDebug "isEmpty with \"${1:-}\": 1.";
   return 1;
 }
