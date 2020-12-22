@@ -46,18 +46,15 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 ## Script must be started as root
-if [ "$EUID" -ne 0 ]; then
-  echo "Please run as root";
-  exit 1;
-fi;
+if [ "$EUID" -ne 0 ]; then logError "Please run as root"; exit 1; fi;
 
 # Search snapshot volume
-SNAPSOURCE=$(LANG=C mount | grep '@snapshots' | grep -o 'on /\..* type btrfs' | awk '{print $2}')
-if [[ -z "${SNAPSOURCE}" ]]; then
-	logLine "Cannot find snapshot directory";
-	exit;
-fi;
+if [[ -z ${SNAPSOURCE} ]]; then SNAPSOURCE=$(LANG=C mount | grep '@snapshots' | grep -o 'on /\..* type btrfs' | awk '{print $2}'); fi;
+if [[ -z "${SNAPSOURCE}" ]]; then logError "Cannot find snapshot directory"; exit 1; fi;
 
+
+
+exit 0;
 # Check if we have data in snapshot volume
 VOLUMES=$(LANG=C ls ${SNAPSOURCE}/ | sort)
 if [[ -z "${VOLUMES}" ]]; then
