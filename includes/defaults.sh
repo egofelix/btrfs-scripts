@@ -14,3 +14,7 @@ fi;
 if [[ -z ${DISTRO:-} ]]; then
   export DISTRO="ARCHLINUX";
 fi;
+
+if [[ -z ${VERBOSE:-} ]]; then
+  export VERBOSE=" &>/dev/null";
+fi;

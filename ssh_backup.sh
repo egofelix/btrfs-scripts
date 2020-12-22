@@ -7,13 +7,33 @@ set -uo pipefail
 source "${BASH_SOURCE%/*}/includes/functions.sh"
 
 # Load Variables
-source "${BASH_SOURCE%/*}/includes/defaults.sh"
+source "${BASH_SOURCE%/*}/includes/defaults.sh";
+ACTION="send";
+VOLUMES=""
 
 ## Script must be started as root
 if [ "$EUID" -ne 0 ]; then
   echo "Please run as root";
   exit 1;
 fi;
+
+# Scan arguments
+while [[ "$#" -gt 0 ]]; do
+  case $i in
+    -s|--source) SNAPSOURCE="$2"; shift ;;
+    -v|--verbose) VERBOSE=""; shift ;;
+	-a|--action) ACTION="$2"; shift ;;
+	-vol|--volume) if [[ -z ${VOLUMES} ]]; then VOLUMES="$2"; else VOLUMES="${VOLUMES} $2"; fi; shift ;;
+	-t|--target) TARGET="$2"; shift ;;
+	-h|--help) 
+	  SELFNAME=$(basename $BASH_SOURCE) 
+	  echo "Usage: ${SELFNAME} -s|--source [sourcevolume] -a|--action [action] -vol|--volume [volume] -t|--target [targetserver]"
+	  exit 0;
+	  ;;
+    *) echo "unknown parameter passed: ${1}."; exit 1;;
+  esac
+  shift
+done
 
 # Search snapshot volume
 SNAPSOURCE=$(LANG=C mount | grep '@snapshots' | grep -o 'on /\..* type btrfs' | awk '{print $2}')
