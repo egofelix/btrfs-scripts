@@ -55,7 +55,7 @@ VOLUMES=$(${SSH_CALL} "list-volumes");
 if [[ $? -ne 0 ]]; then logError "Unable to query volumes: ${VOLUMES}."; exit 1; fi;
 
 # loop through volumes and list snapshots to check if which is the latest snapshot
-logDebug Detected volumes: $(echo "${VOLUMES}" | tr '\n' ',');
+logDebug Detected volumes: $(removeTrailingChar $(echo "${VOLUMES}" | tr '\n' ',') ',');
 if [[ -z "${TARGETSNAPSHOT:-}" ]]; then
   logDebug "autodetecting latest snapshot...";
   for VOLUME in $(echo "${VOLUMES}" | sort)
