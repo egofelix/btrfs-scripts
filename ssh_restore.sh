@@ -102,6 +102,11 @@ do
   if ! runCmd mkdir /tmp/mnt/disks/system/@snapshots/${VOLUME}; then logLine "Failed to create snapshot directory for volume \"${VOLUME}\"."; exit 1; fi;
   ${SSH_CALL} "download-snapshot" "${VOLUME}" "${TARGETSNAPSHOT}" | btrfs receive -q /tmp/mnt/disks/system/@snapshots/${VOLUME};
   if [[ $? -ne 0 ]]; then logLine "Failed to receive the snapshot for volume \"${VOLUME}\"."; exit 1; fi;
+  
+  # Restore ROOTVOLUME
+  logLine "Restoring ${ROOTVOLUME}...";
+  RESTORERESULT=$(btrfs subvol snapshot /tmp/mnt/disks/system/@snapshots/${VOLUME}/${TARGETSNAPSHOT} /tmp/mnt/disks/system/${VOLUME})
+  if [[ $? -ne 0 ]]; then logLine "Failed to restore the snapshot for volume \"${VOLUME}\": ${RESTORERESULT}."; exit 1; fi;
 done;
 
 # Scan for fstab
@@ -111,22 +116,23 @@ for VOLUME in $(echo "${VOLUMES}" | sort)
 do
   logDebug "Searching in volume \"${VOLUME}\"...";
   
-  if [[ -f "/tmp/mnt/disks/system/@snapshots/${VOLUME}/${TARGETSNAPSHOT}/etc/fstab" ]]; then
+  if [[ -f "/tmp/mnt/disks/system/${VOLUME}/etc/fstab" ]]; then
     if [[ ! -z "${FSTABPATH}" ]]; then
 	  logError "Multiple fstab files found. Aborting.";
 	  exit 1;
 	fi;
 	
-    FSTABPATH="/tmp/mnt/disks/system/@snapshots/${VOLUME}/${TARGETSNAPSHOT}/etc/fstab";
+    FSTABPATH="/tmp/mnt/disks/system/${VOLUME}/etc/fstab";
   fi;
 done;
 if [[ -z "${FSTABPATH}" ]]; then logError "Could not locate /etc/fstab"; exit 1; fi;
 logDebug "FSTABPATH: ${FSTABPATH}";
 
-# Search for root subvolume in FSTAB
-ROOTVOLUME=$(cat "${FSTABPATH}" | grep -P '\/\s+btrfs.*subvol\=[^\s\,\)]*' | grep -o -P 'subvol\=[^\s\,\)]*' | awk -F'=' '{print $2}')
-if [[ -z "${ROOTVOLUME}" ]]; then logError "Could not detect root volume"; exit 1; fi;
-logDebug "ROOTVOLUME: ${ROOTVOLUME}";
+# Create @volumes
+
+
+# Mount regarding to fstab
+
 
 exit 1;
 
