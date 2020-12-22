@@ -49,6 +49,13 @@ done
 ## Script must be started as root
 if [ "$EUID" -ne 0 ]; then logError "Please run as root"; exit 1; fi;
 
+# PRIVATE
+_lock()             { flock -$1 $LOCKFD; }
+_no_more_locking()  { _lock u; _lock xn && rm -f $LOCKFILE; }
+_prepare_locking()  { eval "exec $LOCKFD>\"$LOCKFILE\""; trap _no_more_locking EXIT; }
+_prepare_locking
+exlock_now || exit 1
+
 # Search snapshot volume
 if isEmpty "${SNAPSOURCE:-}"; then SNAPSOURCE=$(LANG=C mount | grep '@snapshots' | grep -o 'on /\..* type btrfs' | awk '{print $2}'); fi;
 if isEmpty "${SNAPSOURCE:-}"; then logError "Cannot find snapshot directory"; exit 1; fi;
