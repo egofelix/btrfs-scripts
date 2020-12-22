@@ -20,7 +20,7 @@ while [[ "$#" -gt 0 ]]; do
 	--debug) DEBUG="true"; ;;
 	-c|--command) ACTION="$2"; shift ;;
 	-vol|--volume) if [[ -z ${VOLUMES} ]]; then VOLUMES="$2"; else VOLUMES="${VOLUMES} $2"; fi; shift ;;
-	-t|--target) TARGET="$2"; shift ;;
+	-t|--target) SSH_URI="$2"; shift ;;
 	-h|--help) 
 	  SELFNAME=$(basename $BASH_SOURCE) 
 	  echo "Usage: ${SELFNAME} [-q|--quiet] [-s|--source <sourcevolume>] [-vol|--volume <volume>] [-t|--target <targetserver>] [-c|--command <command>]";
@@ -68,11 +68,10 @@ do
   if isEmpty $(mount | grep "${VOLUME}" | grep 'type btrfs'); then logError "Source \"${VOLUME}\" must be a btrfs volume"; exit 1; fi;
 done;
 
-
-exit 1;
-
 # Detect SSH-Server
 source "${BASH_SOURCE%/*}/scripts/ssh_serverdetect.sh"
+
+exit 1;
 
 logLine "Source Directory: ${SNAPSOURCE}";
 logLine "Volumes to backup: ${VOLUMES}";

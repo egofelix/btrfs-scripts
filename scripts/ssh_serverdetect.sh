@@ -1,10 +1,17 @@
 #!/bin/bash
-if [[ -z "${SSH_HOSTNAME:-}" ]]; then
+if ! isEmpty "${SSH_URI:-}"; then
+  if ! [[ "${SSH_URI,,}" = "ssh://"*; ]]; then echo "SSH_URI must start with ssh://"; exit 1; fi;
+  
+  # TODO split server
+fi;
+
+if isEmpty "${SSH_URI:-}"; then
+
   # Get info
   if [[ -z "${HOSTNAME:-}" ]]; then
     HOSTNAME=$(cat /proc/sys/kernel/hostname)
   fi;
-  logDebug "Trying autodetection of SSH_HOSTNAME with current hostname: ${HOSTNAME}";  
+  logDebug "Trying autodetection of SSH_URI with current hostname: ${HOSTNAME}";  
   
   MY_HOSTNAME=$(echo "${HOSTNAME}" | awk -F'.' '{print $1}')
   export SSH_HOSTNAME=""
@@ -57,6 +64,7 @@ if [[ -z "${SSH_HOSTNAME:-}" ]]; then
   SSH_HOSTNAME=$(echo ${DNS_RESULT} | awk '{print $4}')
   export SSH_HOSTNAME="${SSH_HOSTNAME::-1}"
   logLine "Autodetected Backup Server: ${SSH_USERNAME}@${SSH_HOSTNAME}:${SSH_PORT}";
+  export SSH_URI="ssh://${SSH_USERNAME}@${SSH_HOSTNAME}:${SSH_PORT}";
 fi;
 
 # Test SSH
