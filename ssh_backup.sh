@@ -135,11 +135,12 @@ if [[ "${COMMAND,,}" = "send" ]]; then
 	  if [[ $? -ne 0 ]]; then logError "Failed to remove snapshot \"${SNAPSHOT}\" for volume \"${VOLUME}\": ${REMOVERESULT}."; exit 1; fi;
 	  
 	  # Remember this snapshot as previos so we can send the next following backup as incremental
-	  PREVIOUSSNAPSHOT=${SNAPSHOT}
+	  PREVIOUSSNAPSHOT="${SNAPSHOT}";
     done;
   done;
 	
   logLine "All snapshots has been transfered";
+  sync;
   exit 0;
 fi;
 
