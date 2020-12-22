@@ -6,6 +6,38 @@ set -uo pipefail
 ## Load Functions
 source "${BASH_SOURCE%/*}/includes/functions.sh"
 
+# Load Variables
+VOLUMES="";
+QUIET="false"; QUIETPS="";
+
+# Scan arguments
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    -q|--quiet) QUIET="true"; QUIETPS=" &>/dev/null"; ;;
+	--debug) DEBUG="true"; ;;
+    -t|--target) SNAPSHOTSPATH=$(removeTrailingChar "$2" "/"); shift ;;
+	-h|--help) 
+	  SELFNAME=$(basename $BASH_SOURCE) 
+	  echo "Usage: ${SELFNAME} [-q|--quiet] [-v|--volume <volume>] [-t|--target <targetdirectory>]";
+	  echo "";
+	  echo "    ${SELFNAME}";
+	  echo "      Create snapshots of every mounted volume.";
+	  echo "";
+	  echo "    ${SELFNAME} --target /.snapshots";
+	  echo "      Create snapshots of every mounted volume in \"/.snapshorts\".";
+	  echo "";
+	  echo "    ${SELFNAME} --volume root-data --volume usr-data";
+	  echo "      Create a snapshot of volumes root-data and usr-data.";
+	  echo "";
+	  echo "If you ommit the <targetdirectory> then the script will try to locate it with the subvolume name @snapshots.";
+	  echo "";
+	  exit 0;
+	  ;;
+    *) echo "unknown parameter passed: ${1}."; exit 1;;
+  esac
+  shift
+done
+
 # We must have first parameter
 if [[ -z "$1" ]]; then
 	echo "Missing Home dir in first paramete";
