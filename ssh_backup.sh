@@ -58,7 +58,7 @@ _prepare_locking()  { eval "exec $LOCKFD>\"$LOCKFILE\""; trap _no_more_locking E
 exlock_now()        { _lock xn; }  # obtain an exclusive lock immediately or fail
 _prepare_locking
 LOCKED=exlock_now
-if ! LOCKED; then
+if ! $LOCKED; then
   logError "Script is running already";
   exit 1;
 fi;
