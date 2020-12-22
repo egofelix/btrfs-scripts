@@ -87,14 +87,14 @@ do
 	
 	# Create Directory for this volume
 	if [[ ! -d "${SNAPSHOTSPATH}/${VOLUME}" ]]; then
-		if ! runCmd mkdir -p ${SNAPSHOTSPATH}/${VOLUME}; then logError "Failed to create directory ${SNAPSHOTSPATH}/${VOLUME}."; exit 1;
+		if ! runCmd mkdir -p ${SNAPSHOTSPATH}/${VOLUME}; then logError "Failed to create directory ${SNAPSHOTSPATH}/${VOLUME}."; exit 1; fi;
 	fi;
 	
 	# Create Snapshot
 	logLine "Creating Snapshot ${SNAPSHOTSPATH}/${VOLUME}/${STAMP}"
 	if ! runCmd btrfs subvolume snapshot -r ${VOLUMEMOUNTPOINT} ${SNAPSHOTSPATH}/${VOLUME}/${STAMP}; then
 		logError "Failed to create snapshot of ${SNAPSHOTSPATH}/${VOLUME}/${STAMP}";
-		exit;
+		exit 1;
 	fi;
 done;
 
