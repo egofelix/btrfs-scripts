@@ -56,20 +56,20 @@ SNAPSHOTMOUNTVOLUME=$(echo "${SNAPSHOTMOUNT}" | awk -F'[' '{print $2}' | awk -F'
 if [[ -z "${SNAPSHOTMOUNTVOLUME}" ]]; then logError "Could not find volume for ${SNAPSHOTMOUNTVOLUME}."; exit 1; fi;
 if [[ ! ${SNAPSHOTMOUNTVOLUME} = "@"* ]] && [[ ! ${SNAPSHOTMOUNTVOLUME} = "/@"* ]]; then logWarn "The target directory relies on volume \"${SNAPSHOTMOUNTVOLUME}\" which will also be snapshotted/backupped, consider using a targetvolume with an @ name..."; fi;
 
-
-exit 0;
-
-
-if isEmpty $(LANG=C mount | grep "${SNAPSHOTSPATH}" | grep 'type btrfs'); then logError "Source \"${SNAPSHOTSPATH}\" must be a btrfs volume"; exit 1; fi;
+# Test if command is illegal
+if containsIllegalCharacter "${COMMAND}"; then logError "Illegal character detected in \"${COMMAND}\"."; exit 1; fi;
 
 ## Script must be started as root
 if [[ "$EUID" -ne 0 ]]; then logError "Please run as root"; exit 1; fi;
 
 # Lockfile (Only one simultan instance is allowed)
-LOCKFILE="/var/lock/$(basename $BASH_SOURCE)"
+LOCKFILE="${SNAPSHOTSPATH}/$(basename $BASH_SOURCE)"
 source "${BASH_SOURCE%/*}/includes/lockfile.sh";
 
-if containsIllegalCharacter "${COMMAND}"; then logError "Illegal character detected in \"${COMMAND}\"."; exit 1; fi;
+
+exit 1;
+
+
 
 exit 1;
 # We must have first parameter
