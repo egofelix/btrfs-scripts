@@ -71,6 +71,7 @@ fi;
 logDebug "Snapshot to restore: ${TARGETSNAPSHOT}";
 for VOLUME in $(echo "${VOLUMES}" | sort)
 do
+  logDebug "Checking if the snapshot exists for volume \"${VOLUME}\"...";
   SNAPSHOTS=$(${SSH_CALL} "list-snapshots" "${VOLUME}");
   SNAPSHOT=$(echo "${SNAPSHOTS}" | grep "${TARGETSNAPSHOT}");
   if [[ -z "${SNAPSHOT}" ]]; then
