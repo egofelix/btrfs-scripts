@@ -69,7 +69,7 @@ do
   VOLUME=$(removeLeadingChar "${VOLUME}" "/")
   if [[ "${VOLUME}" = "@"* ]]; then logDebug "Skipping Volume ${VOLUME}"; continue; fi;
   logDebug "Testing VOLUME: ${VOLUME}";
-  if isEmpty $(mount | grep "${VOLUME}" | grep 'type btrfs'); then logError "Source \"${VOLUME}\" must be a btrfs volume"; exit 1; fi;
+  if isEmpty $(LANG=C mount | grep -P '[\(\,](subvol\=[/]{0,1}root-data)[\)\,]' | grep 'type btrfs'); then logError "Source \"${VOLUME}\" must be a btrfs volume"; exit 1; fi;
 done;
 
 exit 2;
