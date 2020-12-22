@@ -84,6 +84,21 @@ if [[ "${COMMAND,,}" = "test" ]]; then logLine "Test passed"; exit 0; fi;
 if [[ "${COMMAND,,}" = "send" ]]; then
   logLine "Source Directory: ${SNAPSHOTSPATH}";
   logLine "Volumes to backup: ${VOLUMES}";
+  
+  for VOLUME in ${VOLUMES}; do
+    # Skip @volumes
+    VOLUME=$(removeLeadingChar "${VOLUME}" "/")
+	if [[ "${VOLUME}" = "@"* ]]; then logDebug "Skipping Volume ${VOLUME}"; continue; fi;
+	
+	# Check if there are any snapshots for this volume
+	SNAPSHOTS=$(LANG=C ls ${SNAPSHOTSPATH}/${volName}/)
+	if [[ -z "${SNAPSHOTS}" ]]; then
+       logLine "No snapshots available to transfer for volume \"${VOLUME}\".";
+       continue;
+	fi;
+	
+	
+  done;
   exit 1;
 fi;
 
