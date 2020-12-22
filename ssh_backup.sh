@@ -55,7 +55,7 @@ if isEmpty "${SNAPSOURCE:-}"; then logError "Cannot find snapshot directory"; ex
 
 # Test if SNAPSOURCE is a btrfs subvol
 logDebug "SNAPSOURCE: ${SNAPSOURCE}";
-if ! isEmpty $(mount | grep "${SNAPSOURCE}" | grep 'type btrfs'); then logError "Source \"${SNAPSOURCE}\" must be a btrfs volume"; exit 1; fi;
+if isEmpty $(mount | grep "${SNAPSOURCE}" | grep 'type btrfs'); then logError "Source \"${SNAPSOURCE}\" must be a btrfs volume"; exit 1; fi;
 
 # Search volumes
 if isEmpty "${VOLUMES:-}"; then VOLUMES=$(LANG=C ls ${SNAPSOURCE}/ | sort); fi;
