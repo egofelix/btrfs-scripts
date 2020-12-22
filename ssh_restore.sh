@@ -117,7 +117,7 @@ do
 	  exit 1;
 	fi;
 	
-    FSTABPATH="/tmp/mnt/disks/system/@snapshots/${VOLUME}/etc/fstab";
+    FSTABPATH="/tmp/mnt/disks/system/@snapshots/${VOLUME}/${TARGETSNAPSHOT}/etc/fstab";
   fi;
 done;
 if [[ -z "${FSTABPATH}" ]]; then logError "Could not locate /etc/fstab"; exit 1; fi;
