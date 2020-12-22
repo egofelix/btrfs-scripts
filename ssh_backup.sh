@@ -22,7 +22,7 @@ while [[ "$#" -gt 0 ]]; do
 	-t|--target) TARGET="$2"; shift ;;
 	-h|--help) 
 	  SELFNAME=$(basename $BASH_SOURCE) 
-	  echo "Usage: ${SELFNAME} [-s|--source <sourcevolume>] [-vol|--volume <volume>] [-t|--target <targetserver>] [-c|--command <command>]";
+	  echo "Usage: ${SELFNAME} [-v|--verbose] [-s|--source <sourcevolume>] [-vol|--volume <volume>] [-t|--target <targetserver>] [-c|--command <command>]";
 	  echo "";
 	  echo "    ${SELFNAME}";
 	  echo "      Send Backups and autodetect servers:";
