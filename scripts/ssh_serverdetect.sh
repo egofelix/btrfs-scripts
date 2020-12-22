@@ -74,7 +74,7 @@ fi;
 logDebug "Testing ssh access: ${SSH_USERNAME}@${SSH_HOSTNAME}:${SSH_PORT}...";
 
 # Try with local key
-export SSH_CALL="ssh -o IdentityFile=/etc/ssh/ssh_host_ed25519_key -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+export SSH_CALL="ssh -o IdentityFile=/etc/ssh/ssh_host_ed25519_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
 TESTRESULT=$(${SSH_CALL} "testReceiver")
 if [[ $? -ne 0 ]]; then
   # Test ssh without key (User auth)
