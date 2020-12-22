@@ -13,29 +13,22 @@ QUIET="false";
 # Scan arguments
 while [[ "$#" -gt 0 ]]; do
   case $1 in
-    -s|--source) SNAPSHOTSPATH=$(removeTrailingChar "$2" "/"); shift ;;
+    -t|--target) SNAPSHOTSPATH=$(removeTrailingChar "$2" "/"); shift ;;
     -q|--quiet) QUIET="true"; ;;
 	--debug) DEBUG="true"; ;;
-	-c|--command) COMMAND="$2"; shift ;;
 	-vol|--volume) if [[ -z ${VOLUMES} ]]; then VOLUMES="$2"; else VOLUMES="${VOLUMES} $2"; fi; shift ;;
-	-t|--target) SSH_URI="$2"; shift ;;
 	-h|--help) 
 	  SELFNAME=$(basename $BASH_SOURCE) 
-	  echo "Usage: ${SELFNAME} [-q|--quiet] [-s|--source <sourcevolume>] [-vol|--volume <volume>] [-t|--target <targetserver>] [-c|--command <command>]";
+	  echo "Usage: ${SELFNAME} [-q|--quiet] [-vol|--volume <volume>] [-t|--target <directory>]";
 	  echo "";
 	  echo "    ${SELFNAME}";
-	  echo "      Send Backups to autodetected server.";
+	  echo "      Create snapshots of every mounted volume.";
 	  echo "";
-	  echo "    ${SELFNAME} -c check-latest -vol root";
-	  echo "      Get timestamp of latest backup for root-volume.";
+	  echo "    ${SELFNAME} --target /.snapshots";
+	  echo "      Create snapshots of every mounted volume in \"/.snapshorts\".";
 	  echo "";
-	  echo "    ${SELFNAME} -t ssh://user@server:port/";
-	  echo "      Send backups to specific server.";
-	  echo "";
-	  echo "Supported commands are: check-latest, send, test";
-	  echo "The default command is: send";
-	  echo "";
-	  echo "If you ommit the <targetserver> then the script will try to locate it via srv-records in dns.";
+	  echo "    ${SELFNAME} --volume root-data --volume usr-data";
+	  echo "      Create a snapshot of volumes root-data and usr-data.";
 	  echo "";
 	  exit 0;
 	  ;;
