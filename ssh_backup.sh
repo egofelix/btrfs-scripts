@@ -8,8 +8,9 @@ source "${BASH_SOURCE%/*}/includes/functions.sh"
 
 # Load Variables
 source "${BASH_SOURCE%/*}/includes/defaults.sh";
-ACTION="send";
-VOLUMES=""
+COMMAND="send";
+VOLUMES="";
+
 
 # Scan arguments
 while [[ "$#" -gt 0 ]]; do
@@ -28,6 +29,9 @@ while [[ "$#" -gt 0 ]]; do
 	  echo "";
 	  echo "    ${SELFNAME} -c check-latest -vol root";
 	  echo "      Get timestamp of latest backup for root-volume:";
+	  echo "";
+	  echo "Supported commands are: check-latest, send";
+	  echo "The default command is: send";
 	  exit 0;
 	  ;;
     *) echo "unknown parameter passed: ${1}."; exit 1;;
