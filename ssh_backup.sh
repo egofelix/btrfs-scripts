@@ -73,14 +73,18 @@ source "${BASH_SOURCE%/*}/scripts/ssh_serverdetect.sh"
 
 exit 1;
 
-logLine "Source Directory: ${SNAPSOURCE}";
-logLine "Volumes to backup: ${VOLUMES}";
-for volName in ${VOLUMES}
-do
-	SUBVOLUMES=$(LANG=C ls ${SNAPSOURCE}/${volName}/)
-	if [[ -z "${SUBVOLUMES}" ]]; then
-		logLine "Nothing to transfer on Volume ${volName}";
-		continue;
+
+if [[ "${COMMAND,,}" = "check-latest" ]]; then
+
+elif [[ "${COMMAND,,}" = "send" ]]; then
+  logLine "Source Directory: ${SNAPSOURCE}";
+  logLine "Volumes to backup: ${VOLUMES}";
+  for volName in ${VOLUMES}
+  do
+    SUBVOLUMES=$(LANG=C ls ${SNAPSOURCE}/${volName}/)
+    if [[ -z "${SUBVOLUMES}" ]]; then
+       logLine "Nothing to transfer on Volume ${volName}";
+       continue;
 	fi;
 	
 	SUBVOLUMECOUNT=$(LANG=C ls ${SNAPSOURCE}/${volName}/ | sort | wc -l)
@@ -95,9 +99,9 @@ do
 	SUBVOLUME_EXISTS=$(${SSH_CALL} check-volume-backup "${volName}" "${FIRSTSUBVOLUME}");
 	if [ $? -ne 0 ]; then logLine "Failed to run ssh command: check-volume-backup "${volName}" "${FIRSTSUBVOLUME}"" exit 1; fi;
 	if isFalse ${SUBVOLUME_EXISTS}; then
-		logLine "Sending backup \"${volName}_${FIRSTSUBVOLUME}\" (Full)";
-		SENDRESULT=$(btrfs send -q ${SNAPSOURCE}/${volName}/${FIRSTSUBVOLUME} | ${SSH_CALL} create-volume-backup ${volName} ${FIRSTSUBVOLUME})	
-		if [[ $? -ne 0 ]] || [[ "${SENDRESULT}" != "success" ]]; then logLine "Failed to send backup."; exit 1; fi;
+	  logLine "Sending backup \"${volName}_${FIRSTSUBVOLUME}\" (Full)";
+	  SENDRESULT=$(btrfs send -q ${SNAPSOURCE}/${volName}/${FIRSTSUBVOLUME} | ${SSH_CALL} create-volume-backup ${volName} ${FIRSTSUBVOLUME})	
+	  if [[ $? -ne 0 ]] || [[ "${SENDRESULT}" != "success" ]]; then logLine "Failed to send backup."; exit 1; fi;
 	fi;
 	
 	PREVIOUSSUBVOLUME=${FIRSTSUBVOLUME}
@@ -105,28 +109,33 @@ do
 	# Now loop over othersubvolumes
 	for subvolName in ${OTHERSUBVOLUMES}
 	do
-		SUBVOLUME_EXISTS=$(${SSH_CALL} check-volume-backup "${volName}" "${subvolName}");
-		if [ $? -ne 0 ]; then logLine "Failed to run ssh command: check-volume-backup "${volName}" "${FIRSTSUBVOLUME}"" exit; fi;
-		if isFalse ${SUBVOLUME_EXISTS}; then
-			logLine "Sending backup \"${volName}_${subvolName}\" (Incremental)";
-			SENDRESULT=$(btrfs send -q -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName} | ${SSH_CALL} create-volume-backup ${volName} ${subvolName})	
-			if [[ $? -ne 0 ]] || [[ "${SENDRESULT}" != "success" ]]; then logLine "Failed to send backup. ${SENDRESULT}"; exit 1; fi;
-		fi;
+	  SUBVOLUME_EXISTS=$(${SSH_CALL} check-volume-backup "${volName}" "${subvolName}");
+	  if [ $? -ne 0 ]; then logLine "Failed to run ssh command: check-volume-backup "${volName}" "${FIRSTSUBVOLUME}"" exit; fi;
+	  if isFalse ${SUBVOLUME_EXISTS}; then
+		logLine "Sending backup \"${volName}_${subvolName}\" (Incremental)";
+		SENDRESULT=$(btrfs send -q -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName} | ${SSH_CALL} create-volume-backup ${volName} ${subvolName})	
+	    if [[ $? -ne 0 ]] || [[ "${SENDRESULT}" != "success" ]]; then logLine "Failed to send backup. ${SENDRESULT}"; exit 1; fi;
+	  fi;
 		
-		# Remove previous subvolume as it is not needed here anymore!
-		btrfs subvolume delete ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} &> /dev/null
+	  # Remove previous subvolume as it is not needed here anymore!
+	  btrfs subvolume delete ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} &> /dev/null
 		
-		# Check Result
-		if [ $? -ne 0 ]; then
-			logLine "Failed to cleanup snapshot..."
-			exit;
-		fi;
+	  # Check Result
+	  if [ $? -ne 0 ]; then
+		logLine "Failed to cleanup snapshot..."
+		exit;
+	  fi;
 		
-		# Remember this subvolume as previos so we can send the next following backup as incremental
-		PREVIOUSSUBVOLUME=${subvolName}
+	  # Remember this subvolume as previos so we can send the next following backup as incremental
+	  PREVIOUSSUBVOLUME=${subvolName}
 	done;
-done;
+  done;
 
-# Finish
-sync
-logLine "Backup transfer done.";
+  # Finish
+  sync
+  logLine "Backup transfer done.";
+  exit 0;
+else 
+  logError "Unknown command \"${COMMAND}\"";
+  exit 1;
+fi;
