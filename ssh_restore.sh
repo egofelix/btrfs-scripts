@@ -151,7 +151,7 @@ while read LINE; do
     MOUNTRESULT=$(mount -o "subvol=${LINESUBVOL}" /dev/mapper/cryptsystem "/tmp/mnt/root${LINEMOUNT}");
 	if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
   fi;
-done < $(cat ${FSTABPATH} | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$');
+done < cat ${FSTABPATH} | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$';
 
 # Mount regarding to fstab
 if ! runCmd mkdir -p /tmp/mnt/root; then logError "Failed to create root mountpoint"; exit 1; fi;
