@@ -129,7 +129,13 @@ if [[ -z "${FSTABPATH}" ]]; then logError "Could not locate /etc/fstab"; exit 1;
 logDebug "FSTABPATH: ${FSTABPATH}";
 
 # Create @volumes
-
+ATVOLUMES=$(cat "${FSTABPATH}" | grep -o -P 'subvol=[\/]{0,1}@[^\s\,\)]*' | awk -F'=' '{print $2}');
+for VOLUME in $(echo "${ATVOLUMES}" | sort)
+do
+  logDebug "Creating ${VOLUME}...";
+  CREATERESULT=$(btrfs subvol create /tmp/mnt/disks/system/${VOLUME});
+  if [[ $? -ne 0 ]]; then logLine "Failed to create volume \"${VOLUME}\": ${CREATERESULT}."; exit 1; fi;
+done;
 
 # Mount regarding to fstab
 
