@@ -23,9 +23,10 @@ while [[ "$#" -gt 0 ]]; do
 	--debug) DEBUG="true"; ;;
     -t|--target) DRIVE_ROOT=$(removeTrailingChar "$2" "/"); shift ;;
 	-n|--name) HOSTNAME="$2"; shift ;;
+	-s|--snapshot) TARGETSNAPSHOT="$2"; shift ;;
 	-h|--help) 
 	  SELFNAME=$(basename $BASH_SOURCE) 
-	  echo "Usage: ${SELFNAME} [-q|--quiet] [-t|--target <targetdrive>] [-n|--name <clientname>]";
+	  echo "Usage: ${SELFNAME} [-q|--quiet] [-t|--target <targetdrive>] [-n|--name <clientname>] [-s|--snapshot <snapshot>]";
 	  echo "";
 	  echo "    ${SELFNAME}";
 	  echo "      Automatic restore.";
