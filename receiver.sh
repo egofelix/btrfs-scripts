@@ -106,7 +106,7 @@ if [[ "${COMMAND_NAME,,}" = "list-volumes" ]]; then
   if [[ $? -ne 0 ]]; then logError "listing volumes failed: ${LISTRESULT}."; exit 1; fi;
   
   logDebug "Listing done..."
-  #echo "${LISTRESULT}";
+  echo "${LISTRESULT}";
   echo "hää?";
   exit 0;
 fi;
