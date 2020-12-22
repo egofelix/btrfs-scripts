@@ -56,8 +56,8 @@ if isEmpty "${SSH_URI:-}"; then
 
   # Could not detect
   if [[ -z "${DNS_RESULT}" ]]; then
-	logLine "Could not autodetect backup server. Please provide SSH_HOSTNAME or another HOSTNAME";
-	exit;
+	logError "Could not autodetect backup server. Please provide SSH_HOSTNAME or another HOSTNAME";
+	exit 1;
   fi;
 
   export SSH_PORT=$(echo ${DNS_RESULT} | awk '{print $3}');
@@ -68,7 +68,7 @@ if isEmpty "${SSH_URI:-}"; then
 fi;
 
 # Test SSH
-logLine "Testing ssh access: ${SSH_USERNAME}@${SSH_HOSTNAME}:${SSH_PORT}...";
+logDebug "Testing ssh access: ${SSH_USERNAME}@${SSH_HOSTNAME}:${SSH_PORT}...";
 
 # Test ssh without key (User auth)
 export SSH_CALL="ssh -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
@@ -78,9 +78,7 @@ if [[ $? -ne 0 ]]; then
   export SSH_CALL="ssh -o IdentityFile=/etc/ssh/ssh_host_ed25519_key -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
   TESTRESULT=$(${SSH_CALL} "testSshReceiver")
   if [[ $? -ne 0 ]]; then
-	logLine "SSH-Connection failed.";
-	logLine "${TESTRESULT}";
-	logLine "${SSH_CALL}";
-	exit;
+	logError "Cannot connect to ${SSH_URI}";
+	exit 1;
   fi;
 fi;
