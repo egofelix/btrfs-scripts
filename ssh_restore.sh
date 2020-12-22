@@ -140,9 +140,10 @@ do
 done;
 
 # Mount regarding to fstab
-while read LINE; do
-  echo "$p"
-done < ${FSTABPATH};
+mount --fstab "${FSTABPATH}" --target-prefix "/tmp/mnt/disks/system";
+#while read LINE; do
+#  echo "$LINE"
+#done < ${FSTABPATH};
 
 
 exit 1;
