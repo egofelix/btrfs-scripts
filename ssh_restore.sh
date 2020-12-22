@@ -50,10 +50,17 @@ source "${BASH_SOURCE%/*}/scripts/drive_detect.sh"
 source "${BASH_SOURCE%/*}/scripts/ssh_serverdetect.sh"
 
 # query volumes
-echo ${SSH_CALL} "list-volumes"
-VOLUMES=$(${SSH_CALL} "list-volumes" | sort);
-if [[ $? -ne 0 ]]; then logError "Unable to query volume: ${VOLUMES}."; exit 1; fi;
+VOLUMES=$(${SSH_CALL} "list-volumes");
+if [[ $? -ne 0 ]]; then logError "Unable to query volumes: ${VOLUMES}."; exit 1; fi;
 
+# loop through volumes and list snapshots
+for VOLUME in $(echo "${VOLUMES}" | sort)
+do
+  SNAPSHOTS=$(${SSH_CALL} "list-snaphots" "${VOLUME}");
+  LASTSNAPSHOT=$(echo ${SNAPSHOTS} | sort | tail -1)
+done;
+
+# Restore volumes
 logDebug "Detected volumes: ${VOLUMES}";
 
 
