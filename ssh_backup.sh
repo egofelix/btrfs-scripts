@@ -83,8 +83,6 @@ if [[ "${COMMAND,,}" = "test" ]]; then logLine "Test passed"; exit 0; fi;
 # Send Command
 if [[ "${COMMAND,,}" = "send" ]]; then
   logLine "Source Directory: ${SNAPSHOTSPATH}";
-  logLine "Volumes to backup: ${VOLUMES}";
-  
   for VOLUME in ${VOLUMES}; do
     # Skip @volumes
     VOLUME=$(removeLeadingChar "${VOLUME}" "/")
