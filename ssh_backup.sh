@@ -16,12 +16,18 @@ while [[ "$#" -gt 0 ]]; do
   case $1 in
     -s|--source) SNAPSOURCE="$2"; shift ;;
     -v|--verbose) VERBOSE=""; shift ;;
-	-a|--action) ACTION="$2"; shift ;;
+	-c|--command) ACTION="$2"; shift ;;
 	-vol|--volume) if [[ -z ${VOLUMES} ]]; then VOLUMES="$2"; else VOLUMES="${VOLUMES} $2"; fi; shift ;;
 	-t|--target) TARGET="$2"; shift ;;
 	-h|--help) 
 	  SELFNAME=$(basename $BASH_SOURCE) 
-	  echo "Usage: ${SELFNAME} -s|--source [sourcevolume] -a|--action [action] -vol|--volume [volume] -t|--target [targetserver]"
+	  echo "Usage: ${SELFNAME} [-s|--source <sourcevolume>] [-vol|--volume <volume>] [-t|--target <targetserver>] [-c|--command <command>]";
+	  echo "";
+	  echo "    Send Backups and autodetect servers:";
+	  echo "      ${SELFNAME}";
+	  echo "";
+	  echo "    Get timestamp of latest backup for root-volume:";
+	  echo "      ${SELFNAME} -c check-latest -vol root";
 	  exit 0;
 	  ;;
     *) echo "unknown parameter passed: ${1}."; exit 1;;
