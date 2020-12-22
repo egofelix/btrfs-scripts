@@ -59,14 +59,14 @@ for VOLUME in $(echo "${VOLUMES}" | sort)
 do
   SNAPSHOTS=$(${SSH_CALL} "list-snapshots" "${VOLUME}");
   LASTSNAPSHOT=$(echo "${SNAPSHOTS}" | sort | tail -1);
-  logDebug "Latest Snapshot for volume \"${VOLUME}\" is: ${LASTSNAPSHOT}";
+  logDebug "Latest Snapshot for volume \"${VOLUME}\" is: \"${LASTSNAPSHOT}\"";
   
   if [[ -z "${TARGETSNAPSHOT}" ]]; then
     TARGETSNAPSHOT="${LASTSNAPSHOT}"; 
   elif [[ "{$TARGETSNAPSHOT}" == "${LASTSNAPSHOT}" ]]; then
     continue;
   else
-    logError "Cannot restore ${TARGETSNAPSHOT} as volume ${VOLUME} has ${LASTSNAPSHOT} as latest snapshot...";
+    logError "Cannot restore \"${TARGETSNAPSHOT}\" as volume ${VOLUME} has \"${LASTSNAPSHOT}\" as latest snapshot...";
 	exit 1;
   fi;
 done;
