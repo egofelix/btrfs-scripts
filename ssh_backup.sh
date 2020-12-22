@@ -55,7 +55,7 @@ if [[ -z "${SNAPSOURCE}" ]]; then logError "Cannot find snapshot directory"; exi
 
 # Test if SNAPSOURCE is a btrfs subvol
 logDebug "SNAPSOURCE: ${SNAPSOURCE}";
-if ! runCmd mount | grep "${SNAPSOURCE" | grep 'type btrfs'; then logError "Source \"${SNAPSOURCE}\" must be a btrfs volume"; exit 1; fi;
+if ! runCmd mount | grep "${SNAPSOURCE}" | grep 'type btrfs'; then logError "Source \"${SNAPSOURCE}\" must be a btrfs volume"; exit 1; fi;
 
 
 
