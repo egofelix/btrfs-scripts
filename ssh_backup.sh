@@ -62,6 +62,13 @@ if isEmpty "${VOLUMES:-}"; then VOLUMES=$(LANG=C ls ${SNAPSOURCE}/ | sort); fi;
 if isEmpty "${VOLUMES}"; then logError "Could not detect volumes to backup"; exit 1; fi;
 logDebug "VOLUMES: ${VOLUMES}";
 
+# Test if VOLUMES are btrfs subvol's
+for VOLUME in ${VOLUMES}
+do
+  logDebug "Testing VOLUME: ${VOLUME}";
+  if isEmpty $(mount | grep "${VOLUME}" | grep 'type btrfs'); then logError "Source \"${VOLUME}\" must be a btrfs volume"; exit 1; fi;
+done;
+
 
 exit 1;
 
