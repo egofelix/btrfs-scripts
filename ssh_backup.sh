@@ -34,7 +34,7 @@ while [[ "$#" -gt 0 ]]; do
 	  echo "    ${SELFNAME} -t ssh://user@server:port/";
 	  echo "      Send backups to specific server.";
 	  echo "";
-	  echo "Supported commands are: check-latest, send";
+	  echo "Supported commands are: check-latest, send, test";
 	  echo "The default command is: send";
 	  echo "";
 	  echo "If you ommit the <targetserver> then the script will try to locate it via srv-records in dns.";
@@ -72,6 +72,7 @@ done;
 source "${BASH_SOURCE%/*}/scripts/ssh_serverdetect.sh"
 
 # Run
+if [[ "${COMMAND,,}" = "test" ]]; then logLine "Test passed"; exit 0; fi;
 if [[ "${COMMAND,,}" = "check-latest" ]]; then
   for VOLUME in ${VOLUMES}; do
     logDebug "Checking volume: ${VOLUME}...";
