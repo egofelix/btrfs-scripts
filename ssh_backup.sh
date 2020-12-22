@@ -15,7 +15,7 @@ QUIET="false";
 # Scan arguments
 while [[ "$#" -gt 0 ]]; do
   case $1 in
-    -s|--source) SNAPSOURCE="$2"; shift ;;
+    -s|--source) SNAPSOURCE=removeTrailingChar "$2" "/"; shift ;;
     -q|--quiet) QUIET="true"; ;;
 	--debug) DEBUG="true"; ;;
 	-c|--command) ACTION="$2"; shift ;;
@@ -53,6 +53,8 @@ if [ "$EUID" -ne 0 ]; then logError "Please run as root"; exit 1; fi;
 if [[ -z ${SNAPSOURCE:-} ]]; then SNAPSOURCE=$(LANG=C mount | grep '@snapshots' | grep -o 'on /\..* type btrfs' | awk '{print $2}'); fi;
 if [[ -z "${SNAPSOURCE}" ]]; then logError "Cannot find snapshot directory"; exit 1; fi;
 logDebug "SNAPSOURCE: ${SNAPSOURCE}";
+# Test if SNAPSOURCE is a btrfs subvol
+
 
 
 exit 0;
