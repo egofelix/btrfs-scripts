@@ -56,7 +56,19 @@ if [[ $? -ne 0 ]]; then logError "Unable to query volumes: ${VOLUMES}."; exit 1;
 
 # loop through volumes and list snapshots to check if latest snapshot is available for all volumes
 logDebug "Detected volumes: ${VOLUMES}";
-if [[ -z "${TARGETSNAPSHOT:-}" ]]; then TARGETSNAPSHOT=""; fi;
+
+if [[ -z "${TARGETSNAPSHOT:-}" ]]; then
+  for VOLUME in $(echo "${VOLUMES}" | sort)
+  do
+    SNAPSHOTS=$(${SSH_CALL} "list-snapshots" "${VOLUME}");
+    LASTSNAPSHOT=$(echo "${SNAPSHOTS}" | sort | tail -1);
+	TARGETSNAPSHOT=$(echo -e "${LASTSNAPSHOT}\n${TARGETSNAPSHOT:-}" | sort | tail -1);
+  done;
+fi;
+
+logDebug "Snapshot to restore: ${TARGETSNAPSHOT}";
+
+# Test if snapshot exists on every volume
 for VOLUME in $(echo "${VOLUMES}" | sort)
 do
   SNAPSHOTS=$(${SSH_CALL} "list-snapshots" "${VOLUME}");
