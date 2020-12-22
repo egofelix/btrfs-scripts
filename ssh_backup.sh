@@ -77,10 +77,20 @@ done;
 # Detect SSH-Server
 source "${BASH_SOURCE%/*}/scripts/ssh_serverdetect.sh"
 
+# Test Command
+if [[ "${COMMAND,,}" = "test" ]]; then logLine "Test passed"; exit 0; fi;
+
+# Send Command
+if [[ "${COMMAND,,}" = "send" ]]; then
+  logLine "Source Directory: ${SNAPSHOTSPATH}";
+  logLine "Volumes to backup: ${VOLUMES}";
+  exit 1;
+fi;
+
 exit 1;
 
 # Run
-if [[ "${COMMAND,,}" = "test" ]]; then logLine "Test passed"; exit 0; fi;
+
 if [[ "${COMMAND,,}" = "check-latest" ]]; then
   for VOLUME in ${VOLUMES}; do
     logDebug "Checking volume: ${VOLUME}...";
