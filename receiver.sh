@@ -68,7 +68,7 @@ source "${BASH_SOURCE%/*}/includes/lockfile.sh";
 
 
 COMMAND_NAME=$(echo "${COMMAND}" | awk '{print $1}')
-if [[ "${COMMAND_NAME,,}" = "testReceiver" ]]; then
+if [[ "${COMMAND_NAME,,}" = "testreceiver" ]]; then
   echo "success";
   exit 0;
 fi;
