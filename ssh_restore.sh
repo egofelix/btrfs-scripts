@@ -139,15 +139,24 @@ do
   if [[ $? -ne 0 ]]; then logLine "Failed to create volume \"${VOLUME}\": ${CREATERESULT}."; exit 1; fi;
 done;
 
+# Mount root
+while read LINE; do
+  LINEDEV=$(echo "$LINE" | awk '{print $1}');
+  LINEMOUNT=$(echo "$LINE" | awk '{print $2}');
+  LINEFS=$(echo "$LINE" | awk '{print $3}');
+  LINESUBVOL=$(echo "$LINE" | awk '{print $4}' | grep -o -P 'subvol\=[^\s\,\)]*');
+  
+  if [[ "${LINEDEV}" == "/dev/mapper/cryptsystem" ]] && [[ "${LINEMOUNT}" == "/" ]]; then
+    logDebug "Mounting Root...";
+    MOUNTRESULT=$(mount -o "subvol=${LINESUBVOL}" /dev/mapper/cryptsystem "/tmp/mnt/root${LINEMOUNT}");
+	if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
+  fi;
+done < $(cat ${FSTABPATH} | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$');
+
 # Mount regarding to fstab
 if ! runCmd mkdir -p /tmp/mnt/root; then logError "Failed to create root mountpoint"; exit 1; fi;
 MOUNTRESULT=$(mount --fstab "${FSTABPATH}" --target-prefix "/tmp/mnt/root" --source /dev/mapper/cryptsystem -a > /dev/null);
 if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
-
-#while read LINE; do
-#  echo "$LINE"
-#done < ${FSTABPATH};
-
 
 exit 1;
 
