@@ -63,7 +63,9 @@ do
   
   if [[ -z "${TARGETSNAPSHOT}" ]]; then
     TARGETSNAPSHOT="${LASTSNAPSHOT}"; 
-  elif [[ ! "{$TARGETSNAPSHOT}" == "${LASTSNAPSHOT}" ]]; then
+  elif [[ "{$TARGETSNAPSHOT}" == "${LASTSNAPSHOT}" ]]; then
+    continue;
+  else
     logError "Cannot restore ${TARGETSNAPSHOT} as volume ${VOLUME} has ${LASTSNAPSHOT} as latest snapshot...";
 	exit 1;
   fi;
