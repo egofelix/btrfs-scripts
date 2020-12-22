@@ -49,7 +49,7 @@ done
 if [ "$EUID" -ne 0 ]; then logError "Please run as root"; exit 1; fi;
 
 # Search snapshot volume
-if [[ -z ${SNAPSOURCE} ]]; then SNAPSOURCE=$(LANG=C mount | grep '@snapshots' | grep -o 'on /\..* type btrfs' | awk '{print $2}'); fi;
+if [[ -z ${SNAPSOURCE:-} ]]; then SNAPSOURCE=$(LANG=C mount | grep '@snapshots' | grep -o 'on /\..* type btrfs' | awk '{print $2}'); fi;
 if [[ -z "${SNAPSOURCE}" ]]; then logError "Cannot find snapshot directory"; exit 1; fi;
 
 
