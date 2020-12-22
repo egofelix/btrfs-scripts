@@ -139,7 +139,8 @@ do
   if [[ $? -ne 0 ]]; then logLine "Failed to create volume \"${VOLUME}\": ${CREATERESULT}."; exit 1; fi;
 done;
 
-# Mount root
+# Mount
+if ! runCmd mkdir -p /tmp/mnt/root; then logError "Failed to create root mountpoint"; exit 1; fi;
 cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$' | while read LINE; do
   LINEDEV=$(echo "$LINE" | awk '{print $1}');
   LINEMOUNT=$(echo "$LINE" | awk '{print $2}');
@@ -152,6 +153,9 @@ cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$' | while read LI
 	if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
   fi;
 done;
+
+exit 1;
+
 
 # Mount regarding to fstab
 if ! runCmd mkdir -p /tmp/mnt/root; then logError "Failed to create root mountpoint"; exit 1; fi;
