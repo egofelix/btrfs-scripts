@@ -6,31 +6,76 @@ set -uo pipefail
 ## Load Functions
 source "${BASH_SOURCE%/*}/includes/functions.sh"
 
+# Load Variables
+VOLUMES="";
+QUIET="false";
+
+# Scan arguments
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    -s|--source) SNAPSHOTSPATH=$(removeTrailingChar "$2" "/"); shift ;;
+    -q|--quiet) QUIET="true"; ;;
+	--debug) DEBUG="true"; ;;
+	-c|--command) COMMAND="$2"; shift ;;
+	-vol|--volume) if [[ -z ${VOLUMES} ]]; then VOLUMES="$2"; else VOLUMES="${VOLUMES} $2"; fi; shift ;;
+	-t|--target) SSH_URI="$2"; shift ;;
+	-h|--help) 
+	  SELFNAME=$(basename $BASH_SOURCE) 
+	  echo "Usage: ${SELFNAME} [-q|--quiet] [-s|--source <sourcevolume>] [-vol|--volume <volume>] [-t|--target <targetserver>] [-c|--command <command>]";
+	  echo "";
+	  echo "    ${SELFNAME}";
+	  echo "      Send Backups to autodetected server.";
+	  echo "";
+	  echo "    ${SELFNAME} -c check-latest -vol root";
+	  echo "      Get timestamp of latest backup for root-volume.";
+	  echo "";
+	  echo "    ${SELFNAME} -t ssh://user@server:port/";
+	  echo "      Send backups to specific server.";
+	  echo "";
+	  echo "Supported commands are: check-latest, send, test";
+	  echo "The default command is: send";
+	  echo "";
+	  echo "If you ommit the <targetserver> then the script will try to locate it via srv-records in dns.";
+	  echo "";
+	  exit 0;
+	  ;;
+    *) echo "unknown parameter passed: ${1}."; exit 1;;
+  esac
+  shift
+done
+
 ## Script must be started as root
-if [ "$EUID" -ne 0 ]; then
-  echo "Please run as root";
-  exit 1;
-fi;
+if [ "$EUID" -ne 0 ]; then logError "Please run as root"; exit 1; fi;
+
+# Lockfile (Only one simultan instance is allowed)
+LOCKFILE="/var/lock/$(basename $BASH_SOURCE)"
+source "${BASH_SOURCE%/*}/includes/lockfile.sh";
+
+# Search snapshot volume
+if isEmpty "${SNAPSHOTSPATH:-}"; then SNAPSHOTSPATH=$(LANG=C mount | grep '@snapshots' | grep -o 'on /\..* type btrfs' | awk '{print $2}'); fi;
+if isEmpty "${SNAPSHOTSPATH:-}"; then logError "Cannot find snapshot directory"; exit 1; fi;
+
+# Test if SNAPSHOTSPATH is a btrfs subvol
+logDebug "SNAPSHOTSPATH: ${SNAPSHOTSPATH}";
+if isEmpty $(mount | grep "${SNAPSHOTSPATH}" | grep 'type btrfs'); then logError "Source \"${SNAPSHOTSPATH}\" must be a btrfs volume"; exit 1; fi;
+
+# Search volumes
+if isEmpty "${VOLUMES:-}"; then VOLUMES=$(LANG=C ls ${SNAPSHOTSPATH}/ | sort); fi;
+if isEmpty "${VOLUMES}"; then logError "Could not detect volumes to backup"; exit 1; fi;
+
+# Test if VOLUMES are btrfs subvol's
+for VOLUME in ${VOLUMES}
+do
+  logDebug "Testing VOLUME: ${VOLUME}";
+  if isEmpty $(mount | grep "${VOLUME}" | grep 'type btrfs'); then logError "Source \"${VOLUME}\" must be a btrfs volume"; exit 1; fi;
+done;
 
 # Current time
 STAMP=`date -u +"%Y-%m-%d_%H-%M-%S"`
 
-# Search snapshot volume
-SNAPDIR=$(LANG=C mount | grep '@snapshots' | grep -o 'on /\..* type btrfs' | awk '{print $2}')
-if [[ -z "${SNAPDIR}" ]]; then
-	logLine "Cannot find snapshot directory";
-	exit;
-fi;
-
-# Search subvolumes (ignore subvolumes starting with @)
-SUBVOLUMES=$(LANG=C mount | grep 'type btrfs' | grep -v -E 'subvol=[/]{0,1}@' | awk '{print $3}')
-if [[ -z "${SUBVOLUMES}" ]]; then
-	logLine "No subvolumes found";
-	exit;
-fi;
-
-logLine "Target Directory: ${SNAPDIR}";
-for subvolName in ${SUBVOLUMES}
+# Backup
+logLine "Target Directory: ${SNAPSHOTSPATH}";
+for subvolName in ${VOLUMES}
 do
 	# Set SNAPNAME
 	SNAPNAME="${subvolName}"
@@ -53,14 +98,14 @@ do
 	fi;
 	
 	# Create Directory for this volume
-	if [[ ! -d "${SNAPDIR}/${SNAPNAME}" ]]; then
-		mkdir -p ${SNAPDIR}/${SNAPNAME};
+	if [[ ! -d "${SNAPSHOTSPATH}/${SNAPNAME}" ]]; then
+		mkdir -p ${SNAPSHOTSPATH}/${SNAPNAME};
 	fi;
 	
 	# Create Snapshot
-	logLine "Creating Snapshot ${SNAPDIR}/${SNAPNAME}/${STAMP}"
-	if ! runCmd btrfs subvolume snapshot -r ${subvolName} ${SNAPDIR}/${SNAPNAME}/${STAMP}; then
-		logLine "Failed!";
+	logLine "Creating Snapshot ${SNAPSHOTSPATH}/${SNAPNAME}/${STAMP}"
+	if ! runCmd btrfs subvolume snapshot -r ${subvolName} ${SNAPSHOTSPATH}/${SNAPNAME}/${STAMP}; then
+		logError "Failed to create snapshot of ${SNAPSHOTSPATH}/${SNAPNAME}/${STAMP}";
 		exit;
 	fi;
 done;

@@ -15,7 +15,7 @@ QUIET="false";
 # Scan arguments
 while [[ "$#" -gt 0 ]]; do
   case $1 in
-    -s|--source) SNAPSOURCE=$(removeTrailingChar "$2" "/"); shift ;;
+    -s|--source) SNAPSHOTSPATH=$(removeTrailingChar "$2" "/"); shift ;;
     -q|--quiet) QUIET="true"; ;;
 	--debug) DEBUG="true"; ;;
 	-c|--command) COMMAND="$2"; shift ;;
@@ -53,17 +53,16 @@ if [ "$EUID" -ne 0 ]; then logError "Please run as root"; exit 1; fi;
 LOCKFILE="/var/lock/$(basename $BASH_SOURCE)"
 source "${BASH_SOURCE%/*}/includes/lockfile.sh";
 
-
 # Search snapshot volume
-if isEmpty "${SNAPSOURCE:-}"; then SNAPSOURCE=$(LANG=C mount | grep '@snapshots' | grep -o 'on /\..* type btrfs' | awk '{print $2}'); fi;
-if isEmpty "${SNAPSOURCE:-}"; then logError "Cannot find snapshot directory"; exit 1; fi;
+if isEmpty "${SNAPSHOTSPATH:-}"; then SNAPSHOTSPATH=$(LANG=C mount | grep '@snapshots' | grep -o 'on /\..* type btrfs' | awk '{print $2}'); fi;
+if isEmpty "${SNAPSHOTSPATH:-}"; then logError "Cannot find snapshot directory"; exit 1; fi;
 
-# Test if SNAPSOURCE is a btrfs subvol
-logDebug "SNAPSOURCE: ${SNAPSOURCE}";
-if isEmpty $(mount | grep "${SNAPSOURCE}" | grep 'type btrfs'); then logError "Source \"${SNAPSOURCE}\" must be a btrfs volume"; exit 1; fi;
+# Test if SNAPSHOTSPATH is a btrfs subvol
+logDebug "SNAPSHOTSPATH: ${SNAPSHOTSPATH}";
+if isEmpty $(mount | grep "${SNAPSHOTSPATH}" | grep 'type btrfs'); then logError "Source \"${SNAPSHOTSPATH}\" must be a btrfs volume"; exit 1; fi;
 
 # Search volumes
-if isEmpty "${VOLUMES:-}"; then VOLUMES=$(LANG=C ls ${SNAPSOURCE}/ | sort); fi;
+if isEmpty "${VOLUMES:-}"; then VOLUMES=$(LANG=C ls ${SNAPSHOTSPATH}/ | sort); fi;
 if isEmpty "${VOLUMES}"; then logError "Could not detect volumes to backup"; exit 1; fi;
 
 # Test if VOLUMES are btrfs subvol's
@@ -88,20 +87,20 @@ if [[ "${COMMAND,,}" = "check-latest" ]]; then
 
   exit 0;  
 elif [[ "${COMMAND,,}" = "send" ]]; then
-  logLine "Source Directory: ${SNAPSOURCE}";
+  logLine "Source Directory: ${SNAPSHOTSPATH}";
   logLine "Volumes to backup: ${VOLUMES}";
   for volName in ${VOLUMES}
   do
-    SUBVOLUMES=$(LANG=C ls ${SNAPSOURCE}/${volName}/)
+    SUBVOLUMES=$(LANG=C ls ${SNAPSHOTSPATH}/${volName}/)
     if [[ -z "${SUBVOLUMES}" ]]; then
        logLine "Nothing to transfer on Volume ${volName}";
        continue;
 	fi;
 	
-	SUBVOLUMECOUNT=$(LANG=C ls ${SNAPSOURCE}/${volName}/ | sort | wc -l)
-	FIRSTSUBVOLUME=$(LANG=C ls ${SNAPSOURCE}/${volName}/ | sort | head -1)
-	OTHERSUBVOLUMES=$(LANG=C ls ${SNAPSOURCE}/${volName}/ | sort | tail -n +2)
-	LASTSUBVOLUME=$(LANG=C ls ${SNAPSOURCE}/${volName}/ | sort | tail -1)
+	SUBVOLUMECOUNT=$(LANG=C ls ${SNAPSHOTSPATH}/${volName}/ | sort | wc -l)
+	FIRSTSUBVOLUME=$(LANG=C ls ${SNAPSHOTSPATH}/${volName}/ | sort | head -1)
+	OTHERSUBVOLUMES=$(LANG=C ls ${SNAPSHOTSPATH}/${volName}/ | sort | tail -n +2)
+	LASTSUBVOLUME=$(LANG=C ls ${SNAPSHOTSPATH}/${volName}/ | sort | tail -1)
 	
 	# Create Directory for this volume
 	if ! runCmd ${SSH_CALL} "create-volume-directory" "${volName}"; then echo "Failed to create volume directory at server."; exit 1; fi;
@@ -111,7 +110,7 @@ elif [[ "${COMMAND,,}" = "send" ]]; then
 	if [ $? -ne 0 ]; then logLine "Failed to run ssh command: check-volume-backup "${volName}" "${FIRSTSUBVOLUME}"" exit 1; fi;
 	if isFalse ${SUBVOLUME_EXISTS}; then
 	  logLine "Sending backup \"${volName}_${FIRSTSUBVOLUME}\" (Full)";
-	  SENDRESULT=$(btrfs send -q ${SNAPSOURCE}/${volName}/${FIRSTSUBVOLUME} | ${SSH_CALL} create-volume-backup ${volName} ${FIRSTSUBVOLUME})	
+	  SENDRESULT=$(btrfs send -q ${SNAPSHOTSPATH}/${volName}/${FIRSTSUBVOLUME} | ${SSH_CALL} create-volume-backup ${volName} ${FIRSTSUBVOLUME})	
 	  if [[ $? -ne 0 ]] || [[ "${SENDRESULT}" != "success" ]]; then logLine "Failed to send backup."; exit 1; fi;
 	fi;
 	
@@ -124,12 +123,12 @@ elif [[ "${COMMAND,,}" = "send" ]]; then
 	  if [ $? -ne 0 ]; then logLine "Failed to run ssh command: check-volume-backup "${volName}" "${FIRSTSUBVOLUME}"" exit; fi;
 	  if isFalse ${SUBVOLUME_EXISTS}; then
 		logLine "Sending backup \"${volName}_${subvolName}\" (Incremental)";
-		SENDRESULT=$(btrfs send -q -p ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSOURCE}/${volName}/${subvolName} | ${SSH_CALL} create-volume-backup ${volName} ${subvolName})	
+		SENDRESULT=$(btrfs send -q -p ${SNAPSHOTSPATH}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSHOTSPATH}/${volName}/${subvolName} | ${SSH_CALL} create-volume-backup ${volName} ${subvolName})	
 	    if [[ $? -ne 0 ]] || [[ "${SENDRESULT}" != "success" ]]; then logLine "Failed to send backup. ${SENDRESULT}"; exit 1; fi;
 	  fi;
 		
 	  # Remove previous subvolume as it is not needed here anymore!
-	  btrfs subvolume delete ${SNAPSOURCE}/${volName}/${PREVIOUSSUBVOLUME} &> /dev/null
+	  btrfs subvolume delete ${SNAPSHOTSPATH}/${volName}/${PREVIOUSSUBVOLUME} &> /dev/null
 		
 	  # Check Result
 	  if [ $? -ne 0 ]; then
