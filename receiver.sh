@@ -57,7 +57,7 @@ function containsIllegalCharacter {
 }
 
 echo ${COMMAND};
-if [[ containsIllegalCharacter "${COMMAND}" ]]; then logError "Illegal character detected in \"$1\"."; exit 1; fi;
+if containsIllegalCharacter "${COMMAND}"; then logError "Illegal character detected in \"$1\"."; exit 1; fi;
 logDebug "Bllaaaa";
 # We must have first parameter
 if [[ -z "$1" ]]; then
