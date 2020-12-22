@@ -41,8 +41,9 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 function containsIllegalCharacter {
-  ILLEGALCHARACTERS=("." "$" "&" "(" ")" "{" "}" "[" "]" ";" "<" ">" "\`" "|" "*" "?" "\"" "'" "*")
-  for CHAR in $ILLEGALCHARACTERS
+  logDebug "containsIllegalCharacter $1";
+  local ILLEGALCHARACTERS=("." "$" "&" "(" ")" "{" "}" "[" "]" ";" "<" ">" "\`" "|" "*" "?" "\"" "'" "*")
+  for CHAR in ${ILLEGALCHARACTERS}
   do
     logDebug "Testing ${CHAR}";
     if [[ "$1" = *"${CHAR}"* ]]; then return 0; fi;
