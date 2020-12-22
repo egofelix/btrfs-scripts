@@ -111,9 +111,9 @@ if [[ "${COMMAND,,}" = "send" ]]; then
 	CHECKVOLUMERESULT=$(${SSH_CALL} check-volume "${VOLUME}" "${FIRSTSNAPSHOT}");
 	if [ $? -ne 0 ]; then logError "Command 'check-volume \"${VOLUME}\" \"${FIRSTSNAPSHOT}\"' failed: ${CHECKVOLUMERESULT}."; exit 1; fi;
 	if isFalse ${CHECKVOLUMERESULT}; then
-	  logLine "Sending backup \"${VOLUME}\"-\"${FIRSTSUBVOLUME}\"... (Full)";
-	  SENDRESULT=$(btrfs send -q ${SNAPSHOTSPATH}/${VOLUME}/${FIRSTSUBVOLUME} | ${SSH_CALL} receive-volume "${VOLUME}" "${FIRSTSUBVOLUME}")
-	  if [[ $? -ne 0 ]] || [[ "${SENDRESULT}" != "success" ]]; then logError "Command 'receive-volume \"${VOLUME}\" \"${FIRSTSUBVOLUME}\"' failed: ${SENDRESULT}"; exit 1; fi;
+	  logLine "Sending backup \"${VOLUME}\"-\"${FIRSTSNAPSHOT}\"... (Full)";
+	  SENDRESULT=$(btrfs send -q ${SNAPSHOTSPATH}/${VOLUME}/${FIRSTSNAPSHOT} | ${SSH_CALL} receive-volume "${VOLUME}" "${FIRSTSNAPSHOT}")
+	  if [[ $? -ne 0 ]] || [[ "${SENDRESULT}" != "success" ]]; then logError "Command 'receive-volume \"${VOLUME}\" \"${FIRSTSNAPSHOT}\"' failed: ${SENDRESULT}"; exit 1; fi;
 	fi;
   done;
   exit 1;
