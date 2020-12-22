@@ -13,7 +13,7 @@ if [[ -z "$1" ]]; then
 fi;
 
 function containsIllegalCharacter {
-  ILLEGALCHARACTERS=("." "$" "&" "(" ")" "{" "}" "[" "]" ";" "<" ">" "\`" "|" "*" "?" "\"" "'")
+  ILLEGALCHARACTERS=("." "$" "&" "(" ")" "{" "}" "[" "]" ";" "<" ">" "\`" "|" "*" "?" "\"" "'" "*")
   for CHAR in $ILLEGALCHARACTERS;
   do
     if [[ "$1" = *"${CHAR}"* ]]; then return 0; fi;
