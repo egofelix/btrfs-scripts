@@ -50,7 +50,7 @@ done
 if [ "$EUID" -ne 0 ]; then logError "Please run as root"; exit 1; fi;
 
 # PRIVATE
-LOCKFILE="/var/lock/`basename $0`"
+LOCKFILE="/var/lock/$(basename $BASH_SOURCE)"
 LOCKFD=99
 _lock()             { flock -$1 $LOCKFD; }
 _no_more_locking()  { _lock u; _lock xn && rm -f $LOCKFILE; }
