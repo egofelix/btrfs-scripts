@@ -54,11 +54,19 @@ VOLUMES=$(${SSH_CALL} "list-volumes");
 if [[ $? -ne 0 ]]; then logError "Unable to query volumes: ${VOLUMES}."; exit 1; fi;
 
 # loop through volumes and list snapshots
+TARGETSNAPSHOT=""
 for VOLUME in $(echo "${VOLUMES}" | sort)
 do
   SNAPSHOTS=$(${SSH_CALL} "list-snapshots" "${VOLUME}");
   LASTSNAPSHOT=$(echo "${SNAPSHOTS}" | sort | tail -1);
   logDebug "Latest Snapshot for volume \"${VOLUME}\" is: ${LASTSNAPSHOT}";
+  
+  if [[ -z "${TARGETSNAPSHOT}" ]]; then
+    TARGETSNAPSHOT="${LASTSNAPSHOT}"; 
+  elif [[ "{$TARGETSNAPSHOT}" != "${LASTSNAPSHOT}" ]]; then
+    logError "Cannot restore ${TARGETSNAPSHOT} as volumes have different dates...";
+	exit 1;
+  fi;
 done;
 
 # Restore volumes
