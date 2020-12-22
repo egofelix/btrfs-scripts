@@ -29,27 +29,25 @@ pacman -S --noconfirm btrfs-progs openssh linux-firmware
 EOF
 if isTrue "${CRYPTED}"; then
 	cat >> /tmp/mnt/root/chroot.sh <<- EOF
-pacman -S --noconfirm cryptsetup
+pacman -S --noconfirm cryptsetup mkinitcpio-netconf mkinitcpio-tinyssh mkinitcpio-utils
 EOF
 fi;
 chroot /tmp/mnt/root /chroot.sh;
 
-# Remove unneccesarry hooks from mkinitcpio.conf
-#HOOKS="HOOKS=($(source /etc/mkinitcpio.conf && HOOKS=(${HOOKS[@]/archiso_shutdown}) && HOOKS=(${HOOKS[@]/archiso_pxe_common}) && HOOKS=(${HOOKS[@]/archiso_pxe_nbd}) && HOOKS=(${HOOKS[@]/archiso_pxe_nfs}) && HOOKS=(${HOOKS[@]/archiso_pxe_http}) && HOOKS=(${HOOKS[@]/archiso_kms}) && HOOKS=(${HOOKS[@]/archiso_loop_mnt}) && HOOKS=(${HOOKS[@]/archiso}) && HOOKS=(${HOOKS[@]/archiso}) && HOOKS=(${HOOKS[@]/memdisk}) && echo ${HOOKS[@]} | xargs echo -n))"
-#sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
+# Setup crypto
+if isTrue "${CRYPTED}"; then
+    # Create crypttab
+	echo cryptsystem PARTLABEL=system none luks > /tmp/mnt/root/etc/crypttab
+	
+	# Setup hooks for cryptsetup to mkinitcpio.conf
+	HOOKS="HOOKS=(base udev autodetect modconf block keyboard keymap netconf tinyssh encryptssh filesystems fsck)"
+	#HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && if [[ ${HOOKS[@]} != *"keyboard"* ]]; then HOOKS+=(keyboard); fi && if [[ ${HOOKS[@]} != *"keymap"* ]]; then HOOKS+=(keymap); fi && if [[ ${HOOKS[@]} != *"encrypt"* ]]; then HOOKS+=(encrypt); fi && echo ${HOOKS[@]} | xargs echo -n))"
+	sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
+fi;
 
 # Add usr hook to mkinitcpio.conf if usr is on a subvolume
 if [[ ${SUBVOLUMES} == *"usr"* ]]; then
 	HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && if [[ ${HOOKS[@]} != *"usr"* ]]; then HOOKS+=(usr); fi && echo ${HOOKS[@]} | xargs echo -n))"
-	sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
-fi;
-
-# Setup crypto
-if isTrue "${CRYPTED}"; then
-	echo cryptsystem PARTLABEL=system none luks > /tmp/mnt/root/etc/crypttab
-	
-	# Add hooks for cryptsetup to mkinitcpio.conf
-	HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && if [[ ${HOOKS[@]} != *"keyboard"* ]]; then HOOKS+=(keyboard); fi && if [[ ${HOOKS[@]} != *"keymap"* ]]; then HOOKS+=(keymap); fi && if [[ ${HOOKS[@]} != *"encrypt"* ]]; then HOOKS+=(encrypt); fi && echo ${HOOKS[@]} | xargs echo -n))"
 	sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
 fi;
 
@@ -58,7 +56,7 @@ sed -i 's/^#PermitRootLogin .*/PermitRootLogin yes/' /tmp/mnt/root/etc/ssh/sshd_
 sed -i 's/^PermitRootLogin .*/PermitRootLogin yes/' /tmp/mnt/root/etc/ssh/sshd_config
 
 # Install bootmanager
-source "${BASH_SOURCE%/*}/bootmanager_archlinux.sh"
+source "${BASH_SOURCE%/*}/bootmanager.sh"
 
 # Setup Network
 rm -f /tmp/mnt/root/etc/network/interfaces
