@@ -103,6 +103,7 @@ if [[ "${COMMAND,,}" = "send" ]]; then
 	LASTSNAPSHOT=$(LANG=C ls ${SNAPSHOTSPATH}/${VOLUME}/ | sort | tail -1)
 	
 	# Create Directory for this volume on the backup server
+	logDebug "Ensuring volume directory at server for \"${VOLUME}\"...";
 	if ! runCmd ${SSH_CALL} "create-volume-directory" "${VOLUME}"; then echo "Failed to create volume directory \"{VOLUME}\" at server."; exit 1; fi;
   done;
   exit 1;
