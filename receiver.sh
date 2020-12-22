@@ -67,7 +67,6 @@ if [[ "$EUID" -ne 0 ]]; then logError "Please run as root"; exit 1; fi;
 
 # Lockfile (Only one simultan instance per SNAPSHOTSPATH is allowed)
 LOCKFILE="${SNAPSHOTSPATH}/.$(basename $BASH_SOURCE)"
-source "${BASH_SOURCE%/*}/includes/lockfile.sh";
 
 # Command testreceiver
 if [[ "${COMMAND_NAME,,}" = "testreceiver" ]]; then
@@ -80,6 +79,9 @@ if [[ "${COMMAND_NAME,,}" = "create-volume" ]]; then
   # Test <volume> parameter
   VOLUME=$(echo "${COMMAND}" | awk '{print $2}');
   if [[ -z "${VOLUME}" ]]; then logError "Usage: create-volume <volume>"; exit 1; fi;
+
+  # Aquire lock
+  source "${BASH_SOURCE%/*}/includes/lockfile.sh";
   
   # Create directory
   if ! runCmd mkdir -p ${SNAPSHOTSPATH}/${VOLUME}; then logError "Failed to create volume directory."; exit 1; fi;
@@ -125,6 +127,9 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
   NAME=$(echo "${COMMAND}" | awk '{print $3}');
   if [[ -z "${VOLUME}" ]] || [[ -z "${NAME}" ]]; then logError "Usage: upload-snapshot <volume> <name>"; exit 1; fi;
   
+  # Aquire lock
+  source "${BASH_SOURCE%/*}/includes/lockfile.sh";
+  
   # Check if the snapshot exists already
   if [[ -d "${SNAPSHOTSPATH}/${VOLUME}/${NAME}" ]]; then logError "already exists"; exit 1; fi;
   
@@ -153,6 +158,9 @@ if [[ "${COMMAND_NAME,,}" = "download-snapshot" ]]; then
   # Check if snapshot exists
   if [[ ! -d "${SNAPSHOTSPATH}/${VOLUME}/${NAME}" ]]; then logError "snapshot does not exists"; exit 1; fi;
 
+  # Aquire lock
+  source "${BASH_SOURCE%/*}/includes/lockfile.sh";
+  
   # Send Snapshot
   btrfs send -q ${SNAPSHOTSPATH}/${VOLUME}/${NAME};
   if [[ $? -ne 0 ]]; then logError "Error sending snapshot."; exit 1; fi;
