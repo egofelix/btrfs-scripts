@@ -73,7 +73,13 @@ source "${BASH_SOURCE%/*}/scripts/ssh_serverdetect.sh"
 
 # Run
 if [[ "${COMMAND,,}" = "check-latest" ]]; then
-  logError 'NotImplementedYet';
+  for VOLUME in ${VOLUMES}; do
+    CHECKRESULT=$(${SSH_CALL} "check-volume-directory" "${VOLUME}")
+	if [[ $? -ne 0 ]]; then logError "Could not check-volume \"${VOLUME}\": ${CHECKRESULT}."; exit 1; fi;
+	echo "${VOLUME}: ${CHECKRESULT}";
+  done
+
+  exit 0;  
 elif [[ "${COMMAND,,}" = "send" ]]; then
   logLine "Source Directory: ${SNAPSOURCE}";
   logLine "Volumes to backup: ${VOLUMES}";
