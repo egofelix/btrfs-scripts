@@ -48,6 +48,18 @@ if isEmpty "${COMMAND:-}"; then logError "<command> must be provided."; exit 1; 
 
 # Test if SNAPSHOTSPATH is a btrfs subvol
 logDebug "SNAPSHOTSPATH: ${SNAPSHOTSPATH}";
+SNAPSHOTMOUNT=$(LANG=C findmnt -n -o SOURCE --target "${SNAPSHOTSPATH}")
+if [[ $? -ne 0 ]] || [[ -z "${SNAPSHOTMOUNT}" ]]; then logError "Could not find mount for \"${SNAPSHOTSPATH}\"."; exit 1; fi;
+SNAPSHOTMOUNTDEVICE=$(echo "${SNAPSHOTMOUNT}" | awk -F'[' '{print $1}')
+if [[ -z "${SNAPSHOTMOUNTDEVICE}" ]]; then logError "Could not find device for ${SNAPSHOTMOUNTDEVICE}."; exit 1; fi;
+SNAPSHOTMOUNTVOLUME=$(echo "${SNAPSHOTMOUNT}" | awk -F'[' '{print $2}' | awk -F']' '{print $1}')
+if [[ -z "${SNAPSHOTMOUNTVOLUME}" ]]; then logError "Could not find volume for ${SNAPSHOTMOUNTVOLUME}."; exit 1; fi;
+if [[ ! ${MOUNTVOLUME} = *"@"* ]]; then logWarn "The target directory will also be snapshooted/backedup, consider using a targetvolume with an @ name..."; fi;
+
+
+exit 0;
+
+
 if isEmpty $(LANG=C mount | grep "${SNAPSHOTSPATH}" | grep 'type btrfs'); then logError "Source \"${SNAPSHOTSPATH}\" must be a btrfs volume"; exit 1; fi;
 
 ## Script must be started as root

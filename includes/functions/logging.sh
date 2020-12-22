@@ -5,6 +5,10 @@ function logDebug {
   fi;
 }
 
+function logWarn {
+  echo "[WARN] $@";
+}
+
 function logLine {
   if isTrue "${QUIET:-}"; then return; fi;
   echo $@;
