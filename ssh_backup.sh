@@ -97,7 +97,13 @@ if [[ "${COMMAND,,}" = "send" ]]; then
        continue;
 	fi;
 	
+	SNAPSHOTCOUNT=$(LANG=C ls ${SNAPSHOTSPATH}/${VOLUME}/ | sort | wc -l)
+	FIRSTSNAPSHOT=$(LANG=C ls ${SNAPSHOTSPATH}/${VOLUME}/ | sort | head -1)
+	OTHERSNAPSHOTS=$(LANG=C ls ${SNAPSHOTSPATH}/${VOLUME}/ | sort | tail -n +2)
+	LASTSNAPSHOT=$(LANG=C ls ${SNAPSHOTSPATH}/${VOLUME}/ | sort | tail -1)
 	
+	# Create Directory for this volume on the backup server
+	if ! runCmd ${SSH_CALL} "create-volume-directory" "${VOLUME}"; then echo "Failed to create volume directory \"{VOLUME}\" at server."; exit 1; fi;
   done;
   exit 1;
 fi;
