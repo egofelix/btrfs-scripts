@@ -47,7 +47,7 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 ## Script must be started as root
-if [ "$EUID" -ne 0 ]; then logError "Please run as root"; exit 1; fi;
+if [[ "$EUID" -ne 0 ]]; then logError "Please run as root"; exit 1; fi;
 
 # Lockfile (Only one simultan instance is allowed)
 LOCKFILE="/var/lock/$(basename $BASH_SOURCE)"
@@ -95,26 +95,52 @@ if [[ "${COMMAND,,}" = "send" ]]; then
        continue;
 	fi;
 	
-	SNAPSHOTCOUNT=$(LANG=C ls ${SNAPSHOTSPATH}/${VOLUME}/ | sort | wc -l)
+	#SNAPSHOTCOUNT=$(LANG=C ls ${SNAPSHOTSPATH}/${VOLUME}/ | sort | wc -l)
 	FIRSTSNAPSHOT=$(LANG=C ls ${SNAPSHOTSPATH}/${VOLUME}/ | sort | head -1)
 	OTHERSNAPSHOTS=$(LANG=C ls ${SNAPSHOTSPATH}/${VOLUME}/ | sort | tail -n +2)
 	LASTSNAPSHOT=$(LANG=C ls ${SNAPSHOTSPATH}/${VOLUME}/ | sort | tail -1)
+	logDebug "FIRSTSNAPSHOT: ${FIRSTSNAPSHOT}";
+	logDebug "LASTSNAPSHOT: ${LASTSNAPSHOT}";
+	logDebug "OTHERSNAPSHOTS: ${OTHERSNAPSHOTS}";
 	
 	# Create Directory for this volume on the backup server
 	logDebug "Ensuring volume directory at server for \"${VOLUME}\"...";
 	CREATERESULT=$(${SSH_CALL} "create-volume" "${VOLUME}");
-	if [ $? -ne 0 ]; then logError "Command 'create-volume \"${VOLUME}\"' failed: ${CREATERESULT}."; exit 1; fi;
+	if [[ $? -ne 0 ]]; then logError "Command 'create-volume \"${VOLUME}\"' failed: ${CREATERESULT}."; exit 1; fi;
 	
 	# Send FIRSTSNAPSHOT
 	CHECKVOLUMERESULT=$(${SSH_CALL} check-volume "${VOLUME}" "${FIRSTSNAPSHOT}");
-	if [ $? -ne 0 ]; then logError "Command 'check-volume \"${VOLUME}\" \"${FIRSTSNAPSHOT}\"' failed: ${CHECKVOLUMERESULT}."; exit 1; fi;
+	if [[ $? -ne 0 ]]; then logError "Command 'check-volume \"${VOLUME}\" \"${FIRSTSNAPSHOT}\"' failed: ${CHECKVOLUMERESULT}."; exit 1; fi;
 	if isFalse ${CHECKVOLUMERESULT}; then
 	  logLine "Sending snapshot \"${FIRSTSNAPSHOT}\" for volume \"${VOLUME}\"... (Full)";
-	  SENDRESULT=$(btrfs send -q ${SNAPSHOTSPATH}/${VOLUME}/${FIRSTSNAPSHOT} | ${SSH_CALL} receive-volume "${VOLUME}" "${FIRSTSNAPSHOT}")
+	  SENDRESULT=$(btrfs send -q ${SNAPSHOTSPATH}/${VOLUME}/${FIRSTSNAPSHOT} | ${SSH_CALL} receive-volume "${VOLUME}" "${FIRSTSNAPSHOT}");
 	  if [[ $? -ne 0 ]] || [[ "${SENDRESULT}" != "success" ]]; then logError "Command 'receive-volume \"${VOLUME}\" \"${FIRSTSNAPSHOT}\"' failed: ${SENDRESULT}"; exit 1; fi;
 	fi;
+  
+    # Now loop over incremental snapshots
+    PREVIOUSSNAPSHOT=${FIRSTSNAPSHOT}
+    for SNAPSHOT in ${OTHERSNAPSHOTS}
+    do
+      CHECKVOLUMERESULT=$(${SSH_CALL} check-volume "${VOLUME}" "${SNAPSHOT}");
+	  if [[ $? -ne 0 ]]; then logError "Command 'check-volume \"${VOLUME}\" \"${SNAPSHOT}\"' failed: ${CHECKVOLUMERESULT}."; exit 1; fi;
+	  if isFalse ${CHECKVOLUMERESULT}; then
+	    logLine "Sending snapshot \"${FIRSTSNAPSHOT}\" for volume \"${VOLUME}\"... (Incremental)";
+	    SENDRESULT=$(btrfs send -q -p ${SNAPSHOTSPATH}/${VOLUME}/${PREVIOUSSNAPSHOT} ${SNAPSHOTSPATH}/${VOLUME}/${SNAPSHOT} | ${SSH_CALL} receive-volume "${VOLUME}" "${SNAPSHOT}");
+	    if [[ $? -ne 0 ]] || [[ "${SENDRESULT}" != "success" ]]; then logError "Command 'receive-volume \"${VOLUME}\" \"${SNAPSHOT}\"' failed: ${SENDRESULT}"; exit 1; fi;
+	  fi;
+
+	  # Remove previous subvolume as it is not needed here anymore!	  
+	  logDebug "Removing SNAPSHOT \"${PREVIOUSSNAPSHOT}\"...";
+	  REMOVERESULT=$(btrfs subvolume delete ${SNAPSHOTSPATH}/${VOLUME}/${PREVIOUSSNAPSHOT})
+	  if [[ $? -ne 0 ]]; then logError "Failed to remove snapshot \"${SNAPSHOT}\" for volume \"${VOLUME}\": ${REMOVERESULT}."; exit 1; fi;
+	  
+	  # Remember this snapshot as previos so we can send the next following backup as incremental
+	  PREVIOUSSNAPSHOT=${SNAPSHOT}
+    done;
   done;
-  exit 1;
+	
+  logLine "All snapshots has been transfered";
+  exit 0;
 fi;
 
 exit 1;

@@ -41,7 +41,7 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 ## Script must be started as root
-if [ "$EUID" -ne 0 ]; then logError "Please run as root"; exit 1; fi;
+if [[ "$EUID" -ne 0 ]]; then logError "Please run as root"; exit 1; fi;
 
 # Lockfile (Only one simultan instance is allowed)
 LOCKFILE="/var/lock/$(basename $BASH_SOURCE)"
