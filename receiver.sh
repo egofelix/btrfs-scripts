@@ -91,7 +91,7 @@ if [[ "${COMMAND_NAME,,}" = "check-volume" ]]; then
   # Test <volume> and <name> parameter
   VOLUME=$(echo "${COMMAND}" | awk '{print $2}');
   NAME=$(echo "${COMMAND}" | awk '{print $3}');
-  if [[ -z "${VOLUME}" ]] || [ -z "${NAME}" ]]; then logError "Usage: check-volume <volume> <name>"; exit 1; fi;
+  if [[ -z "${VOLUME}" ]] || [[ -z "${NAME}" ]]; then logError "Usage: check-volume <volume> <name>"; exit 1; fi;
   
   # Test and return
   if [[ ! -d "${SNAPSHOTSPATH}/${VOLUME}/${NAME}" ]]; then echo "false"; exit 0; fi;
