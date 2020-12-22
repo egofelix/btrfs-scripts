@@ -1,6 +1,6 @@
 #!/bin/bash
 if ! isEmpty "${SSH_URI:-}"; then
-  if [[ ! "${SSH_URI,,}" = "ssh://"*; ]]; then echo "SSH_URI must start with ssh://"; exit 1; fi;
+  if [[ "${SSH_URI,,}" != "ssh://"* ]]; then echo "SSH_URI must start with ssh://"; exit 1; fi;
   
   # TODO split server
 fi;
