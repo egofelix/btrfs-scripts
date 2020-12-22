@@ -15,21 +15,21 @@ QUIET="false";
 # Scan arguments
 while [[ "$#" -gt 0 ]]; do
   case $1 in
-    -s|--source) SNAPSHOTSPATH=$(removeTrailingChar "$2" "/"); shift ;;
-    -q|--quiet) QUIET="true"; ;;
+    -q|--quiet) QUIET="true"; QUIETPS=" &>/dev/null"; ;;
 	--debug) DEBUG="true"; ;;
+    -s|--source) SNAPSHOTSPATH=$(removeTrailingChar "$2" "/"); shift ;;
 	-c|--command) COMMAND="$2"; shift ;;
-	-vol|--volume) if [[ -z ${VOLUMES} ]]; then VOLUMES="$2"; else VOLUMES="${VOLUMES} $2"; fi; shift ;;
+	-v|--volume) if [[ -z ${VOLUMES} ]]; then VOLUMES="$2"; else VOLUMES="${VOLUMES} $2"; fi; shift ;;
 	-t|--target) SSH_URI="$2"; shift ;;
 	-h|--help) 
 	  SELFNAME=$(basename $BASH_SOURCE) 
-	  echo "Usage: ${SELFNAME} [-q|--quiet] [-s|--source <sourcevolume>] [-vol|--volume <volume>] [-t|--target <targetserver>] [-c|--command <command>]";
+	  echo "Usage: ${SELFNAME} [-q|--quiet] [-s|--source <sourcevolume>] [-v|--volume <volume>] [-t|--target <targetserver>] [-c|--command <command>]";
 	  echo "";
 	  echo "    ${SELFNAME}";
 	  echo "      Send Backups to autodetected server.";
 	  echo "";
-	  echo "    ${SELFNAME} -c check-latest -vol root";
-	  echo "      Get timestamp of latest backup for root-volume.";
+	  echo "    ${SELFNAME} -c check-latest --volume root.data";
+	  echo "      Get timestamp of latest backup-volume root-data.";
 	  echo "";
 	  echo "    ${SELFNAME} -t ssh://user@server:port/";
 	  echo "      Send backups to specific server.";
@@ -62,18 +62,22 @@ logDebug "SNAPSHOTSPATH: ${SNAPSHOTSPATH}";
 if isEmpty $(mount | grep "${SNAPSHOTSPATH}" | grep 'type btrfs'); then logError "Source \"${SNAPSHOTSPATH}\" must be a btrfs volume"; exit 1; fi;
 
 # Search volumes
-if isEmpty "${VOLUMES:-}"; then VOLUMES=$(LANG=C ls ${SNAPSHOTSPATH}/ | sort | uniq); fi;
+if isEmpty "${VOLUMES:-}"; then VOLUMES=$(LANG=C mount | grep -o -P 'subvol\=[^\s\,\)]*' | awk -F'=' '{print $2}' | sort | uniq); fi;
 if isEmpty "${VOLUMES}"; then logError "Could not detect volumes to backup"; exit 1; fi;
 
 # Test if VOLUMES are btrfs subvol's
 for VOLUME in ${VOLUMES}
 do
+  VOLUME=$(removeLeadingChar "${VOLUME}" "/")
+  if [[ "${VOLUME}" = "@"* ]]; then continue; fi;
   logDebug "Testing VOLUME: ${VOLUME}";
-  if isEmpty $(mount | grep "${VOLUME}" | grep 'type btrfs'); then logError "Source \"${VOLUME}\" must be a btrfs volume"; exit 1; fi;
+  if isEmpty $(LANG=C mount | grep -P "[\(\,](subvol\=[/]{0,1}${VOLUME})[\)\,]" | grep 'type btrfs'); then logError "Source \"${VOLUME}\" could not be found."; exit 1; fi;
 done;
 
 # Detect SSH-Server
 source "${BASH_SOURCE%/*}/scripts/ssh_serverdetect.sh"
+
+exit 1;
 
 # Run
 if [[ "${COMMAND,,}" = "test" ]]; then logLine "Test passed"; exit 0; fi;

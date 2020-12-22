@@ -8,18 +8,19 @@ source "${BASH_SOURCE%/*}/includes/functions.sh"
 
 # Load Variables
 VOLUMES="";
-QUIET="false";
+QUIET="false"; QUIETPS="";
+
 
 # Scan arguments
 while [[ "$#" -gt 0 ]]; do
   case $1 in
-    -t|--target) SNAPSHOTSPATH=$(removeTrailingChar "$2" "/"); shift ;;
-    -q|--quiet) QUIET="true"; ;;
+    -q|--quiet) QUIET="true"; QUIETPS=" &>/dev/null"; ;;
 	--debug) DEBUG="true"; ;;
-	-vol|--volume) if [[ -z ${VOLUMES} ]]; then VOLUMES="$2"; else VOLUMES="${VOLUMES} $2"; fi; shift ;;
+    -t|--target) SNAPSHOTSPATH=$(removeTrailingChar "$2" "/"); shift ;;
+	-v|--volume) if [[ -z ${VOLUMES} ]]; then VOLUMES="$2"; else VOLUMES="${VOLUMES} $2"; fi; shift ;;
 	-h|--help) 
 	  SELFNAME=$(basename $BASH_SOURCE) 
-	  echo "Usage: ${SELFNAME} [-q|--quiet] [-vol|--volume <volume>] [-t|--target <targetdirectory>]";
+	  echo "Usage: ${SELFNAME} [-q|--quiet] [-v|--volume <volume>] [-t|--target <targetdirectory>]";
 	  echo "";
 	  echo "    ${SELFNAME}";
 	  echo "      Create snapshots of every mounted volume.";
