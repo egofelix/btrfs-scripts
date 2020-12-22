@@ -51,12 +51,13 @@ function containsIllegalCharacter {
 		return 0;
 	fi;
   done;
+  
   return 1;
 }
 
-echo ${COMMAND}
+echo ${COMMAND};
 if containsIllegalCharacter "${COMMAND}"; then logError "Illegal character detected in \"$1\"."; exit 1; fi;
-
+logDebug "Bllaaaa";
 # We must have first parameter
 if [[ -z "$1" ]]; then
 	echo "Missing Home dir in first paramete";
