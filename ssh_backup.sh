@@ -101,7 +101,7 @@ if [[ "${COMMAND,,}" = "send" ]]; then
 	LASTSNAPSHOT=$(LANG=C ls ${SNAPSHOTSPATH}/${VOLUME}/ | sort | tail -1)
 	logDebug "FIRSTSNAPSHOT: ${FIRSTSNAPSHOT}";
 	logDebug "LASTSNAPSHOT: ${LASTSNAPSHOT}";
-	logDebug OTHERSNAPSHOTS: $(removeTrailingChar $(echo "${OTHERSNAPSHOTS}" | tr '\n' ',') ',');;
+	logDebug OTHERSNAPSHOTS: $(removeTrailingChar $(echo "${OTHERSNAPSHOTS}" | tr '\n' ',') ',');
 	
 	# Create Directory for this volume on the backup server
 	logDebug "Ensuring volume directory at server for \"${VOLUME}\"...";
