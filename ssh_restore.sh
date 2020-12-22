@@ -121,7 +121,7 @@ do
   fi;
 done;
 if [[ ! -z "${FSTABPATH}" ]]; then logError "Could not locate /etc/fstab"; exit 1; fi;
-
+logDebug "FSTABPATH: ${FSTABPATH}";
 
 exit 1;
 
