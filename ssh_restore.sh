@@ -104,6 +104,24 @@ do
   if [[ $? -ne 0 ]]; then logLine "Failed to receive the snapshot for volume \"${VOLUME}\"."; exit 1; fi;
 done;
 
+# Scan for fstab
+FSTABPATH="";
+logDebug "Searching for /etc/fstab...";
+for VOLUME in $(echo "${VOLUMES}" | sort)
+do
+  logDebug "Searching in volume \"${VOLUME}\"...";
+  
+  if [[ -f "/tmp/mnt/disks/system/@snapshots/${VOLUME}/etc/fstab" ]]; then
+    if [[ ! -z "${FSTABPATH}" ]]; then
+	  logError "Multiple fstab files found. Aborting.";
+	  exit 1;
+	fi;
+	
+    FSTABPATH="/tmp/mnt/disks/system/@snapshots/${VOLUME}/etc/fstab";
+  fi;
+done;
+if [[ ! -z "${FSTABPATH}" ]]; then logError "Could not locate /etc/fstab"; exit 1; fi;
+
 
 exit 1;
 
