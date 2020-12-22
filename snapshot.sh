@@ -104,7 +104,7 @@ do
 	
 	# Create Snapshot
 	logLine "Creating Snapshot ${SNAPSHOTSPATH}/${SNAPNAME}/${STAMP}"
-	if ! runCmd btrfs subvolume snapshot -r ${subvolName} ${SNAPSHOTSPATH}/${SNAPNAME}/${STAMP}; then
+	if ! runCmd btrfs subvolume snapshot -r ${subvolName}/ ${SNAPSHOTSPATH}/${SNAPNAME}/${STAMP}; then
 		logError "Failed to create snapshot of ${SNAPSHOTSPATH}/${SNAPNAME}/${STAMP}";
 		exit;
 	fi;
