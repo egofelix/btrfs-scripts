@@ -46,7 +46,10 @@ function containsIllegalCharacter {
   for CHAR in ${ILLEGALCHARACTERS}
   do
     logDebug "Testing ${CHAR}";
-    if [[ "$1" = *"${CHAR}"* ]]; then return 0; fi;
+    if [[ "$1" = *"${CHAR}"* ]]; then 
+	  logDebug "Detected";
+		return 0;
+	fi;
   done;
   return 1;
 }
