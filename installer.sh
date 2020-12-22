@@ -120,4 +120,5 @@ source "${BASH_SOURCE%/*}/scripts/chroot.sh";
 #source "${BASH_SOURCE%/*}/cleanup.sh";
 
 # Finish
+sync
 logLine "Your system is ready! Type reboot to boot it.";
