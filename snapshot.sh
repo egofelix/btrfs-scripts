@@ -67,8 +67,7 @@ if isEmpty "${VOLUMES}"; then logError "Could not detect volumes to backup"; exi
 for VOLUME in ${VOLUMES}
 do
   VOLUME=$(removeLeadingChar "${VOLUME}" "/")
-  if [[ "${VOLUME}" = "@"* ]]; then logDebug "Skipping Volume ${VOLUME}"; continue; fi;
-  
+  if [[ "${VOLUME}" = "@"* ]]; then continue; fi;
   logDebug "Testing VOLUME: ${VOLUME}";
   if isEmpty $(LANG=C mount | grep -P "[\(\,](subvol\=[/]{0,1}${VOLUME})[\)\,]" | grep 'type btrfs'); then logError "Source \"${VOLUME}\" could not be found."; exit 1; fi;
 done;
@@ -79,37 +78,23 @@ STAMP=`date -u +"%Y-%m-%d_%H-%M-%S"`
 # Backup
 logLine "Target Directory: ${SNAPSHOTSPATH}";
 exit 2;
-for subvolName in ${VOLUMES}
+for VOLUME in ${VOLUMES}
 do
-	# Set SNAPNAME
-	SNAPNAME="${subvolName}"
+	VOLUME=$(removeLeadingChar "${VOLUME}" "/")
+	if [[ "${VOLUME}" = "@"* ]]; then logDebug "Skipping Volume ${VOLUME}"; continue; fi;
 	
-	if [[ "${SNAPNAME,,}" = "/var/lib/docker/"* ]]; then
-		continue;
-	fi;
-	
-	# Remove first char if it is a /
-	if [[ "${SNAPNAME}" = "/"* ]]; then
-		SNAPNAME="${SNAPNAME:1}"
-	fi;
-	
-	# Replace / with -
-	SNAPNAME="${SNAPNAME//[\/]/-}"
-	
-	# If we have an empty name, we are at the root
-	if [[ -z "${SNAPNAME}" ]]; then
-		SNAPNAME="root";
-	fi;
+	# Find the first mountpoint for the volume
+	VOLUMEMOUNTPOINT=$(LANG=C mount | grep -P "[\(\,](subvol\=[/]{0,1}${VOLUME})[\)\,]" | grep -o -P 'on(\s)+[^\s]*' | awk '{print $2}' | head -1)
 	
 	# Create Directory for this volume
-	if [[ ! -d "${SNAPSHOTSPATH}/${SNAPNAME}" ]]; then
-		mkdir -p ${SNAPSHOTSPATH}/${SNAPNAME};
+	if [[ ! -d "${SNAPSHOTSPATH}/${VOLUME}" ]]; then
+		if ! runCmd mkdir -p ${SNAPSHOTSPATH}/${VOLUME}; then logError "Failed to create directory ${SNAPSHOTSPATH}/${VOLUME}."; exit 1;
 	fi;
 	
 	# Create Snapshot
-	logLine "Creating Snapshot ${SNAPSHOTSPATH}/${SNAPNAME}/${STAMP}"
-	if ! runCmd btrfs subvolume snapshot -r /${subvolName} ${SNAPSHOTSPATH}/${SNAPNAME}/${STAMP}; then
-		logError "Failed to create snapshot of ${SNAPSHOTSPATH}/${SNAPNAME}/${STAMP}";
+	logLine "Creating Snapshot ${SNAPSHOTSPATH}/${VOLUME}/${STAMP}"
+	if ! runCmd btrfs subvolume snapshot -r ${VOLUMEMOUNTPOINT} ${SNAPSHOTSPATH}/${VOLUME}/${STAMP}; then
+		logError "Failed to create snapshot of ${SNAPSHOTSPATH}/${VOLUME}/${STAMP}";
 		exit;
 	fi;
 done;
