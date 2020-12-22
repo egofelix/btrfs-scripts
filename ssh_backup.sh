@@ -18,7 +18,7 @@ while [[ "$#" -gt 0 ]]; do
     -s|--source) SNAPSOURCE=$(removeTrailingChar "$2" "/"); shift ;;
     -q|--quiet) QUIET="true"; ;;
 	--debug) DEBUG="true"; ;;
-	-c|--command) ACTION="$2"; shift ;;
+	-c|--command) COMMAND="$2"; shift ;;
 	-vol|--volume) if [[ -z ${VOLUMES} ]]; then VOLUMES="$2"; else VOLUMES="${VOLUMES} $2"; fi; shift ;;
 	-t|--target) SSH_URI="$2"; shift ;;
 	-h|--help) 
