@@ -19,7 +19,7 @@ fi;
 
 # Scan arguments
 while [[ "$#" -gt 0 ]]; do
-  case $i in
+  case $1 in
     -s|--source) SNAPSOURCE="$2"; shift ;;
     -v|--verbose) VERBOSE=""; shift ;;
 	-a|--action) ACTION="$2"; shift ;;
