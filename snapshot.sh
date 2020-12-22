@@ -67,7 +67,7 @@ if isEmpty "${VOLUMES}"; then logError "Could not detect volumes to backup"; exi
 for VOLUME in ${VOLUMES}
 do
   VOLUME=$(removeLeadingChar "${VOLUME}" "/")
-  if [[ "${VOLUME}" = "@"* ]]; then logDebug "Skipping Volume ${VOLUME]"; continue; fi;
+  if [[ "${VOLUME}" = "@"* ]]; then logDebug "Skipping Volume ${VOLUME}"; continue; fi;
   logDebug "Testing VOLUME: ${VOLUME}";
   if isEmpty $(mount | grep "${VOLUME}" | grep 'type btrfs'); then logError "Source \"${VOLUME}\" must be a btrfs volume"; exit 1; fi;
 done;
