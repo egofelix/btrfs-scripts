@@ -14,7 +14,6 @@ if [[ "$EUID" -ne 0 ]]; then logError "Please run as root"; exit 1; fi;
 
 # Install Dependencies
 source "${BASH_SOURCE%/*}/scripts/dependencies.sh"
-source "${BASH_SOURCE%/*}/scripts/unmount.sh"
 
 # Scan arguments
 while [[ "$#" -gt 0 ]]; do
@@ -90,6 +89,7 @@ if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ ! $REPLY =~ ^$ ]]; then
 fi
 
 # Prepare disk
+source "${BASH_SOURCE%/*}/scripts/unmount.sh"
 source "${BASH_SOURCE%/*}/scripts/drive_prepare.sh"
 
 # Create system snapshot volume
