@@ -73,12 +73,12 @@ fi;
 # Test SSH
 logDebug "Testing ssh access: ${SSH_USERNAME}@${SSH_HOSTNAME}:${SSH_PORT}...";
 
-# Test ssh without key (User auth)
-export SSH_CALL="ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+# Try with local key
+export SSH_CALL="ssh -o IdentityFile=/etc/ssh/ssh_host_ed25519_key -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
 TESTRESULT=$(${SSH_CALL} "testReceiver")
 if [[ $? -ne 0 ]]; then
-  # Try with local key
-  export SSH_CALL="ssh -o IdentityFile=/etc/ssh/ssh_host_ed25519_key -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+  # Test ssh without key (User auth)
+  export SSH_CALL="ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
   TESTRESULT=$(${SSH_CALL} "testReceiver")
   if [[ $? -ne 0 ]]; then
 	logError "Cannot connect to ${SSH_URI}";
