@@ -59,7 +59,7 @@ if isEmpty "${SNAPSHOTSPATH:-}"; then logError "Cannot find snapshot directory";
 
 # Test if SNAPSHOTSPATH is a btrfs subvol
 logDebug "SNAPSHOTSPATH: ${SNAPSHOTSPATH}";
-if isEmpty $(mount | grep "${SNAPSHOTSPATH}" | grep 'type btrfs'); then logError "Source \"${SNAPSHOTSPATH}\" must be a btrfs volume"; exit 1; fi;
+if isEmpty $(LANG=C mount | grep "${SNAPSHOTSPATH}" | grep 'type btrfs'); then logError "Source \"${SNAPSHOTSPATH}\" must be a btrfs volume"; exit 1; fi;
 
 # Search volumes
 if isEmpty "${VOLUMES:-}"; then VOLUMES=$(LANG=C mount | grep -o -P 'subvol\=[^\s\,\)]*' | awk -F'=' '{print $2}' | sort | uniq); fi;

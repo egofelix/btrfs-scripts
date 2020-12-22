@@ -48,7 +48,7 @@ if isEmpty "${COMMAND:-}"; then logError "<command> must be provided."; exit 1; 
 
 # Test if SNAPSHOTSPATH is a btrfs subvol
 logDebug "SNAPSHOTSPATH: ${SNAPSHOTSPATH}";
-if isEmpty $(mount | grep "${SNAPSHOTSPATH}" | grep 'type btrfs'); then logError "Source \"${SNAPSHOTSPATH}\" must be a btrfs volume"; exit 1; fi;
+if isEmpty $(LANG=C mount | grep "${SNAPSHOTSPATH}" | grep 'type btrfs'); then logError "Source \"${SNAPSHOTSPATH}\" must be a btrfs volume"; exit 1; fi;
 
 ## Script must be started as root
 if [[ "$EUID" -ne 0 ]]; then logError "Please run as root"; exit 1; fi;
