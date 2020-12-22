@@ -54,9 +54,8 @@ source "${BASH_SOURCE%/*}/scripts/ssh_serverdetect.sh"
 VOLUMES=$(${SSH_CALL} "list-volumes");
 if [[ $? -ne 0 ]]; then logError "Unable to query volumes: ${VOLUMES}."; exit 1; fi;
 
-# loop through volumes and list snapshots to check if latest snapshot is available for all volumes
+# loop through volumes and list snapshots to check if which is the latest snapshot
 logDebug "Detected volumes: ${VOLUMES}";
-
 if [[ -z "${TARGETSNAPSHOT:-}" ]]; then
   logDebug "autodetecting latest snapshot...";
   for VOLUME in $(echo "${VOLUMES}" | sort)
@@ -68,18 +67,14 @@ if [[ -z "${TARGETSNAPSHOT:-}" ]]; then
   done;
 fi;
 
-logDebug "Snapshot to restore: ${TARGETSNAPSHOT}";
-
 # Test if snapshot exists on every volume
+logDebug "Snapshot to restore: ${TARGETSNAPSHOT}";
 for VOLUME in $(echo "${VOLUMES}" | sort)
 do
   SNAPSHOTS=$(${SSH_CALL} "list-snapshots" "${VOLUME}");
-  LASTSNAPSHOT=$(echo "${SNAPSHOTS}" | sort | tail -1);
-   
-  if [[ -z "${TARGETSNAPSHOT}" ]]; then
-    TARGETSNAPSHOT="${LASTSNAPSHOT}"; 
-  elif [[ "${TARGETSNAPSHOT}" != "${LASTSNAPSHOT}" ]]; then
-    logError "Cannot restore \"${TARGETSNAPSHOT}\" as volume ${VOLUME} has \"${LASTSNAPSHOT}\" as latest snapshot...";
+  SNAPSHOT=$(echo "${SNAPSHOTS}" | grep "${TARGETSNAPSHOT}");
+  if [[ -z "${SNAPSHOT}" ]]; then
+    logError "Cannot restore \"${TARGETSNAPSHOT}\" as volume \"${VOLUME}\" does not have this snapshot.";
 	exit 1;
   fi;
 done;
