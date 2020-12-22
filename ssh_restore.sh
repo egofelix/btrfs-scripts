@@ -53,7 +53,8 @@ source "${BASH_SOURCE%/*}/scripts/ssh_serverdetect.sh"
 VOLUMES=$(${SSH_CALL} "list-volumes");
 if [[ $? -ne 0 ]]; then logError "Unable to query volumes: ${VOLUMES}."; exit 1; fi;
 
-# loop through volumes and list snapshots
+# loop through volumes and list snapshots to check if latest snapshot is available for all volumes
+logDebug "Detected volumes: ${VOLUMES}";
 TARGETSNAPSHOT=""
 for VOLUME in $(echo "${VOLUMES}" | sort)
 do
@@ -69,8 +70,18 @@ do
   fi;
 done;
 
+# Get user confirmation
+read -p "Will restore ${TARGETSNAPSHOT} to ${DRIVE_ROOT}. Is this ok? [Yn]: " -n 1 -r
+echo    # (optional) move to a new line
+if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ ! $REPLY =~ ^$ ]]; then
+    # TODO: Build selection here
+    logLine "Script canceled by user";
+    exit 1;
+fi
+
+
 # Restore volumes
-logDebug "Detected volumes: ${VOLUMES}";
+
 
 
 exit 1;
@@ -83,15 +94,7 @@ if [[ $? -ne 0 ]]; then
   exit 1;
 fi;
 
-# Get user confirmation
-RESTOREPOINT=$(echo "${SUBVOLUMES}" | head -1)
-read -p "Will restore ${RESTOREPOINT} to ${DRIVE_ROOT}. Is this ok? [Yn]: " -n 1 -r
-echo    # (optional) move to a new line
-if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ ! $REPLY =~ ^$ ]]; then
-    # TODO: Build selection here
-    logLine "Script canceled by user";
-    exit 1;
-fi
+
 
 # Prepare disk
 source "${BASH_SOURCE%/*}/scripts/drive_prepare.sh"
