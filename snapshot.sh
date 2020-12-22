@@ -19,7 +19,7 @@ while [[ "$#" -gt 0 ]]; do
 	-vol|--volume) if [[ -z ${VOLUMES} ]]; then VOLUMES="$2"; else VOLUMES="${VOLUMES} $2"; fi; shift ;;
 	-h|--help) 
 	  SELFNAME=$(basename $BASH_SOURCE) 
-	  echo "Usage: ${SELFNAME} [-q|--quiet] [-vol|--volume <volume>] [-t|--target <directory>]";
+	  echo "Usage: ${SELFNAME} [-q|--quiet] [-vol|--volume <volume>] [-t|--target <targetdirectory>]";
 	  echo "";
 	  echo "    ${SELFNAME}";
 	  echo "      Create snapshots of every mounted volume.";
@@ -29,6 +29,8 @@ while [[ "$#" -gt 0 ]]; do
 	  echo "";
 	  echo "    ${SELFNAME} --volume root-data --volume usr-data";
 	  echo "      Create a snapshot of volumes root-data and usr-data.";
+	  echo "";
+	  echo "If you ommit the <targetdirectory> then the script will try to locate it with the subvolume name @snapshots.";
 	  echo "";
 	  exit 0;
 	  ;;
