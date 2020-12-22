@@ -93,19 +93,19 @@ fi
 source "${BASH_SOURCE%/*}/scripts/drive_prepare.sh"
 
 # Create system snapshot volume
-if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@snapshots; then logLine "Failed to create btrfs @snapshots-volume"; exit 1; fi;
+if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@snapshots; then logError "Failed to create btrfs @snapshots-volume"; exit 1; fi;
 
 # Restore volumes
 for VOLUME in $(echo "${VOLUMES}" | sort)
 do
   logLine "Receiving snapshot for \"${VOLUME}\"...";
-  if ! runCmd mkdir /tmp/mnt/disks/system/@snapshots/${VOLUME}; then logLine "Failed to create snapshot directory for volume \"${VOLUME}\"."; exit 1; fi;
+  if ! runCmd mkdir /tmp/mnt/disks/system/@snapshots/${VOLUME}; then logError "Failed to create snapshot directory for volume \"${VOLUME}\"."; exit 1; fi;
   ${SSH_CALL} "download-snapshot" "${VOLUME}" "${TARGETSNAPSHOT}" | btrfs receive -q /tmp/mnt/disks/system/@snapshots/${VOLUME};
-  if [[ $? -ne 0 ]]; then logLine "Failed to receive the snapshot for volume \"${VOLUME}\"."; exit 1; fi;
+  if [[ $? -ne 0 ]]; then logError "Failed to receive the snapshot for volume \"${VOLUME}\"."; exit 1; fi;
   
   # Restore ROOTVOLUME
   RESTORERESULT=$(btrfs subvol snapshot /tmp/mnt/disks/system/@snapshots/${VOLUME}/${TARGETSNAPSHOT} /tmp/mnt/disks/system/${VOLUME})
-  if [[ $? -ne 0 ]]; then logLine "Failed to restore the snapshot for volume \"${VOLUME}\": ${RESTORERESULT}."; exit 1; fi;
+  if [[ $? -ne 0 ]]; then logError "Failed to restore the snapshot for volume \"${VOLUME}\": ${RESTORERESULT}."; exit 1; fi;
 done;
 
 # Scan for fstab
@@ -140,7 +140,10 @@ do
 done;
 
 # Mount regarding to fstab
-mount --fstab "${FSTABPATH}" --target-prefix "/tmp/mnt/disks/system";
+if ! runCmd mkdir -p /tmp/mnt/root; then logError "Failed to create root mountpoint"; exit 1; fi;
+MOUNTRESULT=$(mount --fstab "${FSTABPATH}" --target-prefix "/tmp/mnt/root" --source /dev/mapper/cryptsystem -a > /dev/null);
+if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
+
 #while read LINE; do
 #  echo "$LINE"
 #done < ${FSTABPATH};
