@@ -9,6 +9,7 @@ source "${BASH_SOURCE%/*}/includes/functions.sh"
 # Load Variables
 VOLUMES="";
 QUIET="false"; QUIETPS="";
+COMMAND=""
 
 # Scan arguments
 while [[ "$#" -gt 0 ]]; do
@@ -16,9 +17,10 @@ while [[ "$#" -gt 0 ]]; do
     -q|--quiet) QUIET="true"; QUIETPS=" &>/dev/null"; ;;
 	--debug) DEBUG="true"; ;;
     -t|--target) SNAPSHOTSPATH=$(removeTrailingChar "$2" "/"); shift ;;
+	-c|--command) COMMAND="$2"; shift ;;
 	-h|--help) 
 	  SELFNAME=$(basename $BASH_SOURCE) 
-	  echo "Usage: ${SELFNAME} [-q|--quiet] [-v|--volume <volume>] [-t|--target <targetdirectory>]";
+	  echo "Usage: ${SELFNAME} --target <targetdirectory> --command <command>]";
 	  echo "";
 	  echo "    ${SELFNAME}";
 	  echo "      Create snapshots of every mounted volume.";
@@ -38,12 +40,6 @@ while [[ "$#" -gt 0 ]]; do
   shift
 done
 
-# We must have first parameter
-if [[ -z "$1" ]]; then
-	echo "Missing Home dir in first paramete";
-	exit 1;
-fi;
-
 function containsIllegalCharacter {
   ILLEGALCHARACTERS=("." "$" "&" "(" ")" "{" "}" "[" "]" ";" "<" ">" "\`" "|" "*" "?" "\"" "'" "*")
   for CHAR in $ILLEGALCHARACTERS;
@@ -54,8 +50,16 @@ function containsIllegalCharacter {
   return 1;
 }
 
-echo $1
-if containsIllegalCharacter "$1"; then logError "Illegal character detected in \"$1\"."; exit 1; fi;
+echo ${COMMAND}
+if containsIllegalCharacter "${COMMAND}"; then logError "Illegal character detected in \"$1\"."; exit 1; fi;
+
+# We must have first parameter
+if [[ -z "$1" ]]; then
+	echo "Missing Home dir in first paramete";
+	exit 1;
+fi;
+
+
 
 # Update home for this script
 HOME=$1
