@@ -2,6 +2,7 @@
 set -uo pipefail
 
 ############### Main Script ################
+
 ## Load Functions
 source "${BASH_SOURCE%/*}/includes/functions.sh"
 
@@ -10,6 +11,18 @@ if [[ -z "$1" ]]; then
 	echo "Missing Home dir in first paramete";
 	exit 1;
 fi;
+
+function containsIllegalCharacter {
+  ILLEGALCHARACTERS=("." "$" "&" "(" ")" "{" "}" "[" "]" ";" "<" ">" "\`" "|" "*" "?" "\"" "'")
+  for CHAR in $ILLEGALCHARACTERS;
+  do
+    if [[ "$1" = *"${CHAR}"* ]]; then return 1; fi;
+  done;
+  return 0;
+}
+
+echo $1
+if containsIllegalCharacter "$1"; then logError "Illegal character detected in \"$1\"."; exit 1; fi;
 
 # Update home for this script
 HOME=$1
