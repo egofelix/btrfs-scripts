@@ -71,11 +71,9 @@ done;
 # Detect SSH-Server
 source "${BASH_SOURCE%/*}/scripts/ssh_serverdetect.sh"
 
-exit 1;
-
-
+# Run
 if [[ "${COMMAND,,}" = "check-latest" ]]; then
-
+  logError 'NotImplementedYet';
 elif [[ "${COMMAND,,}" = "send" ]]; then
   logLine "Source Directory: ${SNAPSOURCE}";
   logLine "Volumes to backup: ${VOLUMES}";
