@@ -20,10 +20,10 @@ EOM
 	fi;
 	
 	# Remember partitions
-	PART_EFI="${DRIVE_ROOT}1";
-	PART_BOOT="${DRIVE_ROOT}2";
-	PART_SYSTEM="${DRIVE_ROOT}3";
-	PART_SYSTEM_NUM="3";
+	export PART_EFI="${DRIVE_ROOT}1";
+	export PART_BOOT="${DRIVE_ROOT}2";
+	export PART_SYSTEM="${DRIVE_ROOT}3";
+	export PART_SYSTEM_NUM="3";
 else
 	logLine "Using BIOS partition scheme..."
 	sfdisk -q ${DRIVE_ROOT} &> /dev/null <<- EOM
@@ -41,10 +41,10 @@ EOM
 	fi;
 
 	# Remember partitions
-	PART_EFI=""
-	PART_BOOT="${DRIVE_ROOT}1"
-	PART_SYSTEM="${DRIVE_ROOT}2"
-	PART_SYSTEM_NUM="2"
+	export PART_EFI=""
+	export PART_BOOT="${DRIVE_ROOT}1"
+	export PART_SYSTEM="${DRIVE_ROOT}2"
+	export PART_SYSTEM_NUM="2"
 fi;
 
 if ! runCmd parted -s ${DRIVE_ROOT} resizepart ${PART_SYSTEM_NUM} 100%; then logLine "Failed to expand ROOT-Partition"; exit; fi;

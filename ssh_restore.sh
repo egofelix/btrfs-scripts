@@ -149,9 +149,17 @@ cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$' | while read LI
   
   if [[ "${LINEDEV}" == "/dev/mapper/cryptsystem" ]] || [[ "${LINEDEV}" == "LABEL=system" ]]; then
     logDebug "Mounting ${LINESUBVOL} at ${LINEMOUNT}...";
-	logDebug mount -o "subvol=${LINESUBVOL}" /dev/mapper/cryptsystem "/tmp/mnt/root${LINEMOUNT}";
     MOUNTRESULT=$(mount -o "subvol=${LINESUBVOL}" /dev/mapper/cryptsystem "/tmp/mnt/root${LINEMOUNT}");
 	if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
+  elif [[ "${LINEMOUNT}" == "/boot" ]]; then
+    MOUNTRESULT=$(mount ${PART_BOOT} "/tmp/mnt/root${LINEMOUNT}");
+	if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
+  elif [[ "${LINEMOUNT}" == "/boot/efi" ]]; then
+    if [[ "${PART_EFI}" ]]; then logWarn "Skipping efi partiton as we are restoring to bios"; continue; fi;
+    MOUNTRESULT=$(mount ${PART_EFI} "/tmp/mnt/root${LINEMOUNT}");
+	if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
+  else
+    logLine "Skipping unknown mount ${LINEMOUNT}.";
   fi;
 done;
 
