@@ -56,7 +56,7 @@ if [[ $? -ne 0 ]]; then logError "Unable to query volumes: ${VOLUMES}."; exit 1;
 # loop through volumes and list snapshots
 for VOLUME in $(echo "${VOLUMES}" | sort)
 do
-  SNAPSHOTS=$(${SSH_CALL} "list-snaphots" "${VOLUME}");
+  SNAPSHOTS=$(${SSH_CALL} "list-snapshots" "${VOLUME}");
   LASTSNAPSHOT=$(echo ${SNAPSHOTS} | sort | tail -1);
   logDebug "Latest Snapshot for volume \"${VOLUME}\" is: ${LASTSNAPSHOT}";
 done;
