@@ -102,6 +102,7 @@ fi;
 if [[ "${COMMAND_NAME,,}" = "list-volumes" ]]; then
   # list directory
   logDebug "Listing ${SNAPSHOTSPATH}..."
+  echo "ls -lah "${SNAPSHOTSPATH}" | sort";
   LISTRESULT=$(ls -lah "${SNAPSHOTSPATH}" | sort)
   if [[ $? -ne 0 ]]; then logError "listing volumes failed: ${LISTRESULT}."; exit 1; fi;
   
