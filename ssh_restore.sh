@@ -10,14 +10,38 @@ source "${BASH_SOURCE%/*}/includes/functions.sh"
 source "${BASH_SOURCE%/*}/includes/defaults.sh"
 
 ## Script must be started as root
-if [ "$EUID" -ne 0 ]; then
-  echo "Please run as root";
-  exit 1;
-fi;
+if [[ "$EUID" -ne 0 ]]; then logError "Please run as root"; exit 1; fi;
 
 # Install Dependencies
 source "${BASH_SOURCE%/*}/scripts/dependencies.sh"
 source "${BASH_SOURCE%/*}/scripts/unmount.sh"
+
+# Scan arguments
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    -q|--quiet) QUIET="true"; QUIETPS=" &>/dev/null"; ;;
+	--debug) DEBUG="true"; ;;
+    -t|--target) DRIVE_ROOT=$(removeTrailingChar "$2" "/"); shift ;;
+	-n|--name) HOSTNAME="$2"; shift ;;
+	-h|--help) 
+	  SELFNAME=$(basename $BASH_SOURCE) 
+	  echo "Usage: ${SELFNAME} [-q|--quiet] [-t|--target <targetdrive>] [-n|--name <clientname>]";
+	  echo "";
+	  echo "    ${SELFNAME}";
+	  echo "      Automatic restore.";
+	  echo "";
+	  echo "    ${SELFNAME} --target /dev/sdb";
+	  echo "      Restore to drive /dev/sdb.";
+	  echo "";
+	  echo "    ${SELFNAME} --name my.host.net";
+	  echo "      Use given hostname for discovery.";
+	  echo "";	  
+	  exit 0;
+	  ;;
+    *) echo "unknown parameter passed: ${1}."; exit 1;;
+  esac
+  shift
+done
 
 # Detect ROOT-Drive
 source "${BASH_SOURCE%/*}/scripts/drive_detect.sh"
@@ -25,8 +49,17 @@ source "${BASH_SOURCE%/*}/scripts/drive_detect.sh"
 # Detect SSH-Server
 source "${BASH_SOURCE%/*}/scripts/ssh_serverdetect.sh"
 
+# query volumes
+VOLUMES=$(${SSH_CALL} "list-volumes" | sort);
+if [[ $? -ne 0 ]]; then logError "Unable to query volume: ${VOLUMES}."; exit 1; fi;
+
+
+
+
+exit 1;
+
 # Check root volumes
-SUBVOLUMES=$(${SSH_CALL} "list-volume" "root" | sort -r)
+SUBVOLUMES=$(${SSH_CALL} "list-volumes" | sort)
 if [[ $? -ne 0 ]]; then
   logLine "Unable to query root volume.";
   logLine "${SUBVOLUMES}";
