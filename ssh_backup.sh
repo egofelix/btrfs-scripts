@@ -16,7 +16,8 @@ QUIET="false";
 while [[ "$#" -gt 0 ]]; do
   case $1 in
     -s|--source) SNAPSOURCE="$2"; shift ;;
-    -q|--quiet) QUIET="true"; shift ;;
+    -q|--quiet) QUIET="true"; ;;
+	--debug) DEBUG="true"; ;;
 	-c|--command) ACTION="$2"; shift ;;
 	-vol|--volume) if [[ -z ${VOLUMES} ]]; then VOLUMES="$2"; else VOLUMES="${VOLUMES} $2"; fi; shift ;;
 	-t|--target) TARGET="$2"; shift ;;
