@@ -54,7 +54,9 @@ SNAPSHOTMOUNTDEVICE=$(echo "${SNAPSHOTMOUNT}" | awk -F'[' '{print $1}')
 if [[ -z "${SNAPSHOTMOUNTDEVICE}" ]]; then logError "Could not find device for ${SNAPSHOTMOUNTDEVICE}."; exit 1; fi;
 SNAPSHOTMOUNTVOLUME=$(echo "${SNAPSHOTMOUNT}" | awk -F'[' '{print $2}' | awk -F']' '{print $1}')
 if [[ -z "${SNAPSHOTMOUNTVOLUME}" ]]; then logError "Could not find volume for ${SNAPSHOTMOUNTVOLUME}."; exit 1; fi;
-if [[ ! ${SNAPSHOTMOUNTVOLUME} = "@"* ]] && [[ ! ${SNAPSHOTMOUNTVOLUME} = "/@"* ]]; then logWarn "The target directory relies on volume \"${SNAPSHOTMOUNTVOLUME}\" which will also be snapshotted/backupped, consider using a targetvolume with an @ name..."; fi;
+if [[ ! ${SNAPSHOTMOUNTVOLUME} = "@"* ]] && [[ ! ${SNAPSHOTMOUNTVOLUME} = "/@"* ]]; then
+  logWarn "The target directory relies on volume \"${SNAPSHOTMOUNTVOLUME}\" which will also be snapshotted/backupped, consider using a targetvolume with an @ name...";
+fi;
 
 # Test if command is illegal
 if containsIllegalCharacter "${COMMAND}"; then logError "Illegal character detected in \"${COMMAND}\"."; exit 1; fi;
