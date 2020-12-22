@@ -49,7 +49,7 @@ function containsIllegalCharacter {
   return 1;
 }
 
-if containsIllegalCharacter "${COMMAND}"; then logError "Illegal character detected in \"${COMMAND}\"."; exit 1; else logError "asdasd"; fi;
+if containsIllegalCharacter "${COMMAND}"; then logError "Illegal character detected in \"${COMMAND}\"."; exit 1; fi;
 
 exit 1;
 # We must have first parameter
