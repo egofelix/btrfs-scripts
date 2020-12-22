@@ -68,16 +68,17 @@ for VOLUME in ${VOLUMES}
 do
   VOLUME=$(removeLeadingChar "${VOLUME}" "/")
   if [[ "${VOLUME}" = "@"* ]]; then logDebug "Skipping Volume ${VOLUME}"; continue; fi;
+  
   logDebug "Testing VOLUME: ${VOLUME}";
-  if isEmpty $(LANG=C mount | grep -P "[\(\,](subvol\=[/]{0,1}${VOLUME})[\)\,]" | grep 'type btrfs'); then logError "Source \"${VOLUME}\" must be a btrfs volume"; exit 1; fi;
+  if isEmpty $(LANG=C mount | grep -P "[\(\,](subvol\=[/]{0,1}${VOLUME})[\)\,]" | grep 'type btrfs'); then logError "Source \"${VOLUME}\" could not be found."; exit 1; fi;
 done;
 
-exit 2;
 # Current time
 STAMP=`date -u +"%Y-%m-%d_%H-%M-%S"`
 
 # Backup
 logLine "Target Directory: ${SNAPSHOTSPATH}";
+exit 2;
 for subvolName in ${VOLUMES}
 do
 	# Set SNAPNAME
