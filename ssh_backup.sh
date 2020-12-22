@@ -23,11 +23,11 @@ while [[ "$#" -gt 0 ]]; do
 	  SELFNAME=$(basename $BASH_SOURCE) 
 	  echo "Usage: ${SELFNAME} [-s|--source <sourcevolume>] [-vol|--volume <volume>] [-t|--target <targetserver>] [-c|--command <command>]";
 	  echo "";
-	  echo "    Send Backups and autodetect servers:";
-	  echo "      ${SELFNAME}";
+	  echo "    ${SELFNAME}";
+	  echo "      Send Backups and autodetect servers:";
 	  echo "";
-	  echo "    Get timestamp of latest backup for root-volume:";
-	  echo "      ${SELFNAME} -c check-latest -vol root";
+	  echo "    ${SELFNAME} -c check-latest -vol root";
+	  echo "      Get timestamp of latest backup for root-volume:";
 	  exit 0;
 	  ;;
     *) echo "unknown parameter passed: ${1}."; exit 1;;
