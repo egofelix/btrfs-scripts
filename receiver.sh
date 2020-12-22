@@ -62,11 +62,18 @@ if containsIllegalCharacter "${COMMAND}"; then logError "Illegal character detec
 ## Script must be started as root
 if [[ "$EUID" -ne 0 ]]; then logError "Please run as root"; exit 1; fi;
 
-# Lockfile (Only one simultan instance is allowed)
+# Lockfile (Only one simultan instance per SNAPSHOTSPATH is allowed)
 LOCKFILE="${SNAPSHOTSPATH}/$(basename $BASH_SOURCE)"
 source "${BASH_SOURCE%/*}/includes/lockfile.sh";
 
 
+COMMAND_NAME=$(echo "${COMMAND}" | awk '{print $1}')
+if [[ "${COMMAND_NAME,,}" = "testReceiver" ]]; then
+  echo "success";
+  exit 0;
+fi;
+
+logError "Unknown Command: ${COMMAND_NAME}.";
 exit 1;
 
 
