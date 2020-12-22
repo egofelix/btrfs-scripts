@@ -41,24 +41,16 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 function containsIllegalCharacter {
-  logDebug "containsIllegalCharacter $1";
   local ILLEGALCHARACTERS=("." "$" "&" "(" ")" "{" "}" "[" "]" ";" "<" ">" "\`" "|" "*" "?" "\"" "'" "*")
   for CHAR in "${ILLEGALCHARACTERS[@]}"
   do
-    logDebug "Testing ${CHAR}";
-    if [[ "$1" == *"${CHAR}"* ]]; then 
-	  logDebug "Detected";
-		return 0;
-	fi;
+    if [[ "$1" == *"${CHAR}"* ]]; then return 0; fi;
   done;
-  
-  logDebug "Not Detected";
   return 1;
 }
 
-echo ${COMMAND};
 if containsIllegalCharacter "${COMMAND}"; then logError "Illegal character detected in \"${COMMAND}\"."; exit 1; else logError "asdasd"; fi;
-logDebug "Bllaaaa";
+
 exit 1;
 # We must have first parameter
 if [[ -z "$1" ]]; then
