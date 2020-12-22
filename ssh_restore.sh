@@ -50,6 +50,7 @@ source "${BASH_SOURCE%/*}/scripts/drive_detect.sh"
 source "${BASH_SOURCE%/*}/scripts/ssh_serverdetect.sh"
 
 # query volumes
+echo ${SSH_CALL} "list-volumes"
 VOLUMES=$(${SSH_CALL} "list-volumes" | sort);
 if [[ $? -ne 0 ]]; then logError "Unable to query volume: ${VOLUMES}."; exit 1; fi;
 
