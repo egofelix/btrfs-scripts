@@ -123,7 +123,7 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
   # Test <volume> and <name> parameter
   VOLUME=$(echo "${COMMAND}" | awk '{print $2}');
   NAME=$(echo "${COMMAND}" | awk '{print $3}');
-  if [[ -z "${VOLUME}" ]] || [ -z "${NAME}" ]]; then logError "Usage: upload-snapshot <volume> <name>"; exit 1; fi;
+  if [[ -z "${VOLUME}" ]] || [[ -z "${NAME}" ]]; then logError "Usage: upload-snapshot <volume> <name>"; exit 1; fi;
   
   # Check if the snapshot exists already
   if [[ -d "${SNAPSHOTSPATH}/${VOLUME}/${NAME}" ]]; then logError "already exists"; exit 1; fi;
@@ -148,7 +148,7 @@ if [[ "${COMMAND_NAME,,}" = "download-snapshot" ]]; then
   # Test <volume> and <name> parameter
   VOLUME=$(echo "${COMMAND}" | awk '{print $2}');
   NAME=$(echo "${COMMAND}" | awk '{print $3}');
-  if [[ -z "${VOLUME}" ]] || [ -z "${NAME}" ]]; then logError "Usage: download-snapshot <volume> <name>"; exit 1; fi;
+  if [[ -z "${VOLUME}" ]] || [[ -z "${NAME}" ]]; then logError "Usage: download-snapshot <volume> <name>"; exit 1; fi;
 
   # Check if snapshot exists
   if [[ ! -d "${SNAPSHOTSPATH}/${VOLUME}/${NAME}" ]]; then logError "snapshot does not exists"; exit 1; fi;
