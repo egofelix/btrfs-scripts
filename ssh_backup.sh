@@ -104,7 +104,8 @@ if [[ "${COMMAND,,}" = "send" ]]; then
 	
 	# Create Directory for this volume on the backup server
 	logDebug "Ensuring volume directory at server for \"${VOLUME}\"...";
-	if ! runCmd ${SSH_CALL} "create-volume" "${VOLUME}"; then logError "Command 'create-volume \"${VOLUME}\"' failed."; exit 1; fi;
+	CREATERESULT=$(${SSH_CALL} "create-volume" "${VOLUME}");
+	if [ $? -ne 0 ]; then logError "Command 'create-volume \"${VOLUME}\"' failed: ${CREATERESULT}."; exit 1; fi;
 	
 	# Send FIRSTSNAPSHOT
 	CHECKVOLUMERESULT=$(${SSH_CALL} check-volume "${VOLUME}" "${FIRSTSNAPSHOT}");
