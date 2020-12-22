@@ -191,4 +191,6 @@ source "${BASH_SOURCE%/*}/scripts/restorepackages.sh";
 logDebug "Restoring Bootmanager...";
 source "${BASH_SOURCE%/*}/scripts/bootmanager.sh";
 
+# Done
+sync
 exit 0;
