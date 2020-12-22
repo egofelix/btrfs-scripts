@@ -158,6 +158,14 @@ cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$' | while read LI
     if [[ "${PART_EFI}" ]]; then logWarn "Skipping efi partiton as we are restoring to bios"; continue; fi;
     MOUNTRESULT=$(mount ${PART_EFI} "/tmp/mnt/root${LINEMOUNT}");
 	if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
+  elif [[ "${LINEMOUNT,,}" == "none" ]] && [[ "${LINEFS,,}" == "swap" ]]; then
+    # Create swapfile
+	if ! runCmd truncate -s 0 /tmp/mnt/root${LINEMOUNT}; then logError "Failed to truncate Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
+	if ! runCmd chattr +C /tmp/mnt/root${LINEMOUNT}; then logError "Failed to chattr Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
+	if ! runCmd chmod 600 /tmp/mnt/root${LINEMOUNT}; then logError "Failed to chmod Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
+	if ! runCmd btrfs property set /tmp/mnt/root${LINEMOUNT} compression none; then logError "Failed to disable compression for Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
+	if ! runCmd fallocate /tmp/mnt/root${LINEMOUNT} -l2g; then logError "Failed to fallocate 2G Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
+	if ! runCmd mkswap /tmp/mnt/root${LINEMOUNT}; then logError "Failed to mkswap for Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
   else
     logLine "Skipping unknown mount ${LINEMOUNT}.";
   fi;
