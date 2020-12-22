@@ -104,7 +104,6 @@ do
   if [[ $? -ne 0 ]]; then logLine "Failed to receive the snapshot for volume \"${VOLUME}\"."; exit 1; fi;
   
   # Restore ROOTVOLUME
-  logLine "Restoring...";
   RESTORERESULT=$(btrfs subvol snapshot /tmp/mnt/disks/system/@snapshots/${VOLUME}/${TARGETSNAPSHOT} /tmp/mnt/disks/system/${VOLUME})
   if [[ $? -ne 0 ]]; then logLine "Failed to restore the snapshot for volume \"${VOLUME}\": ${RESTORERESULT}."; exit 1; fi;
 done;
@@ -141,6 +140,9 @@ do
 done;
 
 # Mount regarding to fstab
+while read LINE; do
+  echo "$p"
+done < ${FSTABPATH};
 
 
 exit 1;
