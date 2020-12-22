@@ -132,6 +132,9 @@ logDebug "FSTABPATH: ${FSTABPATH}";
 ATVOLUMES=$(cat "${FSTABPATH}" | grep -o -P 'subvol=[\/]{0,1}@[^\s\,\)]*' | awk -F'=' '{print $2}');
 for VOLUME in $(echo "${ATVOLUMES}" | sort)
 do
+  # Skip @snapshots as we have created it before restore
+  if [[ "${VOLUME}" == "@snapshots" ]]; then continue; fi;
+
   logDebug "Creating ${VOLUME}...";
   CREATERESULT=$(btrfs subvol create /tmp/mnt/disks/system/${VOLUME});
   if [[ $? -ne 0 ]]; then logLine "Failed to create volume \"${VOLUME}\": ${CREATERESULT}."; exit 1; fi;
