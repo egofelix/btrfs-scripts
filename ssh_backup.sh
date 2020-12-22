@@ -76,7 +76,7 @@ if [[ "${COMMAND,,}" = "test" ]]; then logLine "Test passed"; exit 0; fi;
 if [[ "${COMMAND,,}" = "check-latest" ]]; then
   for VOLUME in ${VOLUMES}; do
     logDebug "Checking volume: ${VOLUME}...";
-    CHECKRESULT=$(${SSH_CALL} "check-volume-directory" "${VOLUME}")
+    CHECKRESULT=$(${SSH_CALL} "list-volume" "${VOLUME}")
 	if [[ $? -ne 0 ]]; then logError "Could not check-volume \"${VOLUME}\": ${CHECKRESULT}."; exit 1; fi;
 	echo "${VOLUME}: ${CHECKRESULT}";
   done

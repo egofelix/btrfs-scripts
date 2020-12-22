@@ -44,7 +44,6 @@ if isEmpty "${SSH_URI:-}"; then
   logDebug "Detected Domain: ${MY_DOMAIN}";
 
   # Check DNS Records  
-  
   RECORD_TO_CHECK="_${MY_HOSTNAME}._backup._ssh.${MY_DOMAIN}"
   logDebug "Looking up SRV-Record: ${RECORD_TO_CHECK}";
   DNS_RESULT=$(dig srv ${RECORD_TO_CHECK} +short)
