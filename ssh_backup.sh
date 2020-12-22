@@ -49,19 +49,10 @@ done
 ## Script must be started as root
 if [ "$EUID" -ne 0 ]; then logError "Please run as root"; exit 1; fi;
 
-# PRIVATE
+# Lockfile (Only one simultan instance is allowed)
 LOCKFILE="/var/lock/$(basename $BASH_SOURCE)"
-LOCKFD=99
-_lock()             { flock -$1 $LOCKFD; }
-_no_more_locking()  { _lock u; _lock xn && rm -f $LOCKFILE; }
-_prepare_locking()  { eval "exec $LOCKFD>\"$LOCKFILE\""; trap _no_more_locking EXIT; }
-exlock_now()        { _lock xn; }  # obtain an exclusive lock immediately or fail
-_prepare_locking
-LOCKED=exlock_now
-if ! $LOCKED; then
-  logError "Script is running already";
-  exit 1;
-fi;
+source "${BASH_SOURCE%/*}/includes/lockfile.sh";
+
 
 # Search snapshot volume
 if isEmpty "${SNAPSOURCE:-}"; then SNAPSOURCE=$(LANG=C mount | grep '@snapshots' | grep -o 'on /\..* type btrfs' | awk '{print $2}'); fi;
