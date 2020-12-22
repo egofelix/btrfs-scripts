@@ -82,7 +82,7 @@ if [[ "${COMMAND_NAME,,}" = "create-volume" ]]; then
   if [[ -z "${VOLUME}" ]]; then logError "Usage: create-volume <volume>"; exit 1; fi;
   
   # Create directory
-  if ! runCmd mkdir -p ${SNAPSHOTSPATH}/$2; then logError "Failed to create volume directory."; exit 1; fi;
+  if ! runCmd mkdir -p ${SNAPSHOTSPATH}/${VOLUME}; then logError "Failed to create volume directory."; exit 1; fi;
   echo "success"; exit 0;
 fi;
 
