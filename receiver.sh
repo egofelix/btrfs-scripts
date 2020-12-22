@@ -16,9 +16,9 @@ function containsIllegalCharacter {
   ILLEGALCHARACTERS=("." "$" "&" "(" ")" "{" "}" "[" "]" ";" "<" ">" "\`" "|" "*" "?" "\"" "'")
   for CHAR in $ILLEGALCHARACTERS;
   do
-    if [[ "$1" = *"${CHAR}"* ]]; then return 1; fi;
+    if [[ "$1" = *"${CHAR}"* ]]; then return 0; fi;
   done;
-  return 0;
+  return 1;
 }
 
 echo $1
