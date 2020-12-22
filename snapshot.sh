@@ -91,10 +91,14 @@ do
 	fi;
 	
 	# Create Snapshot
-	logLine "Creating Snapshot ${SNAPSHOTSPATH}/${VOLUME}/${STAMP}"
-	if ! runCmd btrfs subvolume snapshot -r ${VOLUMEMOUNTPOINT} ${SNAPSHOTSPATH}/${VOLUME}/${STAMP}; then
+	if [[ -d "${SNAPSHOTSPATH}/${VOLUME}/${STAMP}" ]]; then
+	  logLine "Snapshot already exists. Aborting";
+	else
+	  logLine "Creating Snapshot ${SNAPSHOTSPATH}/${VOLUME}/${STAMP}"
+	  if ! runCmd btrfs subvolume snapshot -r ${VOLUMEMOUNTPOINT} ${SNAPSHOTSPATH}/${VOLUME}/${STAMP}; then
 		logError "Failed to create snapshot of ${SNAPSHOTSPATH}/${VOLUME}/${STAMP}";
 		exit 1;
+	  fi;
 	fi;
 done;
 
