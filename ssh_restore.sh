@@ -111,7 +111,7 @@ for VOLUME in $(echo "${VOLUMES}" | sort)
 do
   logDebug "Searching in volume \"${VOLUME}\"...";
   
-  if [[ -f "/tmp/mnt/disks/system/@snapshots/${VOLUME}/etc/fstab" ]]; then
+  if [[ -f "/tmp/mnt/disks/system/@snapshots/${VOLUME}/${TARGETSNAPSHOT}/etc/fstab" ]]; then
     if [[ ! -z "${FSTABPATH}" ]]; then
 	  logError "Multiple fstab files found. Aborting.";
 	  exit 1;
@@ -120,7 +120,7 @@ do
     FSTABPATH="/tmp/mnt/disks/system/@snapshots/${VOLUME}/etc/fstab";
   fi;
 done;
-if [[ ! -z "${FSTABPATH}" ]]; then logError "Could not locate /etc/fstab"; exit 1; fi;
+if [[ -z "${FSTABPATH}" ]]; then logError "Could not locate /etc/fstab"; exit 1; fi;
 logDebug "FSTABPATH: ${FSTABPATH}";
 
 exit 1;
