@@ -1,4 +1,5 @@
 #!/bin/bash
 function logLine {
-  echo $@
+  if isTrue "${QUIET:-}"; then return; fi;
+  echo $@;
 }

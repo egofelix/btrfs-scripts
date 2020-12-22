@@ -10,19 +10,19 @@ source "${BASH_SOURCE%/*}/includes/functions.sh"
 source "${BASH_SOURCE%/*}/includes/defaults.sh";
 COMMAND="send";
 VOLUMES="";
-
+QUIET="false";
 
 # Scan arguments
 while [[ "$#" -gt 0 ]]; do
   case $1 in
     -s|--source) SNAPSOURCE="$2"; shift ;;
-    -v|--verbose) VERBOSE=""; shift ;;
+    -q|--quiet) QUIET="true"; shift ;;
 	-c|--command) ACTION="$2"; shift ;;
 	-vol|--volume) if [[ -z ${VOLUMES} ]]; then VOLUMES="$2"; else VOLUMES="${VOLUMES} $2"; fi; shift ;;
 	-t|--target) TARGET="$2"; shift ;;
 	-h|--help) 
 	  SELFNAME=$(basename $BASH_SOURCE) 
-	  echo "Usage: ${SELFNAME} [-v|--verbose] [-s|--source <sourcevolume>] [-vol|--volume <volume>] [-t|--target <targetserver>] [-c|--command <command>]";
+	  echo "Usage: ${SELFNAME} [-q|--quiet] [-s|--source <sourcevolume>] [-vol|--volume <volume>] [-t|--target <targetserver>] [-c|--command <command>]";
 	  echo "";
 	  echo "    ${SELFNAME}";
 	  echo "      Send Backups to autodetected server.";
