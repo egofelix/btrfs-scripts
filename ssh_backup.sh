@@ -57,7 +57,10 @@ _no_more_locking()  { _lock u; _lock xn && rm -f $LOCKFILE; }
 _prepare_locking()  { eval "exec $LOCKFD>\"$LOCKFILE\""; trap _no_more_locking EXIT; }
 exlock_now()        { _lock xn; }  # obtain an exclusive lock immediately or fail
 _prepare_locking
-exlock_now || (logError "Script is running already" && exit 1);
+if isFalse $(exlock_now || echo "false"); then
+  logError "Script is running already";
+  exit 1;
+fi;
 
 # Search snapshot volume
 if isEmpty "${SNAPSOURCE:-}"; then SNAPSOURCE=$(LANG=C mount | grep '@snapshots' | grep -o 'on /\..* type btrfs' | awk '{print $2}'); fi;
