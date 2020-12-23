@@ -81,7 +81,13 @@ if [[ -z "${TARGETSNAPSHOT:-}" ]]; then
 fi;
 
 # Test if snapshot exists on every volume
-logDebug "Snapshot to restore: ${TARGETSNAPSHOT}";
+if ! isTrue ${ISTEST:-}; then
+  logDebug "Snapshot to restore: ${TARGETSNAPSHOT}";
+else
+  logDebug "Snapshot to test: ${TARGETSNAPSHOT}";
+fi;
+
+HASERROR="false";
 for VOLUME in $(echo "${VOLUMES}" | sort)
 do
   logDebug "Checking if the snapshot exists for volume \"${VOLUME}\"...";
@@ -91,6 +97,7 @@ do
   
     if isTrue ${ISTEST:-}; then
 	  logError "\"${TARGETSNAPSHOT}\" for volume \"${VOLUME}\" does not exist.";
+	  HASERROR="true";
 	else
       logError "Cannot restore \"${TARGETSNAPSHOT}\" as volume \"${VOLUME}\" does not have this snapshot.";
 	  exit 1;
@@ -99,7 +106,13 @@ do
 done;
 
 # Just test, so we are done here
-if isTrue ${ISTEST:-}; then logLine "Latest snapshot is ok."; exit 0; fi;
+if isTrue ${ISTEST:-}; then 
+  if isFalse ${HASERROR}; then
+    logLine "Latest snapshot is ok."; exit 0; 
+  else
+    logError "Latest snapshot is not ok."; exit 1;
+  fi;
+fi;
 
 # Get user confirmation
 read -p "Will restore ${TARGETSNAPSHOT} to ${DRIVE_ROOT}. Is this ok? [Yn]: " -n 1 -r
