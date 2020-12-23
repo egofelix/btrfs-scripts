@@ -188,12 +188,12 @@ cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$' | while read LI
   elif [[ "${LINEMOUNT,,}" == "none" ]] && [[ "${LINEFS,,}" == "swap" ]]; then
     # Create swapfile
 	logDebug "Creating new swapfile...";
-	if ! runCmd truncate -s 0 /tmp/mnt/root${LINEMOUNT}; then logError "Failed to truncate Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
-	if ! runCmd chattr +C /tmp/mnt/root${LINEMOUNT}; then logError "Failed to chattr Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
-	if ! runCmd chmod 600 /tmp/mnt/root${LINEMOUNT}; then logError "Failed to chmod Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
-	if ! runCmd btrfs property set /tmp/mnt/root${LINEMOUNT} compression none; then logError "Failed to disable compression for Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
-	if ! runCmd fallocate /tmp/mnt/root${LINEMOUNT} -l2g; then logError "Failed to fallocate 2G Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
-	if ! runCmd mkswap /tmp/mnt/root${LINEMOUNT}; then logError "Failed to mkswap for Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
+	if ! runCmd truncate -s 0 /tmp/mnt/root${LINEDEV}; then logError "Failed to truncate Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
+	if ! runCmd chattr +C /tmp/mnt/root${LINEDEV}; then logError "Failed to chattr Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
+	if ! runCmd chmod 600 /tmp/mnt/root${LINEDEV}; then logError "Failed to chmod Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
+	if ! runCmd btrfs property set /tmp/mnt/root${LINEDEV} compression none; then logError "Failed to disable compression for Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
+	if ! runCmd fallocate /tmp/mnt/root${LINEDEV} -l2g; then logError "Failed to fallocate 2G Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
+	if ! runCmd mkswap /tmp/mnt/root${LINEDEV}; then logError "Failed to mkswap for Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
   else
     # unknown, we skip it here
     logWarn "Skipping unknown mount ${LINEMOUNT}.";
