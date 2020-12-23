@@ -134,6 +134,9 @@ do
   # Skip @snapshots as we have created it before restore
   if [[ "${VOLUME}" == "@snapshots" ]]; then continue; fi;
 
+  # Fix for broken fstab (mount is there multiple times)
+  if [[ -d "/tmp/mnt/disks/system/${VOLUME}" ]]; then continue; fi;
+  
   logDebug "Creating ${VOLUME}...";
   CREATERESULT=$(btrfs subvol create /tmp/mnt/disks/system/${VOLUME});
   if [[ $? -ne 0 ]]; then logLine "Failed to create volume \"${VOLUME}\": ${CREATERESULT}."; exit 1; fi;
