@@ -104,7 +104,7 @@ do
   if [[ $? -ne 0 ]]; then logError "Failed to receive the snapshot for volume \"${VOLUME}\"."; exit 1; fi;
   
   # Restore ROOTVOLUME
-  RESTORERESULT=$(btrfs subvol snapshot /tmp/mnt/disks/system/@snapshots/${VOLUME}/${TARGETSNAPSHOT} /tmp/mnt/disks/system/${VOLUME})
+  RESTORERESULT=$(btrfs subvol snapshot /tmp/mnt/disks/system/@snapshots/${VOLUME}/${TARGETSNAPSHOT} /tmp/mnt/disks/system/${VOLUME} 2>&1)
   if [[ $? -ne 0 ]]; then logError "Failed to restore the snapshot for volume \"${VOLUME}\": ${RESTORERESULT}."; exit 1; fi;
 done;
 
@@ -138,7 +138,7 @@ do
   if [[ -d "/tmp/mnt/disks/system/${VOLUME}" ]]; then continue; fi;
   
   logDebug "Creating ${VOLUME}...";
-  CREATERESULT=$(btrfs subvol create /tmp/mnt/disks/system/${VOLUME});
+  CREATERESULT=$(btrfs subvol create /tmp/mnt/disks/system/${VOLUME} 2>&1);
   if [[ $? -ne 0 ]]; then logLine "Failed to create volume \"${VOLUME}\": ${CREATERESULT}."; exit 1; fi;
 done;
 
@@ -151,20 +151,29 @@ cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$' | while read LI
   LINEFS=$(echo "$LINE" | awk '{print $3}');
   LINESUBVOL=$(echo "$LINE" | awk '{print $4}' | grep -o -P 'subvol\=[^\s\,\)]*' | awk -F'=' '{print $2}');
   
+  # Fix for broken fstab (mount is there multiple times)
+  LINEDEVREGEX=$(echo "${LINEDEV}" | sed -e 's/[\.&]/\\&/g' | sed -e 's/[\/&]/\\&/g')
+  LINEMOUNTREGEX=$(echo "${LINEMOUNT}" | sed -e 's/[\.&]/\\&/g' | sed -e 's/[\/&]/\\&/g')
+  LINESUBVOLREGEX$(echo "${LINESUBVOL}" | sed -e 's/[\.&]/\\&/g' | sed -e 's/[\/&]/\\&/g')
+  MOUNTTEST=$(LANG=C mount | grep -P "${LINEDEVREGEX}\son[\s]+${LINEMOUNTREGEX}\s.*subvol\=[/]{0,1}${LINESUBVOLREGEX}")
+  logDebug "Mounttest: ${MOUNTTEST}";
+  #end
+  
+  
   if [[ "${LINEDEV}" == "/dev/mapper/cryptsystem" ]] || [[ "${LINEDEV}" == "LABEL=system" ]]; then
     # Mount simple volume
     logDebug "Mounting ${LINESUBVOL} at ${LINEMOUNT}...";
-    MOUNTRESULT=$(mount -o "subvol=${LINESUBVOL}" /dev/mapper/cryptsystem "/tmp/mnt/root${LINEMOUNT}");
-	if [[ $? -ne 0 ]]; then logLine "Failed to mount. Command \"mount -o \"subvol=${LINESUBVOL}\" /dev/mapper/cryptsystem \"/tmp/mnt/root${LINEMOUNT}\", Result \"${MOUNTRESULT}\"."; exit 1; fi;
+    MOUNTRESULT=$(mount -o "subvol=${LINESUBVOL}" /dev/mapper/cryptsystem "/tmp/mnt/root${LINEMOUNT}" 2>&1);
+	if [[ $? -ne 0 ]]; then logLine "Failed to mount. Command \"mount -o \"subvol=${LINESUBVOL}\" /dev/mapper/cryptsystem \"/tmp/mnt/root${LINEMOUNT}\"\", Result \"${MOUNTRESULT}\"."; exit 1; fi;
   elif [[ "${LINEMOUNT}" == "/boot" ]]; then
     # Mount boot partition
-    MOUNTRESULT=$(mount ${PART_BOOT} "/tmp/mnt/root${LINEMOUNT}");
+    MOUNTRESULT=$(mount ${PART_BOOT} "/tmp/mnt/root${LINEMOUNT}" 2>&1);
 	if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
   elif [[ "${LINEMOUNT}" == "/boot/efi" ]]; then
     # Mount efi partition
     if [[ -z "${PART_EFI}" ]]; then logWarn "Skipping efi partiton as we are restoring to bios"; continue; fi;
 	if ! runCmd mkdir /tmp/mnt/root${LINEMOUNT}; then logError "Failed to create efi directory."; exit 1; fi;
-    MOUNTRESULT=$(mount ${PART_EFI} "/tmp/mnt/root${LINEMOUNT}");
+    MOUNTRESULT=$(mount ${PART_EFI} "/tmp/mnt/root${LINEMOUNT}" 2>&1);
 	if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
   elif [[ "${LINEMOUNT,,}" == "none" ]] && [[ "${LINEFS,,}" == "swap" ]]; then
     # Create swapfile
