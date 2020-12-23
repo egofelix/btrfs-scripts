@@ -9,9 +9,6 @@ source "${BASH_SOURCE%/*}/includes/functions.sh"
 # Load Variables
 source "${BASH_SOURCE%/*}/includes/defaults.sh"
 
-# Install Dependencies
-source "${BASH_SOURCE%/*}/scripts/dependencies.sh"
-
 # Scan arguments
 while [[ "$#" -gt 0 ]]; do
   case $1 in
@@ -54,8 +51,12 @@ if [[ "$EUID" -ne 0 ]]; then
   fi;
 fi;
 
-# Detect ROOT-Drive
+# Prechecks when not in testmode
 if ! isTrue ${ISTEST:-}; then
+  # Install Dependencies
+  source "${BASH_SOURCE%/*}/scripts/dependencies.sh"
+  
+  # Detect ROOT-Drive
   source "${BASH_SOURCE%/*}/scripts/drive_detect.sh";
 fi;
 
