@@ -83,7 +83,7 @@ fi;
 # No target snapshot found
 if [[ -z "${TARGETSNAPSHOT:-}" ]]; then
   logError "No snapshots found";
-  exit;
+  exit 1;
 fi;
 
 # Test if snapshot exists on every volume
