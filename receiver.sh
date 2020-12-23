@@ -134,7 +134,7 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
   if [[ -d "${SNAPSHOTSPATH}/${VOLUME}/${NAME}" ]]; then logError "already exists"; exit 1; fi;
   
   # Receive  
-  RESULT=$(btrfs receive -q ${SNAPSHOTSPATH}/${VOLUME} < /dev/stdin);
+  RESULT=$(btrfs receive -v ${SNAPSHOTSPATH}/${VOLUME} < /dev/stdin);
   if [[ $? -ne 0 ]]; then
 	# Remove broken backup
 	# TODO, Detect name from RESULT here, otherwise the user could maybe delete snaps from the remote
