@@ -154,7 +154,7 @@ cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$' | while read LI
   # Fix for broken fstab (mount is there multiple times, so we check if this is mounted already here)
   LINEDEVREGEX=$(echo "${LINEDEV}" | sed -e 's/[\.&]/\\&/g' | sed -e 's/[\/&]/\\&/g')
   LINEMOUNTREGEX=$(echo "${LINEMOUNT}" | sed -e 's/[\.&]/\\&/g' | sed -e 's/[\/&]/\\&/g')
-  LINESUBVOLREGEX$(echo "${LINESUBVOL}" | sed -e 's/[\.&]/\\&/g' | sed -e 's/[\/&]/\\&/g')
+  LINESUBVOLREGEX=$(echo "${LINESUBVOL}" | sed -e 's/[\.&]/\\&/g' | sed -e 's/[\/&]/\\&/g')
   logDebug "LINEDEVREGEX: ${LINEDEVREGEX}";
   logDebug "LINEMOUNTREGEX: ${LINEMOUNTREGEX}";
   logDebug "LINESUBVOLREGEX: ${LINESUBVOLREGEX}";
