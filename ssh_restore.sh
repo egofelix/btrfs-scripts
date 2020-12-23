@@ -166,7 +166,9 @@ cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$' | while read LI
     continue;
   fi;
   #end
-  
+  logDebug "LINEDEV: ${LINEDEV}";
+  logDebug "LINEMOUNT: ${LINEMOUNT}";
+  logDebug "LINESUBVOL: ${LINESUBVOL}";
   
   if [[ "${LINEDEV}" == "/dev/mapper/cryptsystem" ]] || [[ "${LINEDEV}" == "LABEL=system" ]]; then
     # Mount simple volume
