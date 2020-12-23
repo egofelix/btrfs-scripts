@@ -23,9 +23,10 @@ while [[ "$#" -gt 0 ]]; do
     -t|--target) DRIVE_ROOT=$(removeTrailingChar "$2" "/"); shift ;;
 	-n|--name) HOSTNAME="$2"; shift ;;
 	-s|--snapshot) TARGETSNAPSHOT="$2"; shift ;;
+	--test) ISTEST="true";
 	-h|--help) 
 	  SELFNAME=$(basename $BASH_SOURCE) 
-	  echo "Usage: ${SELFNAME} [-q|--quiet] [-t|--target <targetdrive>] [-n|--name <clientname>] [-s|--snapshot <snapshot>]";
+	  echo "Usage: ${SELFNAME} [-q|--quiet] [-t|--target <targetdrive>] [-n|--name <clientname>] [-s|--snapshot <snapshot>] [--test]";
 	  echo "";
 	  echo "    ${SELFNAME}";
 	  echo "      Automatic restore.";
@@ -38,6 +39,9 @@ while [[ "$#" -gt 0 ]]; do
 	  echo "";	  
 	  echo "    ${SELFNAME} --snapshot 2020-12-23_12-03-26";
 	  echo "      Restore snapshot with name 2020-12-23_12-03-26.";
+	  echo "";
+	  echo "    ${SELFNAME} --test";
+	  echo "      Test if latest snapshot exists for every volume.";
 	  echo "";	  
 	  exit 0;
 	  ;;
@@ -77,10 +81,18 @@ do
   SNAPSHOTS=$(${SSH_CALL} "list-snapshots" "${VOLUME}");
   SNAPSHOT=$(echo "${SNAPSHOTS}" | grep "${TARGETSNAPSHOT}");
   if [[ -z "${SNAPSHOT}" ]]; then
-    logError "Cannot restore \"${TARGETSNAPSHOT}\" as volume \"${VOLUME}\" does not have this snapshot.";
-	exit 1;
+  
+    if isTrue ${ISTEST:-}; then
+	  logError "\"${TARGETSNAPSHOT}\" for volume \"${VOLUME}\" does not exist.";
+	else
+      logError "Cannot restore \"${TARGETSNAPSHOT}\" as volume \"${VOLUME}\" does not have this snapshot.";
+	  exit 1;
+	fi;
   fi;
 done;
+
+# Just test, so we are done here
+if isTrue ${ISTEST:-}; then logLine "Latest snapshot is ok."; exit 0; fi;
 
 # Get user confirmation
 read -p "Will restore ${TARGETSNAPSHOT} to ${DRIVE_ROOT}. Is this ok? [Yn]: " -n 1 -r
