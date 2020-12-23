@@ -155,20 +155,12 @@ cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$' | while read LI
   LINEDEVREGEX=$(echo "${LINEDEV}" | sed -e 's/[\.&]/\\&/g') # | sed -e 's/[\/&]/\\&/g')
   LINEMOUNTREGEX=$(echo "/tmp/mnt/root${LINEMOUNT}" | sed -e 's/[\.&]/\\&/g') # | sed -e 's/[\/&]/\\&/g')
   LINESUBVOLREGEX=$(echo "${LINESUBVOL}" | sed -e 's/[\.&]/\\&/g') # | sed -e 's/[\/&]/\\&/g')
-  #logDebug "LINEDEVREGEX: ${LINEDEVREGEX}";
-  #logDebug "LINEMOUNTREGEX: ${LINEMOUNTREGEX}";
-  #logDebug "LINESUBVOLREGEX: ${LINESUBVOLREGEX}";
-  #logDebug "Mounttestcmd: LANG=C mount | grep -P \"${LINEDEVREGEX}[\s]+on[\s]+${LINEMOUNTREGEX}\s.*subvol\=[/]{0,1}${LINESUBVOLREGEX}\"";
   MOUNTTEST=$(LANG=C mount | grep -P "${LINEDEVREGEX}[\s]+on[\s]+${LINEMOUNTREGEX}\s.*subvol\=[/]{0,1}${LINESUBVOLREGEX}");
-  logDebug "Mounttest: ${MOUNTTEST}";
   if ! isEmpty "${MOUNTTEST}"; then
     logDebug "Skipping line, as it is mounted already (Double check)";
     continue;
   fi;
   #end
-  logDebug "LINEDEV: ${LINEDEV}";
-  logDebug "LINEMOUNT: ${LINEMOUNT}";
-  logDebug "LINESUBVOL: ${LINESUBVOL}";
   
   if [[ "${LINEDEV}" == "/dev/mapper/cryptsystem" ]] || [[ "${LINEDEV}" == "LABEL=system" ]]; then
     # Mount simple volume
@@ -199,8 +191,6 @@ cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$' | while read LI
     logWarn "Skipping unknown mount ${LINEMOUNT}.";
   fi;
 done;
-
-exit 1;
 
 # Reinstall new crypto keys and backup header
 if isTrue "${CRYPTED}"; then
