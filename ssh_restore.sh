@@ -20,7 +20,7 @@ while [[ "$#" -gt 0 ]]; do
     -t|--target) DRIVE_ROOT=$(removeTrailingChar "$2" "/"); shift ;;
 	-n|--name) HOSTNAME="$2"; shift ;;
 	-s|--snapshot) TARGETSNAPSHOT="$2"; shift ;;
-	--test) ISTEST="true";
+	--test) ISTEST="true"; ;;
 	-h|--help) 
 	  SELFNAME=$(basename $BASH_SOURCE) 
 	  echo "Usage: ${SELFNAME} [-q|--quiet] [-t|--target <targetdrive>] [-n|--name <clientname>] [-s|--snapshot <snapshot>] [--test]";
