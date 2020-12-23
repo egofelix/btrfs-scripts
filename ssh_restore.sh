@@ -145,7 +145,7 @@ done;
 # Mount
 if ! runCmd mkdir -p /tmp/mnt/root; then logError "Failed to create root mountpoint"; exit 1; fi;
 cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$' | while read LINE; do
-  logDebug "Line: ${LINE}";
+  logDebug "Handling fstab line: ${LINE}";
   LINEDEV=$(echo "$LINE" | awk '{print $1}');
   LINEMOUNT=$(echo "$LINE" | awk '{print $2}');
   LINEFS=$(echo "$LINE" | awk '{print $3}');
