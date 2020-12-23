@@ -65,6 +65,7 @@ if isEmpty "${VOLUMES}"; then logError "Could not detect volumes to backup"; exi
 for VOLUME in ${VOLUMES}
 do
   VOLUME=$(removeLeadingChar "${VOLUME}" "/")
+  if [[ -z "${VOLUME}" ]]; then continue; fi;
   if [[ "${VOLUME}" = "@"* ]]; then continue; fi;
   logDebug "Testing VOLUME: ${VOLUME}";
   if isEmpty $(LANG=C mount | grep -P "[\(\,](subvol\=[/]{0,1}${VOLUME})[\)\,]" | grep 'type btrfs'); then logError "Source \"${VOLUME}\" could not be found."; exit 1; fi;
@@ -86,6 +87,7 @@ if [[ "${COMMAND,,}" = "send" ]]; then
   for VOLUME in ${VOLUMES}; do
     # Skip @volumes
     VOLUME=$(removeLeadingChar "${VOLUME}" "/")
+	if [[ -z "${VOLUME}" ]]; then continue; fi;
 	if [[ "${VOLUME}" = "@"* ]]; then logDebug "Skipping Volume ${VOLUME}"; continue; fi;
 	
 	# Check if there are any snapshots for this volume
