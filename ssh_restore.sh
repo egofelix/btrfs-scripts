@@ -227,7 +227,7 @@ fi
 
 # Todo Question for reboot
 read -p "Do you want to reboot into the system now? [Yn]: " -n 1 -r;
-if [[ $REPLY =~ ^[Yy]$ ]] && [[ $REPLY =~ ^$ ]]; then
+if [[ $REPLY =~ ^[Yy]$ ]] || [[ $REPLY =~ ^$ ]]; then
 	sync;
 	source "${BASH_SOURCE%/*}/scripts/unmount.sh";
 	logLine "Rebooting...";
