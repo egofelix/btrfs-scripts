@@ -144,7 +144,14 @@ done;
 
 # Mount
 if ! runCmd mkdir -p /tmp/mnt/root; then logError "Failed to create root mountpoint"; exit 1; fi;
+
+FSTABCONTENT1=$(cat "${FSTABPATH}")
+FSTABCONTENT2=$(cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$')
+logDebug "FSTABCONTENT1: ${FSTABCONTENT1}";
+logDebug "FSTABCONTENT2: ${FSTABCONTENT2}";
+
 cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$' | while read LINE; do
+  logDebug "Line: ${LINE}";
   LINEDEV=$(echo "$LINE" | awk '{print $1}');
   LINEMOUNT=$(echo "$LINE" | awk '{print $2}');
   LINEFS=$(echo "$LINE" | awk '{print $3}');
