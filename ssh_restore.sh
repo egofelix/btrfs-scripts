@@ -144,13 +144,7 @@ done;
 
 # Mount
 if ! runCmd mkdir -p /tmp/mnt/root; then logError "Failed to create root mountpoint"; exit 1; fi;
-
-FSTABCONTENT1=$(cat "${FSTABPATH}")
-FSTABCONTENT2=$(cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$')
-logDebug "FSTABCONTENT1: ${FSTABCONTENT1}";
-logDebug "FSTABCONTENT2: ${FSTABCONTENT2}";
-
-(echo "" | cat "${FSTABPATH}" -) | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$' | while read LINE; do
+cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$' | while read LINE; do
   logDebug "Line: ${LINE}";
   LINEDEV=$(echo "$LINE" | awk '{print $1}');
   LINEMOUNT=$(echo "$LINE" | awk '{print $2}');
@@ -161,7 +155,7 @@ logDebug "FSTABCONTENT2: ${FSTABCONTENT2}";
     # Mount simple volume
     logDebug "Mounting ${LINESUBVOL} at ${LINEMOUNT}...";
     MOUNTRESULT=$(mount -o "subvol=${LINESUBVOL}" /dev/mapper/cryptsystem "/tmp/mnt/root${LINEMOUNT}");
-	if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
+	if [[ $? -ne 0 ]]; then logLine "Failed to mount. Command \"mount -o \"subvol=${LINESUBVOL}\" /dev/mapper/cryptsystem \"/tmp/mnt/root${LINEMOUNT}\", Result \"${MOUNTRESULT}\"."; exit 1; fi;
   elif [[ "${LINEMOUNT}" == "/boot" ]]; then
     # Mount boot partition
     MOUNTRESULT=$(mount ${PART_BOOT} "/tmp/mnt/root${LINEMOUNT}");
@@ -174,6 +168,7 @@ logDebug "FSTABCONTENT2: ${FSTABCONTENT2}";
 	if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
   elif [[ "${LINEMOUNT,,}" == "none" ]] && [[ "${LINEFS,,}" == "swap" ]]; then
     # Create swapfile
+	logDebug "Creating new swapfile...";
 	if ! runCmd truncate -s 0 /tmp/mnt/root${LINEMOUNT}; then logError "Failed to truncate Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
 	if ! runCmd chattr +C /tmp/mnt/root${LINEMOUNT}; then logError "Failed to chattr Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
 	if ! runCmd chmod 600 /tmp/mnt/root${LINEMOUNT}; then logError "Failed to chmod Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
