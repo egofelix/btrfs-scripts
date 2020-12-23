@@ -80,6 +80,12 @@ if [[ -z "${TARGETSNAPSHOT:-}" ]]; then
   done;
 fi;
 
+# No target snapshot found
+if [[ -z "${TARGETSNAPSHOT:-}" ]]; then
+  logError "No snapshots found";
+  exit;
+fi;
+
 # Test if snapshot exists on every volume
 if ! isTrue ${ISTEST:-}; then
   logDebug "Snapshot to restore: ${TARGETSNAPSHOT}";
