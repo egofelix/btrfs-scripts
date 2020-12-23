@@ -219,7 +219,7 @@ source "${BASH_SOURCE%/*}/scripts/bootmanager.sh";
 sync
 read -p "Your system has been restored. Do you want to chroot into the restored system now and make changes? [yN]: " -n 1 -r;
 echo    # (optional) move to a new line
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+if [[ $REPLY =~ ^[Yy]$ ]]; then
     logLine "Entering chroot...";
     chroot /tmp/mnt/root /bin/bash;
 	sync;
@@ -227,7 +227,7 @@ fi
 
 # Todo Question for reboot
 read -p "Do you want to reboot into the system now? [Yn]: " -n 1 -r;
-if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ ! $REPLY =~ ^$ ]]; then
+if [[ $REPLY =~ ^[Yy]$ ]] && [[ $REPLY =~ ^$ ]]; then
 	sync;
 	source "${BASH_SOURCE%/*}/scripts/unmount.sh";
 	logLine "Rebooting...";
