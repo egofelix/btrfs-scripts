@@ -159,8 +159,12 @@ cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$' | while read LI
   logDebug "LINEMOUNTREGEX: ${LINEMOUNTREGEX}";
   logDebug "LINESUBVOLREGEX: ${LINESUBVOLREGEX}";
   logDebug "Mounttestcmd: LANG=C mount | grep -P \"${LINEDEVREGEX}[\s]+on[\s]+${LINEMOUNTREGEX}\s.*subvol\=[/]{0,1}${LINESUBVOLREGEX}\"";
-  MOUNTTEST=$(LANG=C mount | grep -P "${LINEDEVREGEX}[\s]+on[\s]+${LINEMOUNTREGEX}\s.*subvol\=[/]{0,1}${LINESUBVOLREGEX}")
+  MOUNTTEST=$(LANG=C mount | grep -P "${LINEDEVREGEX}[\s]+on[\s]+${LINEMOUNTREGEX}\s.*subvol\=[/]{0,1}${LINESUBVOLREGEX}");
   logDebug "Mounttest: ${MOUNTTEST}";
+  if ! isEmpty "${MOUNTTEST}"; then
+    logDebug "Skipping line, as it is mounted already (Double check)";
+    continue;
+  fi;
   #end
   
   
