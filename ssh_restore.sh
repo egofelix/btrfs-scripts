@@ -186,6 +186,8 @@ cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$' | while read LI
   fi;
 done;
 
+exit 1;
+
 # Reinstall new crypto keys and backup header
 if isTrue "${CRYPTED}"; then
   logDebug "Installing new crypto key...";
