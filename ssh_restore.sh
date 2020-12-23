@@ -81,18 +81,12 @@ if [[ -z "${TARGETSNAPSHOT:-}" ]]; then
 fi;
 
 # No target snapshot found
-if [[ -z "${TARGETSNAPSHOT:-}" ]]; then
-  logError "No snapshots found";
-  exit 1;
-fi;
+if [[ -z "${TARGETSNAPSHOT:-}" ]]; then logError "No snapshots found"; exit 1; fi;
+
+# logDebug TARGETSNAPSHOT
+if ! isTrue ${ISTEST:-}; then logDebug "Snapshot to restore: ${TARGETSNAPSHOT}"; else logDebug "Snapshot to test: ${TARGETSNAPSHOT}"; fi;
 
 # Test if snapshot exists on every volume
-if ! isTrue ${ISTEST:-}; then
-  logDebug "Snapshot to restore: ${TARGETSNAPSHOT}";
-else
-  logDebug "Snapshot to test: ${TARGETSNAPSHOT}";
-fi;
-
 HASERROR="false";
 for VOLUME in $(echo "${VOLUMES}" | sort)
 do
