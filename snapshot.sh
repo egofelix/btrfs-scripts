@@ -77,7 +77,7 @@ logLine "Target Directory: ${SNAPSHOTSPATH}";
 for VOLUME in ${VOLUMES}
 do
 	VOLUME=$(removeLeadingChar "${VOLUME}" "/")
-	if [[ -z "${VOLUME}" ]]; then continue fi;
+	if [[ -z "${VOLUME}" ]]; then continue; fi;
 	if [[ "${VOLUME}" = "@"* ]]; then logDebug "Skipping Volume ${VOLUME}"; continue; fi;
 	
 	# Find the first mountpoint for the volume
