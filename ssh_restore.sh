@@ -151,10 +151,11 @@ cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$' | while read LI
   LINEFS=$(echo "$LINE" | awk '{print $3}');
   LINESUBVOL=$(echo "$LINE" | awk '{print $4}' | grep -o -P 'subvol\=[^\s\,\)]*' | awk -F'=' '{print $2}');
   
-  # Fix for broken fstab (mount is there multiple times)
+  # Fix for broken fstab (mount is there multiple times, so we check if this is mounted already here)
   LINEDEVREGEX=$(echo "${LINEDEV}" | sed -e 's/[\.&]/\\&/g' | sed -e 's/[\/&]/\\&/g')
   LINEMOUNTREGEX=$(echo "${LINEMOUNT}" | sed -e 's/[\.&]/\\&/g' | sed -e 's/[\/&]/\\&/g')
   LINESUBVOLREGEX$(echo "${LINESUBVOL}" | sed -e 's/[\.&]/\\&/g' | sed -e 's/[\/&]/\\&/g')
+  logDebug "Mounttestcmd: LANG=C mount | grep -P \"${LINEDEVREGEX}\son[\s]+${LINEMOUNTREGEX}\s.*subvol\=[/]{0,1}${LINESUBVOLREGEX}\"";
   MOUNTTEST=$(LANG=C mount | grep -P "${LINEDEVREGEX}\son[\s]+${LINEMOUNTREGEX}\s.*subvol\=[/]{0,1}${LINESUBVOLREGEX}")
   logDebug "Mounttest: ${MOUNTTEST}";
   #end
