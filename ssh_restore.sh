@@ -9,9 +9,6 @@ source "${BASH_SOURCE%/*}/includes/functions.sh"
 # Load Variables
 source "${BASH_SOURCE%/*}/includes/defaults.sh"
 
-## Script must be started as root
-if [[ "$EUID" -ne 0 ]]; then logError "Please run as root"; exit 1; fi;
-
 # Install Dependencies
 source "${BASH_SOURCE%/*}/scripts/dependencies.sh"
 
@@ -50,11 +47,20 @@ while [[ "$#" -gt 0 ]]; do
   shift
 done
 
+## Script must be started as root
+if [[ "$EUID" -ne 0 ]]; then
+  if ! isTrue ${ISTEST:-}; then
+	logError "Please run as root"; exit 1;
+  fi;
+fi;
+
 # Detect ROOT-Drive
-source "${BASH_SOURCE%/*}/scripts/drive_detect.sh"
+if ! isTrue ${ISTEST:-}; then
+  source "${BASH_SOURCE%/*}/scripts/drive_detect.sh";
+fi;
 
 # Detect SSH-Server
-source "${BASH_SOURCE%/*}/scripts/ssh_serverdetect.sh"
+source "${BASH_SOURCE%/*}/scripts/ssh_serverdetect.sh";
 
 # query volumes
 VOLUMES=$(${SSH_CALL} "list-volumes");
