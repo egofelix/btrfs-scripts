@@ -22,7 +22,7 @@ EOF
 # After modifying, run ./mkscr
 
 setenv bootpart 1;
-setenv bootargs cryptdevice=PARTLABEL=system:cryptsystem root=/dev/mapper/cryptsystem rootflags=subvol=root-data ip=dhcp rw rootwait console=\${console};
+setenv bootargs cryptdevice=PARTLABEL=system:cryptsystem root=/dev/mapper/cryptsystem rootflags=subvol=root-data ip=:::::eth0:dhcp rw rootwait console=\${console};
 
 if load \${devtype} \${devnum}:\${bootpart} \${kernel_addr_r} /zImage; then
   if load \${devtype} \${devnum}:\${bootpart} \${fdt_addr_r} /dtbs/\${fdtfile}; then
