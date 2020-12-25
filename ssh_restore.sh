@@ -108,7 +108,11 @@ done;
 # Just test, so we are done here
 if isTrue ${ISTEST:-}; then 
   if isFalse ${HASERROR}; then
-    logLine "Latest snapshot \"${TARGETSNAPSHOT}\" is ok."; exit 0; 
+    if isTrue ${QUIET}; then
+	  echo ${TARGETSNAPSHOT}; exit 0;
+	else
+	  logLine "Latest snapshot \"${TARGETSNAPSHOT}\" is ok."; exit 0; 
+	fi;
   else
     logError "Latest snapshot \"${TARGETSNAPSHOT}\" is not ok."; exit 1;
   fi;
