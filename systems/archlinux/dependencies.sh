@@ -57,7 +57,7 @@ fi;
 # Install sed
 if ! which sed &> /dev/null; then
 	logDebug "Installing dependency sed";
-	pacman -Sy --noconfirm sed &> /dev/null;;
+	pacman -Sy --noconfirm sed &> /dev/null;
 fi;
 
 # Install debootstrap
