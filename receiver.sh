@@ -134,16 +134,13 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
   if [[ -d "${SNAPSHOTSPATH}/${VOLUME}/${NAME}" ]]; then logError "already exists"; exit 1; fi;
   
   # Check if subvolume matches
-  SUBVOLCHECK=$(LANG=C btrfs receive --dump < /dev/stdin 2>&1 | grep 'subvol ');
+  SUBVOLCHECK=$(LANG=C btrfs receive --dump < /dev/stdin 2>&1 | grep 'subvol ' | awk '{print $2}');
   if [[ -z "${SUBVOLCHECK}" ]]; then
     # Return error
 	logError "failed to detect subvolume: ${SUBVOLCHECK}."; exit 1;
   fi;
   
-  logError "failed to detect subvolume: ${SUBVOLCHECK}."; exit 1;
-  
-  SUBVOLCHECK=$(echo "${SUBVOLCHECK}" | awk '{print $3}')
-  if [[ "${SUBVOLCHECK}" -ne "${NAME}/" ]]; then
+  if [[ "${SUBVOLCHECK}" -ne "./${NAME}" ]]; then
     # Return error
 	logError "subvolume mismatch \"${SUBVOLCHECK}\" != \"${NAME}/\"."; exit 1;
   fi;
