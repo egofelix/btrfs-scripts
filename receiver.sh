@@ -164,6 +164,10 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
 	# Return error
 	logError "failed to receive the volume: ${RESULT}."; exit 1;
   fi;
+  
+  # Restore Trap
+  trap - EXIT SIGHUP SIGKILL SIGTERM SIGINT;
+  trap _no_more_locking EXIT;
    
   # Snapshot received
   echo "success"; exit 0;
