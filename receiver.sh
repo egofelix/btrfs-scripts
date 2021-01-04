@@ -148,7 +148,7 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
   # Receive
   _abortReceive() {
     REMOVERESULT=$(btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${NAME});
-    _no_more_locking();
+    logError "Receive Aborted: ${REMOVERESULT}";
   }
   trap _abortReceive EXIT;
   RESULT=$(btrfs receive -q ${SNAPSHOTSPATH}/${VOLUME} < /dev/stdin);
