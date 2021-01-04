@@ -140,7 +140,6 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
   }
   trap _abortReceive EXIT;
   RESULT=$(LANG=C btrfs receive ${SNAPSHOTSPATH}/${VOLUME} < /dev/stdin 2>&1 | grep 'subvol ' | awk '{print $2}');
-  
   RESULTCODE=$?
   
   # Restore Trap
