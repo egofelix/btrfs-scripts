@@ -139,7 +139,7 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
     logError "Receive Aborted: ${REMOVERESULT}";
   }
   trap _abortReceive EXIT;
-  RESULT=$(LANG=C btrfs receive ${SNAPSHOTSPATH}/${VOLUME} < /dev/stdin 2>&1 | grep 'subvol ' | awk '{print $2}');
+  RESULT=$(LANG=C btrfs receive ${SNAPSHOTSPATH}/${VOLUME} < /dev/stdin 2>&1);
   RESULTCODE=$?
   
   # Restore Trap
@@ -156,7 +156,7 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
   fi;
   
   # Check if subvolume matches
-  SUBVOLCHECK=$(LANG=C btrfs receive --dump < /dev/stdin 2>&1 | grep 'subvol ' | awk '{print $2}');
+  SUBVOLCHECK=$(echo ${RESULT} | grep 'subvol ' | awk '{print $2}');
   if [[ -z "${SUBVOLCHECK}" ]]; then
     # Return error
 	logError "failed to detect subvolume: ${SUBVOLCHECK}."; exit 1;
