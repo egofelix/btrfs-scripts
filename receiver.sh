@@ -1,4 +1,4 @@
-r#!/bin/bash
+#!/bin/bash
 set -uo pipefail
 
 ############### Main Script ################
