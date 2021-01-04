@@ -137,6 +137,7 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
   RESULT=$(LANG=C btrfs receive ${SNAPSHOTSPATH}/${VOLUME} < /dev/stdin 2>&1);
   RESULTCODE=$?
   echo "${RESULT}" > /tmp/bla
+  echo "${RESULTCODE}" > /tmp/bla1
   
   # Check if subvolume matches
   SUBVOLCHECK=$(echo ${RESULT} | grep 'At subvol ' | awk '{print $3}');
