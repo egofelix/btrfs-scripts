@@ -144,29 +144,25 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
   
   # Restore Trap
   trap _no_more_locking EXIT;
+
+  # Check if subvolume matches
+  SUBVOLCHECK=$(echo ${RESULT} | grep 'At subvol ' | awk '{print $3}');
+  if [[ -z "${SUBVOLCHECK}" ]]; then
+    # Return error
+	logError "failed to detect subvolume: ${RESULT}."; exit 1;
+  fi;
   
-  # Validate Receive
-  if [[ ${RESULTCODE} -ne 0 ]]; then
+  if [[ "${SUBVOLCHECK}" != "${NAME}" ]]; then
+    # Return error
+	logError "subvolume mismatch \"${SUBVOLCHECK}\" != \"${NAME}/\"."; exit 1;
+	
 	# Remove broken backup
-	# TODO, Detect name from RESULT here, otherwise the user could maybe delete snaps from the remote
-    REMOVERESULT=$(btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${NAME});
+    REMOVERESULT=$(btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${SUBVOLCHECK});
 	
 	# Return error
 	logError "failed to receive the volume: ${RESULT}."; exit 1;
   fi;
-  
-  # Check if subvolume matches
-  SUBVOLCHECK=$(echo ${RESULT} | grep 'subvol ');
-  if [[ -z "${SUBVOLCHECK}" ]]; then
-    # Return error
-	logError "failed to detect subvolume: ${SUBVOLCHECK}."; exit 1;
-  fi;
-  
-  if [[ "${SUBVOLCHECK}" != "./${NAME}" ]]; then
-    # Return error
-	logError "subvolume mismatch \"${SUBVOLCHECK}\" != \"${NAME}/\"."; exit 1;
-  fi;
-  
+   
   # Snapshot received
   echo "success"; exit 0;
 fi;
