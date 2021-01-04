@@ -135,12 +135,13 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
   
   # Trap for aborted receives (cleanup)
   _failedReceive() {
+    # Remove broken subvolume
     SUBVOLCHECK=$(echo "${RECEIVERESULT}" | grep -P 'At (subvol|snapshot) ' | awk '{print $3}');
-	
 	if [[ ! -z "${SUBVOLCHECK}" ]]; then
 	  REMOVERESULT=$(btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${SUBVOLCHECK});
 	fi;
 	
+	# Exit
     logError "Receive Aborted."; exit 1;
   }
   trap _failedReceive EXIT SIGHUP SIGKILL SIGTERM SIGINT;
@@ -159,7 +160,7 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
   # Check if subvolume was received correctly
   if [[ ${RESULTCODE} -ne 0 || "${SUBVOLCHECK}" != "${NAME}" ]]; then
     # Return error and fire trap for removal
-	logError "subvolume mismatch \"${SUBVOLCHECK}\" != \"${NAME}/\"."; exit 1;
+	logError "subvolume mismatch \"${SUBVOLCHECK}\" != \"${NAME}\"."; exit 1;
   fi;
   
   # Restore Trap
