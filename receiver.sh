@@ -151,7 +151,7 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
   SUBVOLCHECK=$(echo ${RESULT} | grep 'At subvol ' | awk '{print $3}');
   if [[ -z "${SUBVOLCHECK}" ]]; then
     # Return error
-	logError "failed to detect subvolume: ${RESULT}."; exit 1;
+	logError "failed to detect subvolume: \"${SUBVOLCHECK}\" in \"${RESULT}\"."; exit 1;
   fi;
   
   if [[ ${RESULTCODE} -ne 0 || "${SUBVOLCHECK}" != "${NAME}" ]]; then
