@@ -158,7 +158,12 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
   fi;
   
   # Check if subvolume was received correctly
-  if [[ ${RESULTCODE} -ne 0 || "${SUBVOLCHECK}" != "${NAME}" ]]; then
+  if [[ ${RESULTCODE} -ne 0 ]]; then
+	# Return error and fire trap for removal
+	logError "failed to receive: ${RECEIVERESULT}."; exit 1;
+  fi;
+  
+  if [[ "${SUBVOLCHECK}" != "${NAME}" ]]; then
     # Return error and fire trap for removal
 	logError "subvolume mismatch \"${SUBVOLCHECK}\" != \"${NAME}\"."; exit 1;
   fi;
