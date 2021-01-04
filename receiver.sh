@@ -146,11 +146,11 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
   fi;
   
   # Receive
-  function abortReceive {
-    REMOVERESULT=$(btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${NAME})
-    _no_more_locking()
+  _abortReceive() {
+    REMOVERESULT=$(btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${NAME});
+    _no_more_locking();
   }
-  trap abortReceive EXIT;
+  trap _abortReceive EXIT;
   RESULT=$(btrfs receive -q ${SNAPSHOTSPATH}/${VOLUME} < /dev/stdin);
   
   RESULTCODE=$?
