@@ -1,4 +1,4 @@
-#!/bin/bash
+r#!/bin/bash
 set -uo pipefail
 
 ############### Main Script ################
@@ -133,9 +133,33 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
   # Check if the snapshot exists already
   if [[ -d "${SNAPSHOTSPATH}/${VOLUME}/${NAME}" ]]; then logError "already exists"; exit 1; fi;
   
-  # Receive  
+  # Check if subvolume matches
+  SUBVOLCHECK=$(btrfs receive --dump ${SNAPSHOTSPATH}/${VOLUME} < /dev/stdin 1>/dev/null 2>/dev/null);
+  if [[ -z "${SUBVOLCHECK}" ]]; then
+    # Return error
+	logError "failed to detect subvolume: ${SUBVOLCHECK}."; exit 1;
+  fi;
+  SUBVOLCHECK=$(echo "${SUBVOLCHECK}" | awk '{print $3}')
+  if [[ "${SUBVOLCHECK}" -ne "${NAME}/" ]]; then
+    # Return error
+	logError "subvolume mismatch \"${SUBVOLCHECK}\" != \"${NAME}/\"."; exit 1;
+  fi;
+  
+  # Receive
+  function abortReceive {
+    REMOVERESULT=$(btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${NAME})
+    _no_more_locking()
+  }
+  trap abortReceive EXIT;
   RESULT=$(btrfs receive -q ${SNAPSHOTSPATH}/${VOLUME} < /dev/stdin);
-  if [[ $? -ne 0 ]]; then
+  
+  RESULTCODE=$?
+  
+  # Restore Trap
+  trap _no_more_locking EXIT;
+  
+  # Validate Receive
+  if [[ ${RESULTCODE} -ne 0 ]]; then
 	# Remove broken backup
 	# TODO, Detect name from RESULT here, otherwise the user could maybe delete snaps from the remote
     REMOVERESULT=$(btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${NAME});
