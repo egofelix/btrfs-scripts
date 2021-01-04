@@ -134,6 +134,14 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
   if [[ -d "${SNAPSHOTSPATH}/${VOLUME}/${NAME}" ]]; then logError "already exists"; exit 1; fi;
   
   # Receive
+  _abortReceive() {
+	echo "Aborting" > /tmp/aborted;
+    REMOVERESULT=$(btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${NAME});
+    logError "Receive Aborted: ${REMOVERESULT}";
+  }
+  trap _abortReceive EXIT SIGHUP SIGKILL SIGTERM SIGINT;
+  
+  # Receive
   RESULT=$(LANG=C btrfs receive ${SNAPSHOTSPATH}/${VOLUME} < /dev/stdin 2>&1);
   RESULTCODE=$?
   echo "${RESULT}" > /tmp/bla
