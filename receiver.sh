@@ -135,31 +135,25 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
   
   # Receive
   _abortReceive() {
-    SUBVOLCHECK=$(echo "${RESULT}" | grep -P 'At (subvol|snapshot) ' | awk '{print $3}');
+    SUBVOLCHECK=$(echo "${RECEIVERESULT}" | grep -P 'At (subvol|snapshot) ' | awk '{print $3}');
 	
-	if [[ -z "${SUBVOLCHECK}" ]]; then
-	  REMOVERESULT=$(btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${NAME});
-	  echo "Aborting NO-SUBVOLCHECK btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${NAME}: ${REMOVERESULT}" > /tmp/aborted;
-	else
+	if [[ ! -z "${SUBVOLCHECK}" ]]; then
 	  REMOVERESULT=$(btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${SUBVOLCHECK});
-	  echo "Aborting SUBVOLCHECK btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${SUBVOLCHECK}: ${REMOVERESULT}" > /tmp/aborted;
 	fi;
 	
-    logError "Receive Aborted: ${REMOVERESULT}";
+    logError "Receive Aborted."; exit 1;
   }
   trap _abortReceive EXIT SIGHUP SIGKILL SIGTERM SIGINT;
   
   # Receive
-  RESULT=$(LANG=C btrfs receive ${SNAPSHOTSPATH}/${VOLUME} < /dev/stdin 2>&1);
+  RECEIVERESULT=$(LANG=C btrfs receive ${SNAPSHOTSPATH}/${VOLUME} < /dev/stdin 2>&1);
   RESULTCODE=$?
-  echo "${RESULT}" > /tmp/bla
-  echo "${RESULTCODE}" > /tmp/bla1
   
   # Check if subvolume matches
-  SUBVOLCHECK=$(echo "${RESULT}" | grep -P 'At (subvol|snapshot) ' | awk '{print $3}');
+  SUBVOLCHECK=$(echo "${RECEIVERESULT}" | grep -P 'At (subvol|snapshot) ' | awk '{print $3}');
   if [[ -z "${SUBVOLCHECK}" ]]; then
     # Return error
-	logError "failed to detect subvolume: \"${SUBVOLCHECK}\" in \"${RESULT}\"."; exit 1;
+	logError "failed to detect subvolume: \"${SUBVOLCHECK}\" in \"${RECEIVERESULT}\"."; exit 1;
   fi;
   
   if [[ ${RESULTCODE} -ne 0 || "${SUBVOLCHECK}" != "${NAME}" ]]; then
@@ -170,7 +164,7 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
     REMOVERESULT=$(btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${SUBVOLCHECK});
 	
 	# Return error
-	logError "failed to receive the volume: ${RESULT}."; exit 1;
+	logError "failed to receive the volume: ${RECEIVERESULT}."; exit 1;
   fi;
   
   # Restore Trap
