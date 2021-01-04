@@ -142,7 +142,7 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
 	fi;
 	
 	# Exit
-    logError "Receive Aborted."; exit 1;
+    logError "Receive failed."; exit 1;
   }
   trap _failedReceive EXIT SIGHUP SIGKILL SIGTERM SIGINT;
   
