@@ -133,8 +133,8 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
   # Check if the snapshot exists already
   if [[ -d "${SNAPSHOTSPATH}/${VOLUME}/${NAME}" ]]; then logError "already exists"; exit 1; fi;
   
-  # Receive
-  _abortReceive() {
+  # Trap for aborted receives (cleanup)
+  _failedReceive() {
     SUBVOLCHECK=$(echo "${RECEIVERESULT}" | grep -P 'At (subvol|snapshot) ' | awk '{print $3}');
 	
 	if [[ ! -z "${SUBVOLCHECK}" ]]; then
@@ -143,28 +143,23 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
 	
     logError "Receive Aborted."; exit 1;
   }
-  trap _abortReceive EXIT SIGHUP SIGKILL SIGTERM SIGINT;
+  trap _failedReceive EXIT SIGHUP SIGKILL SIGTERM SIGINT;
   
   # Receive
   RECEIVERESULT=$(LANG=C btrfs receive ${SNAPSHOTSPATH}/${VOLUME} < /dev/stdin 2>&1);
   RESULTCODE=$?
   
-  # Check if subvolume matches
+  # Get name of received subvolume
   SUBVOLCHECK=$(echo "${RECEIVERESULT}" | grep -P 'At (subvol|snapshot) ' | awk '{print $3}');
   if [[ -z "${SUBVOLCHECK}" ]]; then
     # Return error
 	logError "failed to detect subvolume: \"${SUBVOLCHECK}\" in \"${RECEIVERESULT}\"."; exit 1;
   fi;
   
+  # Check if subvolume was received correctly
   if [[ ${RESULTCODE} -ne 0 || "${SUBVOLCHECK}" != "${NAME}" ]]; then
-    # Return error
+    # Return error and fire trap for removal
 	logError "subvolume mismatch \"${SUBVOLCHECK}\" != \"${NAME}/\"."; exit 1;
-	
-	# Remove broken backup
-    REMOVERESULT=$(btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${SUBVOLCHECK});
-	
-	# Return error
-	logError "failed to receive the volume: ${RECEIVERESULT}."; exit 1;
   fi;
   
   # Restore Trap
