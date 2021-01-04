@@ -140,7 +140,7 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
 	logError "failed to detect subvolume: ${SUBVOLCHECK}."; exit 1;
   fi;
   
-  if [[ "${SUBVOLCHECK}" -ne "./${NAME}" ]]; then
+  if [[ "${SUBVOLCHECK}" != "./${NAME}" ]]; then
     # Return error
 	logError "subvolume mismatch \"${SUBVOLCHECK}\" != \"${NAME}/\"."; exit 1;
   fi;
