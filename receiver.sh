@@ -141,6 +141,7 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
     logError "Receive Aborted: ${REMOVERESULT}";
   }
   trap _abortReceive EXIT;
+  trap _abortReceive SIGINT;
   logLine "Receiving";
   RESULT=$(LANG=C btrfs receive ${SNAPSHOTSPATH}/${VOLUME} < /dev/stdin 2>&1);
   RESULTCODE=$?
