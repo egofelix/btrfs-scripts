@@ -135,6 +135,7 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
   
   # Receive
   _abortReceive() {
+    echo "Aborting";
     REMOVERESULT=$(btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${NAME});
     logError "Receive Aborted: ${REMOVERESULT}";
   }
