@@ -141,12 +141,14 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
     logError "Receive Aborted: ${REMOVERESULT}";
   }
   trap _abortReceive EXIT;
+  logLine "Receiving";
   RESULT=$(LANG=C btrfs receive ${SNAPSHOTSPATH}/${VOLUME} < /dev/stdin 2>&1);
   RESULTCODE=$?
   
   # Restore Trap
   trap _no_more_locking EXIT;
-
+  logLine "Receiving done";
+  
   # Check if subvolume matches
   SUBVOLCHECK=$(echo ${RESULT} | grep 'At subvol ' | awk '{print $3}');
   if [[ -z "${SUBVOLCHECK}" ]]; then
