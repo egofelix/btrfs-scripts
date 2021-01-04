@@ -75,7 +75,8 @@ EOF
 
     if isTrue "${CRYPTED}"; then
 		# Setup Grub for Cryptsetup
-		sed -i '/^#GRUB_ENABLE_CRYPTODISK=.*$/s/^#\ //' /tmp/mnt/root/etc/default/grub
+		sed -i "s/#GRUB_ENABLE_CRYPTODISK/GRUB_ENABLE_CRYPTODISK/g" /tmp/mnt/root/etc/default/grub
+		sed -i "s/GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"cryptdevice=PARTLABEL=system:cryptsystem ip=:::::eth0:dhcp\"/g" /tmp/mnt/root/etc/default/grub
 	fi;
 
 	# Setup Grub
