@@ -133,25 +133,13 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
   # Check if the snapshot exists already
   if [[ -d "${SNAPSHOTSPATH}/${VOLUME}/${NAME}" ]]; then logError "already exists"; exit 1; fi;
   
-  # Check if subvolume matches
-  SUBVOLCHECK=$(LANG=C btrfs receive --dump < /dev/stdin 2>&1 | grep 'subvol ' | awk '{print $2}');
-  if [[ -z "${SUBVOLCHECK}" ]]; then
-    # Return error
-	logError "failed to detect subvolume: ${SUBVOLCHECK}."; exit 1;
-  fi;
-  
-  if [[ "${SUBVOLCHECK}" != "./${NAME}" ]]; then
-    # Return error
-	logError "subvolume mismatch \"${SUBVOLCHECK}\" != \"${NAME}/\"."; exit 1;
-  fi;
-  
   # Receive
   _abortReceive() {
     REMOVERESULT=$(btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${NAME});
     logError "Receive Aborted: ${REMOVERESULT}";
   }
   trap _abortReceive EXIT;
-  RESULT=$(btrfs receive -q ${SNAPSHOTSPATH}/${VOLUME} < /dev/stdin);
+  RESULT=$(LANG=C btrfs receive ${SNAPSHOTSPATH}/${VOLUME} < /dev/stdin 2>&1 | grep 'subvol ' | awk '{print $2}');
   
   RESULTCODE=$?
   
@@ -166,6 +154,18 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
 	
 	# Return error
 	logError "failed to receive the volume: ${RESULT}."; exit 1;
+  fi;
+  
+  # Check if subvolume matches
+  SUBVOLCHECK=$(LANG=C btrfs receive --dump < /dev/stdin 2>&1 | grep 'subvol ' | awk '{print $2}');
+  if [[ -z "${SUBVOLCHECK}" ]]; then
+    # Return error
+	logError "failed to detect subvolume: ${SUBVOLCHECK}."; exit 1;
+  fi;
+  
+  if [[ "${SUBVOLCHECK}" != "./${NAME}" ]]; then
+    # Return error
+	logError "subvolume mismatch \"${SUBVOLCHECK}\" != \"${NAME}/\"."; exit 1;
   fi;
   
   # Snapshot received
