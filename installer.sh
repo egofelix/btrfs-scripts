@@ -91,8 +91,8 @@ do
 done;
 
 # Mount logs
-mkdir -p /tmp/mnt/root/var/logs
-if ! runCmd mount -o subvol=/@logs ${PART_SYSTEM} /tmp/mnt/root/var/logs; then echo "Failed to Mount Subvolume LOGS-Volume at /tmp/mnt/root/var/logs"; exit; fi;
+mkdir -p /tmp/mnt/root/var/log
+if ! runCmd mount -o subvol=/@logs ${PART_SYSTEM} /tmp/mnt/root/var/log; then echo "Failed to Mount Subvolume LOGS-Volume at /tmp/mnt/root/var/log"; exit; fi;
 
 # Install base system
 logLine "Installing Base-System (${DISTRO^^})...";
