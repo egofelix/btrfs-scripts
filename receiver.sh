@@ -134,7 +134,7 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
   if [[ -d "${SNAPSHOTSPATH}/${VOLUME}/${NAME}" ]]; then logError "already exists"; exit 1; fi;
   
   # Check if subvolume matches
-  SUBVOLCHECK=$(btrfs receive --dump < /dev/stdin 1>/dev/null 2>/dev/null);
+  SUBVOLCHECK=$(btrfs receive --dump < /dev/stdin 1>/dev/null);
   if [[ -z "${SUBVOLCHECK}" ]]; then
     # Return error
 	logError "failed to detect subvolume: ${SUBVOLCHECK}."; exit 1;
