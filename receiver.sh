@@ -135,8 +135,8 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
   
   # Receive
   _abortReceive() {
-	echo "Aborting btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${NAME}" > /tmp/aborted;
     REMOVERESULT=$(btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${NAME});
+	echo "Aborting btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${NAME}: ${REMOVERESULT}" > /tmp/aborted;
     logError "Receive Aborted: ${REMOVERESULT}";
   }
   trap _abortReceive EXIT SIGHUP SIGKILL SIGTERM SIGINT;
