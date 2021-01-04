@@ -135,8 +135,16 @@ if [[ "${COMMAND_NAME,,}" = "upload-snapshot" ]]; then
   
   # Receive
   _abortReceive() {
-    REMOVERESULT=$(btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${NAME});
-	echo "Aborting btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${NAME}: ${REMOVERESULT}" > /tmp/aborted;
+    SUBVOLCHECK=$(echo "${RESULT}" | grep -P 'At (subvol|snapshot) ' | awk '{print $3}');
+	
+	if [[ -z "${SUBVOLCHECK}" ]]; then
+	  REMOVERESULT=$(btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${NAME});
+	  echo "Aborting NO-SUBVOLCHECK btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${NAME}: ${REMOVERESULT}" > /tmp/aborted;
+	else
+	  REMOVERESULT=$(btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${SUBVOLCHECK});
+	  echo "Aborting SUBVOLCHECK btrfs subvol del ${SNAPSHOTSPATH}/${VOLUME}/${SUBVOLCHECK}: ${REMOVERESULT}" > /tmp/aborted;
+	fi;
+	
     logError "Receive Aborted: ${REMOVERESULT}";
   }
   trap _abortReceive EXIT SIGHUP SIGKILL SIGTERM SIGINT;
