@@ -1,7 +1,11 @@
 #!/bin/bash
-if [[ $(getSystemName) = "ARCHLINUX" ]]; then
+if [[ ${DISTRO^^} = "ARCHLINUX" ]]; then
 	source "${BASH_SOURCE%/*}/../systems/archlinux/strap.sh"
+elif [[ ${DISTRO^^} = "DEBIAN" ]]; then
+	source "${BASH_SOURCE%/*}/../systems/debian/strap.sh"
+elif [[ ${DISTRO^^} = "UBUNTU" ]]; then
+	source "${BASH_SOURCE%/*}/../systems/ubuntu/strap.sh"
 else
-	logLine "Unknown system detected... Aborting"
+	logLine "Unknown distro \"${DISTRO}\" detected... Aborting"
 	exit 1;
 fi;
