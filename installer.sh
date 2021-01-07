@@ -9,12 +9,14 @@ source "${BASH_SOURCE%/*}/includes/functions.sh"
 # Load Variables
 source "${BASH_SOURCE%/*}/includes/defaults.sh"
 QUIET="false";
+RAID="false";
 
 # Scan arguments
 while [[ "$#" -gt 0 ]]; do
   case $1 in
     -q|--quiet) QUIET="true"; QUIETPS=" &>/dev/null"; ;;
 	-nc|--nocrypt) CRYPTED="false"; ;;
+	-r|--raid) RAID="true"; ;;
 	--debug) DEBUG="true"; ;;
 	-d|--distro) DISTRO="${2^^}"; shift ;;
 	-h|--help) 
@@ -59,7 +61,13 @@ source "${BASH_SOURCE%/*}/scripts/drive_detect.sh"
 
 # Print INFO
 echo
-echo "System will be installed to: ${DRIVE_ROOT}"
+
+if isTrue "${RAID:-}"; then
+	echo "System will be installed to: ${DRIVE_ROOT_A} & ${DRIVE_ROOT_B}"
+else
+	echo "System will be installed to: ${DRIVE_ROOT}"
+fi;
+
 if isTrue "${CRYPTED}"; then
 	echo "The System will be encrypted with cryptsetup";
 fi;
