@@ -6,7 +6,7 @@ function getSystemName {
   elif [ -f "/etc/arch-release" ]; then
     # Fallback detection
     echo -n "ARCHLINUX";
-  if [[ "${SYSNAME^^}" = *"DEBIAN"* ]]; then
+  elif [[ "${SYSNAME^^}" = *"DEBIAN"* ]]; then
     echo -n "DEBIAN";
   else
     echo -n "UNKNOWN";
