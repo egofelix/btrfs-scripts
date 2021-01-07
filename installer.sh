@@ -146,7 +146,7 @@ if [ $? -ne 0 ]; then
 	logLine "Failed to generate fstab";
 	exit
 fi;
-if ! runCmd sed -i 's#^LABEL=system#/dev/mapper/cryptsystem#g' /tmp/mnt/root/etc/fstab; then echo "Failed to modify fstab"; exit; fi;c
+if ! runCmd sed -i 's#^LABEL=system#/dev/mapper/cryptsystem#g' /tmp/mnt/root/etc/fstab; then echo "Failed to modify fstab"; exit; fi;
 if ! runCmd sed -i 's/,subvolid=[0-9]*//g' /tmp/mnt/root/etc/fstab; then echo "Failed to modify fstab"; exit; fi;
 if ! runCmd sed -i 's/,subvol=\/[^,]*//g' /tmp/mnt/root/etc/fstab; then echo "Failed to modify fstab"; exit; fi;
 
