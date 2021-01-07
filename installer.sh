@@ -63,6 +63,7 @@ echo "System will be installed to: ${DRIVE_ROOT}"
 if isTrue "${CRYPTED}"; then
 	echo "The System will be encrypted with cryptsetup";
 fi;
+echo "Distribution will be: ${DISTRO}"
 echo
 
 # Get user confirmation
