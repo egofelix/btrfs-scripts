@@ -76,6 +76,8 @@ fi;
 
 # Install debootstrap
 if ! which debootstrap &> /dev/null; then
+  echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/sources.list
+  DEBIAN_FRONTEND=noninteractive apt-get update
   logDebug "Installing dependency debootstrap";
-  DEBIAN_FRONTEND=noninteractive apt-get -yq install debootstrap &> /dev/null;
+  DEBIAN_FRONTEND=noninteractive apt-get -yq install -t buster-backports debootstrap &> /dev/null;
 fi;
