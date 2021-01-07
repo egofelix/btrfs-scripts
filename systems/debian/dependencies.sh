@@ -66,6 +66,14 @@ if ! which mkfs.vfat &> /dev/null; then
 	DEBIAN_FRONTEND=noninteractive apt-get -yq install dosfstools &> /dev/null;
 fi;
 
+# Install mdadm
+if isTrue ${RAID:-}; then
+  if ! which mdadm &> /dev/null; then
+    logDebug "Installing dependency mdadm";
+	DEBIAN_FRONTEND=noninteractive apt-get -yq install mdadm &> /dev/null;
+  fi;
+fi;
+
 # Install debootstrap
 if [[ "${DISTRO^^}" == "DEBIAN" ]]; then
   if ! which debootstrap &> /dev/null; then
