@@ -1,4 +1,18 @@
 #!/bin/bash
+
+if isTrue ${RAID:-}; then
+  mdadm --zero-superblock ${DRIVE_ROOT_A}
+  mdadm --zero-superblock ${DRIVE_ROOT_B}
+  DRIVE_ROOT=/dev/md/raid
+  
+  echo "Preparing raid...";
+  RAIDRESULT=$(echo yes | mdadm --create /dev/md/raid --level=1 --raid-devices=2 ${DRIVE_ROOT_A} ${DRIVE_ROOT_B})
+  if [ $? -ne 0 ]; then
+		logLine "Failed to prepare raid. aborting."
+		exit
+	fi;
+fi;
+
 # Format drives
 logLine "Partitioning ${DRIVE_ROOT}..."
 
