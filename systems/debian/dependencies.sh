@@ -75,9 +75,7 @@ if isTrue ${RAID:-}; then
 fi;
 
 # Install debootstrap
-if [[ "${DISTRO^^}" == "DEBIAN" ]]; then
-  if ! which debootstrap &> /dev/null; then
-    logDebug "Installing dependency debootstrap";
-	DEBIAN_FRONTEND=noninteractive apt-get -yq install debootstrap &> /dev/null;
-  fi;
+if ! which debootstrap &> /dev/null; then
+  logDebug "Installing dependency debootstrap";
+  DEBIAN_FRONTEND=noninteractive apt-get -yq install debootstrap &> /dev/null;
 fi;

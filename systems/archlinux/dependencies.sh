@@ -69,9 +69,7 @@ if isTrue ${RAID:-}; then
 fi;
 
 # Install debootstrap
-if [[ "${DISTRO^^}" == "DEBIAN" ]]; then
-  if ! which debootstrap &> /dev/null; then
-    logDebug "Installing dependency debootstrap";
-    pacman -Sy --noconfirm debootstrap &> /dev/null;
-  fi;
+if ! which debootstrap &> /dev/null; then
+  logDebug "Installing dependency debootstrap";
+  pacman -Sy --noconfirm debootstrap &> /dev/null;
 fi;
