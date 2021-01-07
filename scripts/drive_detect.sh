@@ -16,9 +16,11 @@ if isTrue ${RAID:-}; then
 		do
 			if [[ -z "${DRIVE_ROOT_A:-}" ]]; then
 				DRIVE_ROOT_A="$item"
+				continue;
 			fi;
 			if [[ -z "${DRIVE_ROOT_B:-}" ]]; then
 				DRIVE_ROOT_B="$item"
+				continue;
 			fi;
 		done;
 		
