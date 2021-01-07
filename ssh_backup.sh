@@ -16,25 +16,28 @@ QUIET="false";
 while [[ "$#" -gt 0 ]]; do
   case $1 in
     -q|--quiet) QUIET="true"; QUIETPS=" &>/dev/null"; ;;
-	-nc|--nocrypt) CRYPTED="false"; ;;
 	--debug) DEBUG="true"; ;;
-	-d|--distro) DISTRO="${2^^}"; shift ;;
+    -s|--source) SNAPSHOTSPATH=$(removeTrailingChar "$2" "/"); shift ;;
+	-c|--command) COMMAND="$2"; shift ;;
+	-v|--volume) if [[ -z ${VOLUMES} ]]; then VOLUMES="$2"; else VOLUMES="${VOLUMES} $2"; fi; shift ;;
+	-t|--target) SSH_URI="$2"; shift ;;
 	-h|--help) 
 	  SELFNAME=$(basename $BASH_SOURCE) 
-	  echo "Usage: ${SELFNAME} [-q|--quiet] [-nc|--nocrypt] [-d|--distro <distro>]";
+	  echo "Usage: ${SELFNAME} [-q|--quiet] [-s|--source <sourcevolume>] [-v|--volume <volume>] [-t|--target <targetserver>] [-c|--command <command>]";
 	  echo "";
 	  echo "    ${SELFNAME}";
-	  echo "      Will install encrypted arch linux.";
+	  echo "      Send Backups to autodetected server.";
 	  echo "";
-	  echo "    ${SELFNAME} -d ubuntu";
-	  echo "      Will install encrypted ubuntu.";
+	  echo "    ${SELFNAME} -c check-latest --volume root.data";
+	  echo "      Get timestamp of latest backup-volume root-data.";
 	  echo "";
-	  echo "    ${SELFNAME} -nc -d debian.";
-	  echo "      Will install unencrypted debian.";
+	  echo "    ${SELFNAME} -t ssh://user@server:port/";
+	  echo "      Send backups to specific server.";
 	  echo "";
-	  echo "Supported distros are: archlinux, debian, ubuntu";
+	  echo "Supported commands are: check-latest, send, test";
+	  echo "The default command is: send";
 	  echo "";
-	  echo "If you ommit the <distro> then the script will use archlinux.";
+	  echo "If you ommit the <targetserver> then the script will try to locate it via srv-records in dns.";
 	  echo "";
 	  exit 0;
 	  ;;

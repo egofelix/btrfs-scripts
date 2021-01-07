@@ -8,6 +8,39 @@ source "${BASH_SOURCE%/*}/includes/functions.sh"
 
 # Load Variables
 source "${BASH_SOURCE%/*}/includes/defaults.sh"
+QUIET="false";
+
+# Scan arguments
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    -q|--quiet) QUIET="true"; QUIETPS=" &>/dev/null"; ;;
+	-nc|--nocrypt) CRYPTED="false"; ;;
+	--debug) DEBUG="true"; ;;
+	-d|--distro) DISTRO="${2^^}"; shift ;;
+	-h|--help) 
+	  SELFNAME=$(basename $BASH_SOURCE) 
+	  echo "Usage: ${SELFNAME} [-q|--quiet] [-nc|--nocrypt] [-d|--distro <distro>]";
+	  echo "";
+	  echo "    ${SELFNAME}";
+	  echo "      Will install encrypted arch linux.";
+	  echo "";
+	  echo "    ${SELFNAME} -d ubuntu";
+	  echo "      Will install encrypted ubuntu.";
+	  echo "";
+	  echo "    ${SELFNAME} -nc -d debian.";
+	  echo "      Will install unencrypted debian.";
+	  echo "";
+	  echo "Supported distros are: archlinux, debian, ubuntu";
+	  echo "";
+	  echo "If you ommit the <distro> then the script will use archlinux.";
+	  echo "";
+	  exit 0;
+	  ;;
+    *) echo "unknown parameter passed: ${1}."; exit 1;;
+  esac
+  shift
+done
+
 
 ## Script must be started as root
 if [ "$EUID" -ne 0 ]; then
