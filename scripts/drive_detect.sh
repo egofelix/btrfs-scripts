@@ -34,6 +34,14 @@ if isTrue ${RAID:-}; then
 		echo "No Drive found";
 		exit;
 	  fi;
+	  
+	  DRIVE_ROOT_A_SIZE=$(LANG=C fdisk -l | grep "Disk ${DRIVE_ROOT_A}" | grep -Po ',\s[0-9]+\sbytes,' | grep -Po '[0-9]+')
+	  DRIVE_ROOT_B_SIZE=$(LANG=C fdisk -l | grep "Disk ${DRIVE_ROOT_B}" | grep -Po ',\s[0-9]+\sbytes,' | grep -Po '[0-9]+')
+	  
+	  if [[ ${DRIVE_ROOT_A_SIZE} != ${DRIVE_ROOT_B_SIZE} ]]; then
+		echo "Cannot use ${DRIVE_ROOT_A} and ${DRIVE_ROOT_B}, they have different sizes";
+		exit;
+	  fi;
 	fi;
 else
 	# Detect ROOT-Drive
