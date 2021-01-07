@@ -60,6 +60,12 @@ if ! which sed &> /dev/null; then
 	DEBIAN_FRONTEND=noninteractive apt-get -yq install sed &> /dev/null;
 fi;
 
+# Install dosfstools
+if ! which mkfs.vfat &> /dev/null; then
+	logDebug "Installing dependency dosfstools";
+	DEBIAN_FRONTEND=noninteractive apt-get -yq install dosfstools &> /dev/null;
+fi;
+
 # Install debootstrap
 if [[ "${DISTRO^^}" == "DEBIAN" ]]; then
   if ! which debootstrap &> /dev/null; then
