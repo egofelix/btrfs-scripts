@@ -28,7 +28,7 @@ EOM
 else
 	logLine "Using BIOS partition scheme..."
 	sfdisk -q ${DRIVE_ROOT} &> /dev/null <<- EOM
-label: mbr
+label: dos
 unit: sectors
 
 start=2048, size=512000, type=21686148-6449-6E6F-744E-656564454649, name="boot"
