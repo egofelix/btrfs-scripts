@@ -9,7 +9,7 @@ DEBIAN_FRONTEND=noninteractive apt-get -yq install linux-image-armhf;
 EOF
 else
 	cat > /tmp/mnt/root/chroot.sh <<- EOF
-DEBIAN_FRONTEND=noninteractive apt-get -yq install linux-image;
+DEBIAN_FRONTEND=noninteractive apt-get -yq install linux-image-generic;
 EOF
 fi;
 chmod +x /tmp/mnt/root/chroot.sh

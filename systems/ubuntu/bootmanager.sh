@@ -2,11 +2,17 @@
 logLine "Setting up Bootmanager (GRUB)";
 
 # Install Grub
+if [[ "${BIOSTYPE}" == "EFI" ]]; then
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
-DEBIAN_FRONTEND=noninteractive apt-get -yq install grub efibootmgr
+DEBIAN_FRONTEND=noninteractive apt-get -yq install grub-efi
 EOF
-
+else
+cat > /tmp/mnt/root/chroot.sh <<- EOF
+#!/bin/bash
+DEBIAN_FRONTEND=noninteractive apt-get -yq install grub-pc
+EOF
+fi;
 chmod +x /tmp/mnt/root/chroot.sh;
 chroot /tmp/mnt/root /chroot.sh;
 
