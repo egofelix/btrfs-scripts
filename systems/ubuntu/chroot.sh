@@ -23,7 +23,7 @@ cat > /tmp/mnt/root/chroot.sh <<- EOF
 echo -e "root\nroot" | passwd root
 
 # Needed Packages
-DEBIAN_FRONTEND=noninteractive apt-get -yq install btrfs-progs openssh linux-firmware
+DEBIAN_FRONTEND=noninteractive apt-get -yq install btrfs-progs openssh-server linux-firmware
 EOF
 if isTrue "${CRYPTED}"; then
 	cat >> /tmp/mnt/root/chroot.sh <<- EOF

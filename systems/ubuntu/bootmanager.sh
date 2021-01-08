@@ -26,8 +26,11 @@ fi;
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 #mkinitcpio -P
-/usr/sbin/grub-install --no-nvram
-/usr/sbin/grub-install
-/usr/sbin/grub-mkconfig -o /boot/grub/grub.cfg
+PATH=${PATH}:/usr/sbin
+update-initramfs -c -k all
+grub-install --no-nvram
+grub-install
+grub-mkconfig -o /boot/grub/grub.cfg
+update-grub
 EOF
 chroot /tmp/mnt/root /chroot.sh;
