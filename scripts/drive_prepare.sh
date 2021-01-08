@@ -33,7 +33,7 @@ unit: sectors
 
 start=2048, size=20480, type=21686148-6449-6E6F-744E-656564454649, bootable
 start=22528, size=512000, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="boot"
-start=534528, size=204800, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="root"
+start=534528, size=204800, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="system"
 EOM
 
 	# Check Result
