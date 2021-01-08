@@ -1,15 +1,16 @@
 #!/bin/bash
 
 if isTrue ${RAID:-}; then
-  mdadm --zero-superblock ${DRIVE_ROOT_A}
-  mdadm --zero-superblock ${DRIVE_ROOT_B}
-  DRIVE_ROOT=/dev/md/raid
-  
+  #mdadm --zero-superblock ${DRIVE_ROOT_A}
+  #mdadm --zero-superblock ${DRIVE_ROOT_B}
+  #DRIVE_ROOT=/dev/md/raid
+  sync
   echo "Partitioning raid disks...";
   for DRIVE_ROOT in "${DRIVE_ROOT_A}" "${DRIVE_ROOT_B}"
   do
 	if [[ "${BIOSTYPE}" == "EFI" ]]; then
 		logLine "Using EFI partition scheme...";
+		echo sfdisk -q ${DRIVE_ROOT}
 		sfdisk -q ${DRIVE_ROOT} &> /dev/null <<- EOM
 	label: gpt
 	unit: sectors
@@ -48,6 +49,7 @@ if isTrue ${RAID:-}; then
 	if ! runCmd parted -s ${DRIVE_ROOT} resizepart ${PART_SYSTEM_NUM} 100%; then logLine "Failed to expand ROOT-Partition"; exit; fi;
   done;
   
+  sync
   echo "Creating raids...";
   if [[ "${BIOSTYPE}" == "EFI" ]]; then
     RAIDRESULT=$(echo yes | mdadm --create /dev/md/raid_efi --metadata=0.90 --level=1 --raid-devices=2 ${DRIVE_ROOT_A}1 ${DRIVE_ROOT_B}1)
