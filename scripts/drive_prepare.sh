@@ -50,12 +50,12 @@ if isTrue ${RAID:-}; then
   
   echo "Creating raids...";
   if [[ "${BIOSTYPE}" == "EFI" ]]; then
-    RAIDRESULT=$(echo yes | mdadm --create /dev/md/raid_efi --metadata=1.0 --level=1 --raid-devices=2 ${DRIVE_ROOT_A}1 ${DRIVE_ROOT_B}1)
+    RAIDRESULT=$(echo yes | mdadm --create /dev/md/raid_efi --metadata=0.9 --level=1 --raid-devices=2 ${DRIVE_ROOT_A}1 ${DRIVE_ROOT_B}1)
     if [ $? -ne 0 ]; then
 	  logLine "Failed to prepare raid. aborting."
       exit
     fi;
-    RAIDRESULT=$(echo yes | mdadm --create /dev/md/raid_boot --metadata=1.0 --level=1 --raid-devices=2 ${DRIVE_ROOT_A}2 ${DRIVE_ROOT_B}2)
+    RAIDRESULT=$(echo yes | mdadm --create /dev/md/raid_boot --metadata=0.9 --level=1 --raid-devices=2 ${DRIVE_ROOT_A}2 ${DRIVE_ROOT_B}2)
     if [ $? -ne 0 ]; then
 	  logLine "Failed to prepare raid. aborting."
 	  exit
@@ -71,7 +71,7 @@ if isTrue ${RAID:-}; then
 	export PART_BOOT="/dev/md/raid_boot";
 	export PART_SYSTEM="/dev/md/raid_root";
   else
-    RAIDRESULT=$(echo yes | mdadm --create /dev/md/raid_boot --metadata=1.0 --level=1 --raid-devices=2 ${DRIVE_ROOT_A}1 ${DRIVE_ROOT_B}1)
+    RAIDRESULT=$(echo yes | mdadm --create /dev/md/raid_boot --metadata=0.9 --level=1 --raid-devices=2 ${DRIVE_ROOT_A}1 ${DRIVE_ROOT_B}1)
     if [ $? -ne 0 ]; then
 	  logLine "Failed to prepare raid. aborting."
 	  exit
