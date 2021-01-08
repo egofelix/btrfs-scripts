@@ -41,6 +41,11 @@ if [ "$EUID" -ne 0 ]; then
   exit;
 fi;
 
+if [[ $(getSystemName) != "ARCHLINUX" ]]; then
+  echo "This installer can only run on archlinux";
+  exit;
+fi;
+
 # Install Dependencies
 source "${BASH_SOURCE%/*}/scripts/dependencies.sh"
 

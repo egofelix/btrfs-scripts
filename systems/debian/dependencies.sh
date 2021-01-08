@@ -60,12 +60,6 @@ if ! which sed &> /dev/null; then
 	DEBIAN_FRONTEND=noninteractive apt-get -yq install sed &> /dev/null;
 fi;
 
-# Install wget
-if ! which wget &> /dev/null; then
-	logDebug "Installing dependency wget";
-	DEBIAN_FRONTEND=noninteractive apt-get -yq install wget &> /dev/null;
-fi;
-
 # Install dosfstools
 if ! which mkfs.vfat &> /dev/null; then
 	logDebug "Installing dependency dosfstools";
@@ -78,6 +72,24 @@ if ! which debootstrap &> /dev/null; then
   DEBIAN_FRONTEND=noninteractive apt-get update
   logDebug "Installing dependency debootstrap";
   DEBIAN_FRONTEND=noninteractive apt-get -yq install -t buster-backports debootstrap &> /dev/null;
+fi;
+
+# Install wget
+if ! which wget &> /dev/null; then
+	logDebug "Installing dependency wget";
+	DEBIAN_FRONTEND=noninteractive apt-get -yq install wget &> /dev/null;
+fi;
+
+# Install curl
+if ! which curl &> /dev/null; then
+	logDebug "Installing dependency curl";
+	DEBIAN_FRONTEND=noninteractive apt-get -yq install curl &> /dev/null;
+fi;
+
+# Install zstd
+if ! which zstd &> /dev/null; then
+	logDebug "Installing dependency zstd";
+	DEBIAN_FRONTEND=noninteractive apt-get -yq install zstd &> /dev/null;
 fi;
 
 # Install arch-pacstrap
