@@ -31,8 +31,9 @@ else
 label: gpt
 unit: sectors
 
-start=2048, size=512000, type=21686148-6449-6E6F-744E-656564454649, name="boot", bootable
-start=514048, size=204800, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="root"
+start=2048, size=20480, type=21686148-6449-6E6F-744E-656564454649, bootable
+start=22528, size=512000, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="boot"
+start=534528, size=204800, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name="root"
 EOM
 
 	# Check Result
@@ -43,9 +44,9 @@ EOM
 
 	# Remember partitions
 	export PART_EFI=""
-	export PART_BOOT="${DRIVE_ROOT}1"
-	export PART_SYSTEM="${DRIVE_ROOT}2"
-	export PART_SYSTEM_NUM="2"
+	export PART_BOOT="${DRIVE_ROOT}2"
+	export PART_SYSTEM="${DRIVE_ROOT}3"
+	export PART_SYSTEM_NUM="3"
 fi;
 
 if ! runCmd parted -s ${DRIVE_ROOT} resizepart ${PART_SYSTEM_NUM} 100%; then logLine "Failed to expand ROOT-Partition"; exit; fi;
