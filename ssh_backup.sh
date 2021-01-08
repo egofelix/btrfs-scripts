@@ -21,6 +21,7 @@ while [[ "$#" -gt 0 ]]; do
 	-c|--command) COMMAND="$2"; shift ;;
 	-v|--volume) if [[ -z ${VOLUMES} ]]; then VOLUMES="$2"; else VOLUMES="${VOLUMES} $2"; fi; shift ;;
 	-t|--target) SSH_URI="$2"; shift ;;
+	--ssh-accept-key) SSH_INSECURE="TRUE"; ;;
 	-h|--help) 
 	  SELFNAME=$(basename $BASH_SOURCE) 
 	  echo "Usage: ${SELFNAME} [-q|--quiet] [-s|--source <sourcevolume>] [-v|--volume <volume>] [-t|--target <targetserver>] [-c|--command <command>]";

@@ -18,10 +18,12 @@ while [[ "$#" -gt 0 ]]; do
     -t|--target) DRIVE_ROOT=$(removeTrailingChar "$2" "/"); shift ;;
 	-n|--name) HOSTNAME="$2"; shift ;;
 	-s|--snapshot) TARGETSNAPSHOT="$2"; shift ;;
+	--source) SSH_URI="$2"; shift ;;
+	--ssh-accept-key) SSH_INSECURE="TRUE"; ;;
 	--test) ISTEST="true"; ;;
 	-h|--help) 
 	  SELFNAME=$(basename $BASH_SOURCE) 
-	  echo "Usage: ${SELFNAME} [-q|--quiet] [-t|--target <targetdrive>] [-n|--name <clientname>] [-s|--snapshot <snapshot>] [--test] [-nc|--nocrypt]";
+	  echo "Usage: ${SELFNAME} [-q|--quiet] [-t|--target <targetdrive>] [-n|--name <clientname>] [-s|--snapshot <snapshot>] [--test] [-nc|--nocrypt] [--source ssh://user@host:port]";
 	  echo "";
 	  echo "    ${SELFNAME}";
 	  echo "      Automatic restore.";

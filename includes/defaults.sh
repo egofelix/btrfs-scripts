@@ -18,3 +18,7 @@ fi;
 if [[ -z ${VERBOSE:-} ]]; then
   export VERBOSE=" &>/dev/null";
 fi;
+
+if [[ -z ${SSH_INSECURE:-} ]]; then
+  export SSH_INSECURE="false";
+fi;

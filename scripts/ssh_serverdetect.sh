@@ -70,15 +70,47 @@ if isEmpty "${SSH_URI:-}"; then
   export SSH_URI="ssh://${SSH_USERNAME}@${SSH_HOSTNAME}:${SSH_PORT}";
 fi;
 
+# Split SSH-URI
+if [[ ${SSH_URI} != ssh://* ]]; then
+  logError "Only ssh:// protocol is supported";
+  exit 1;
+fi;
+
+if [[ ${SSH_URI} = *@* ]]; then
+  export SSH_USERNAME=$(echo ${SSH_URI} | cut -d'/' -f3 | cut -d'@' -f1)
+  export SSH_HOSTNAME=$(echo ${SSH_URI} | cut -d'/' -f3 | cut -d'@' -f2)
+else
+  if [[ -z "${HOSTNAME:-}" ]]; then HOSTNAME=$(cat /proc/sys/kernel/hostname) fi;
+  MY_HOSTNAME=$(echo "${HOSTNAME}" | awk -F'.' '{print $1}')
+  export SSH_USERNAME="${MY_HOSTNAME}"
+  export SSH_HOSTNAME=$(echo ${SSH_URI} | cut -d'/' -f3)
+fi;
+
+if [[ ${SSH_HOSTNAME} = *:* ]]; then
+  export SSH_PORT=$(echo ${SSH_HOSTNAME} | cut -d':' -f2)
+  export SSH_HOSTNAME=$(echo ${SSH_HOSTNAME} | cut -d':' -f1)
+else
+  export SSH_PORT="22"
+fi;
+
+
 # Test SSH
 logDebug "Testing ssh access: ${SSH_USERNAME}@${SSH_HOSTNAME}:${SSH_PORT}...";
 
 # Try with local key
-export SSH_CALL="ssh -o IdentityFile=/etc/ssh/ssh_host_ed25519_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+if isTrue ${SSH_INSECURE}; then
+  export SSH_CALL="ssh -o IdentityFile=/etc/ssh/ssh_host_ed25519_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+else
+  export SSH_CALL="ssh -o IdentityFile=/etc/ssh/ssh_host_ed25519_key -o IdentitiesOnly=yes -o CheckHostKeyDNS=yes -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+fi;
 TESTRESULT=$(${SSH_CALL} "testReceiver")
 if [[ $? -ne 0 ]]; then
   # Test ssh without key (User auth)
-  export SSH_CALL="ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+  if isTrue ${SSH_INSECURE}; then
+	export SSH_CALL="ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+  else
+    export SSH_CALL="ssh -o CheckHostKeyDNS=yes -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+  fi;
   TESTRESULT=$(${SSH_CALL} "testReceiver")
   if [[ $? -ne 0 ]]; then
 	logError "Cannot connect to ${SSH_URI}";
