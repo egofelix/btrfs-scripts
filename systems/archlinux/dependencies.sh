@@ -60,14 +60,6 @@ if ! which sed &> /dev/null; then
 	pacman -Sy --noconfirm sed &> /dev/null;
 fi;
 
-# Install mdadm
-if isTrue ${RAID:-}; then
-  if ! which mdadm &> /dev/null; then
-    logDebug "Installing dependency mdadm";
-    pacman -Sy --noconfirm mdadm &> /dev/null; 
-  fi;
-fi;
-
 # Install debootstrap
 if ! which debootstrap &> /dev/null; then
   logDebug "Installing dependency debootstrap";
