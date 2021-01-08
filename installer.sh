@@ -162,7 +162,7 @@ source "${BASH_SOURCE%/*}/scripts/chroot.sh";
 
 # Question for CHROOT
 sync
-read -p "Your system has been installed. Do you want to chroot into the restored system now and make changes? [yN]: " -n 1 -r;
+read -p "Your system has been installed. Do you want to chroot into the system now and make changes? [yN]: " -n 1 -r;
 echo    # (optional) move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     logLine "Entering chroot...";
