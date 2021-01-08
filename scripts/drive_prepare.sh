@@ -1,7 +1,13 @@
 #!/bin/bash
 
 if isTrue ${RAID:-}; then
+  mdadm --zero-superblock ${DRIVE_ROOT_A}3
+  mdadm --zero-superblock ${DRIVE_ROOT_A}2
+  mdadm --zero-superblock ${DRIVE_ROOT_A}1
   mdadm --zero-superblock ${DRIVE_ROOT_A}
+  mdadm --zero-superblock ${DRIVE_ROOT_B}3
+  mdadm --zero-superblock ${DRIVE_ROOT_B}2
+  mdadm --zero-superblock ${DRIVE_ROOT_B}1
   mdadm --zero-superblock ${DRIVE_ROOT_B}
   #DRIVE_ROOT=/dev/md/raid
   sync
