@@ -14,13 +14,14 @@ while [[ "$#" -gt 0 ]]; do
   case $1 in
     -q|--quiet) QUIET="true"; QUIETPS=" &>/dev/null"; ;;
 	--debug) DEBUG="true"; ;;
+	-nc|--nocrypt) CRYPTED="false"; ;;
     -t|--target) DRIVE_ROOT=$(removeTrailingChar "$2" "/"); shift ;;
 	-n|--name) HOSTNAME="$2"; shift ;;
 	-s|--snapshot) TARGETSNAPSHOT="$2"; shift ;;
 	--test) ISTEST="true"; ;;
 	-h|--help) 
 	  SELFNAME=$(basename $BASH_SOURCE) 
-	  echo "Usage: ${SELFNAME} [-q|--quiet] [-t|--target <targetdrive>] [-n|--name <clientname>] [-s|--snapshot <snapshot>] [--test]";
+	  echo "Usage: ${SELFNAME} [-q|--quiet] [-t|--target <targetdrive>] [-n|--name <clientname>] [-s|--snapshot <snapshot>] [--test] [-nc|--nocrypt]";
 	  echo "";
 	  echo "    ${SELFNAME}";
 	  echo "      Automatic restore.";
