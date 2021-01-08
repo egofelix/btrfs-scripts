@@ -146,11 +146,6 @@ if [[ "${COMMAND,,}" = "send" ]]; then
   sync;
   exit 0;
 fi;
-
-exit 1;
-
-# Run
-
 if [[ "${COMMAND,,}" = "check-latest" ]]; then
   for VOLUME in ${VOLUMES}; do
     logDebug "Checking volume: ${VOLUME}...";
@@ -160,66 +155,7 @@ if [[ "${COMMAND,,}" = "check-latest" ]]; then
   done
 
   exit 0;  
-elif [[ "${COMMAND,,}" = "send" ]]; then
-  logLine "Source Directory: ${SNAPSHOTSPATH}";
-  logLine "Volumes to backup: ${VOLUMES}";
-  for volName in ${VOLUMES}
-  do
-    SUBVOLUMES=$(LANG=C ls ${SNAPSHOTSPATH}/${volName}/)
-    if [[ -z "${SUBVOLUMES}" ]]; then
-       logLine "Nothing to transfer on Volume ${volName}";
-       continue;
-	fi;
-	
-	SUBVOLUMECOUNT=$(LANG=C ls ${SNAPSHOTSPATH}/${volName}/ | sort | wc -l)
-	FIRSTSUBVOLUME=$(LANG=C ls ${SNAPSHOTSPATH}/${volName}/ | sort | head -1)
-	OTHERSUBVOLUMES=$(LANG=C ls ${SNAPSHOTSPATH}/${volName}/ | sort | tail -n +2)
-	LASTSUBVOLUME=$(LANG=C ls ${SNAPSHOTSPATH}/${volName}/ | sort | tail -1)
-	
-	# Create Directory for this volume
-	if ! runCmd ${SSH_CALL} "create-volume-directory" "${volName}"; then echo "Failed to create volume directory at server."; exit 1; fi;
-	
-	# Send FIRSTSUBVOLUME
-	SUBVOLUME_EXISTS=$(${SSH_CALL} check-volume-backup "${volName}" "${FIRSTSUBVOLUME}");
-	if [ $? -ne 0 ]; then logLine "Failed to run ssh command: check-volume-backup "${volName}" "${FIRSTSUBVOLUME}"" exit 1; fi;
-	if isFalse ${SUBVOLUME_EXISTS}; then
-	  logLine "Sending backup \"${volName}_${FIRSTSUBVOLUME}\" (Full)";
-	  SENDRESULT=$(btrfs send -q ${SNAPSHOTSPATH}/${volName}/${FIRSTSUBVOLUME} | ${SSH_CALL} create-volume-backup ${volName} ${FIRSTSUBVOLUME})	
-	  if [[ $? -ne 0 ]] || [[ "${SENDRESULT}" != "success" ]]; then logLine "Failed to send backup."; exit 1; fi;
-	fi;
-	
-	PREVIOUSSUBVOLUME=${FIRSTSUBVOLUME}
-	
-	# Now loop over othersubvolumes
-	for subvolName in ${OTHERSUBVOLUMES}
-	do
-	  SUBVOLUME_EXISTS=$(${SSH_CALL} check-volume-backup "${volName}" "${subvolName}");
-	  if [ $? -ne 0 ]; then logLine "Failed to run ssh command: check-volume-backup "${volName}" "${FIRSTSUBVOLUME}"" exit; fi;
-	  if isFalse ${SUBVOLUME_EXISTS}; then
-		logLine "Sending backup \"${volName}_${subvolName}\" (Incremental)";
-		SENDRESULT=$(btrfs send -q -p ${SNAPSHOTSPATH}/${volName}/${PREVIOUSSUBVOLUME} ${SNAPSHOTSPATH}/${volName}/${subvolName} | ${SSH_CALL} create-volume-backup ${volName} ${subvolName})	
-	    if [[ $? -ne 0 ]] || [[ "${SENDRESULT}" != "success" ]]; then logLine "Failed to send backup. ${SENDRESULT}"; exit 1; fi;
-	  fi;
-		
-	  # Remove previous subvolume as it is not needed here anymore!
-	  btrfs subvolume delete ${SNAPSHOTSPATH}/${volName}/${PREVIOUSSUBVOLUME} &> /dev/null
-		
-	  # Check Result
-	  if [ $? -ne 0 ]; then
-		logLine "Failed to cleanup snapshot..."
-		exit;
-	  fi;
-		
-	  # Remember this subvolume as previos so we can send the next following backup as incremental
-	  PREVIOUSSUBVOLUME=${subvolName}
-	done;
-  done;
-
-  # Finish
-  sync
-  logLine "Backup transfer done.";
-  exit 0;
-else 
-  logError "Unknown command \"${COMMAND}\"";
-  exit 1;
 fi;
+
+logError "Unknown command \"${COMMAND}\"";
+exit 1;
