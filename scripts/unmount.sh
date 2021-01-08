@@ -13,5 +13,3 @@ rm -rf /tmp/mnt &> /dev/null || true
 
 cryptsetup close cryptsystem &> /dev/null || true
 cryptsetup close cryptbackup &> /dev/null || true
-mdadm --stop /dev/md/* &> /dev/null || true
-mdadm --stop /dev/md* &> /dev/null || true

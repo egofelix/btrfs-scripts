@@ -251,7 +251,7 @@ source "${BASH_SOURCE%/*}/scripts/restorepackages.sh";
 logDebug "Restoring Bootmanager...";
 source "${BASH_SOURCE%/*}/scripts/bootmanager.sh";
 
-# Todo Question for CHROOT
+# Question for CHROOT
 sync
 read -p "Your system has been restored. Do you want to chroot into the restored system now and make changes? [yN]: " -n 1 -r;
 echo    # (optional) move to a new line
@@ -261,7 +261,11 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
 	sync;
 fi
 
-# Todo Question for reboot
+# Restore resolve
+logDebug "Restoring resolv.conf...";
+source "${BASH_SOURCE%/*}/scripts/restoreresolv.sh";
+
+# Question for reboot
 read -p "Do you want to reboot into the system now? [Yn]: " -n 1 -r;
 if [[ $REPLY =~ ^[Yy]$ ]] || [[ $REPLY =~ ^$ ]]; then
 	sync;

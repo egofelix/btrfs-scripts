@@ -5,13 +5,11 @@
 # Install Kernel
 if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
 	cat > /tmp/mnt/root/chroot.sh <<- EOF
-# install grub
-pacman -Sy --noconfirm linux-armv7
+DEBIAN_FRONTEND=noninteractive apt-get -yq install linux-image-armhf;
 EOF
 else
 	cat > /tmp/mnt/root/chroot.sh <<- EOF
-# install grub
-pacman -Sy --noconfirm linux
+DEBIAN_FRONTEND=noninteractive apt-get -yq install linux-image;
 EOF
 fi;
 chmod +x /tmp/mnt/root/chroot.sh
@@ -25,11 +23,11 @@ cat > /tmp/mnt/root/chroot.sh <<- EOF
 echo -e "root\nroot" | passwd root
 
 # Needed Packages
-pacman -S --noconfirm btrfs-progs openssh linux-firmware
+DEBIAN_FRONTEND=noninteractive apt-get -yq install btrfs-progs openssh linux-firmware
 EOF
 if isTrue "${CRYPTED}"; then
 	cat >> /tmp/mnt/root/chroot.sh <<- EOF
-pacman -S --noconfirm cryptsetup mkinitcpio-netconf mkinitcpio-tinyssh mkinitcpio-utils
+DEBIAN_FRONTEND=noninteractive apt-get -yq install cryptsetup mkinitcpio-netconf mkinitcpio-tinyssh mkinitcpio-utils
 EOF
 fi;
 chroot /tmp/mnt/root /chroot.sh;
@@ -85,10 +83,6 @@ Name=eth*
 [Network]
 DHCP=yes
 EOM
-
-# Restore resolv.conf
-rm -f /tmp/mnt/root/etc/resolv.conf
-ln -s /run/systemd/resolve/stub-resolv.conf /tmp/mnt/root/etc/resolv.conf
 
 # Remove chroot file
 rm -f /tmp/mnt/root/chroot.sh
