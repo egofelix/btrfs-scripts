@@ -66,14 +66,6 @@ if ! which mkfs.vfat &> /dev/null; then
 	DEBIAN_FRONTEND=noninteractive apt-get -yq install dosfstools &> /dev/null;
 fi;
 
-# Install debootstrap
-if ! which debootstrap &> /dev/null; then
-  echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/sources.list
-  DEBIAN_FRONTEND=noninteractive apt-get update
-  logDebug "Installing dependency debootstrap";
-  DEBIAN_FRONTEND=noninteractive apt-get -yq install -t buster-backports debootstrap &> /dev/null;
-fi;
-
 # Install wget
 if ! which wget &> /dev/null; then
 	logDebug "Installing dependency wget";
@@ -86,14 +78,8 @@ if ! which curl &> /dev/null; then
 	DEBIAN_FRONTEND=noninteractive apt-get -yq install curl &> /dev/null;
 fi;
 
-# Install zstd
-if ! which zstd &> /dev/null; then
-	logDebug "Installing dependency zstd";
-	DEBIAN_FRONTEND=noninteractive apt-get -yq install zstd &> /dev/null;
-fi;
-
-# Install arch-pacstrap
-if [[ ! -f /tmp/arch-bootstrap.sh ]]; then
-  wget https://raw.githubusercontent.com/tokland/arch-bootstrap/master/arch-bootstrap.sh -O /tmp/arch-bootstrap.sh
-  chmod +x /tmp/arch-bootstrap.sh
+# Install dig
+if ! which dig &> /dev/null; then
+	logDebug "Installing dependency dnsutils ";
+	DEBIAN_FRONTEND=noninteractive apt-get -yq install dnsutils &> /dev/null;
 fi;
