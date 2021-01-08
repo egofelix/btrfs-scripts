@@ -1,4 +1,15 @@
 #!/bin/bash
+if isTrue ${RAID:-}; then
+	# Install mdadm
+	cat > /tmp/mnt/root/chroot.sh <<- EOF
+#!/bin/bash
+pacman -S --noconfirm mdadm
+EOF
+    
+	chmod +x /tmp/mnt/root/chroot.sh;
+	chroot /tmp/mnt/root /chroot.sh;
+fi;
+
 if [[ ( $(getSystemType) = "ARMHF" ) ]]; then
 	logLine "Setting up Bootmanager (UBOOT)";
 
