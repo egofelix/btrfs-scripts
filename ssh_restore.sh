@@ -33,13 +33,16 @@ while [[ "$#" -gt 0 ]]; do
 	  echo "";
 	  echo "    ${SELFNAME} --name my.host.net";
 	  echo "      Use given hostname for discovery.";
-	  echo "";	  
+	  echo "";
+	  echo "    ${SELFNAME} --source ssh://myuser@my.host.net:12345/";
+	  echo "      Recover from specified server with myuser.";
+	  echo "";
 	  echo "    ${SELFNAME} --snapshot 2020-12-23_12-03-26";
 	  echo "      Restore snapshot with name 2020-12-23_12-03-26.";
 	  echo "";
 	  echo "    ${SELFNAME} --test";
 	  echo "      Test if latest snapshot exists for every volume.";
-	  echo "";	  
+	  echo "";
 	  exit 0;
 	  ;;
     *) echo "unknown parameter passed: ${1}."; exit 1;;
