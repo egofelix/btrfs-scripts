@@ -63,13 +63,20 @@ EOF
 	chroot /tmp/mnt/root /chroot.sh;
 else
 	logLine "Setting up Bootmanager (GRUB)";
-	
+
+if [[ "${BIOSTYPE}" == "EFI" ]]; then	
     # Install Grub
 	cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 pacman -S --noconfirm grub efibootmgr
 EOF
-    
+else
+    # Install Grub
+	cat > /tmp/mnt/root/chroot.sh <<- EOF
+#!/bin/bash
+pacman -S --noconfirm grub
+EOF
+fi;
 	chmod +x /tmp/mnt/root/chroot.sh;
 	chroot /tmp/mnt/root /chroot.sh;
 
