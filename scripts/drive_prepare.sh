@@ -58,7 +58,7 @@ if isTrue ${RAID:-}; then
   sync
   echo "Creating raids...";
   if [[ "${BIOSTYPE}" == "EFI" ]]; then
-    RAIDRESULT=$(echo yes | mdadm --create /dev/md0 --metadata=0.90 --level=1 --raid-devices=2 ${DRIVE_ROOT_A}1 ${DRIVE_ROOT_B}1)
+    RAIDRESULT=$(echo yes | mdadm --create /dev/md0 --metadata=1.0 --level=1 --raid-devices=2 ${DRIVE_ROOT_A}1 ${DRIVE_ROOT_B}1)
     if [ $? -ne 0 ]; then
 	  logLine "Failed to prepare raid_efi. aborting."
       exit

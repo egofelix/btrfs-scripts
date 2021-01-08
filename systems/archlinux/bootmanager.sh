@@ -1,6 +1,7 @@
 #!/bin/bash
 if isTrue ${RAID:-}; then
 	# Install mdadm
+	mdadm --detail --scan >> /tmp/mnt/root/etc/mdadm.conf
 	cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 pacman -S --noconfirm mdadm
