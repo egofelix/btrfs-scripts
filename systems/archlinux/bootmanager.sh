@@ -80,11 +80,20 @@ EOF
 	fi;
 
 	# Setup Grub
+if [[ "${BIOSTYPE}" == "EFI" ]]; then
 	cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 mkinitcpio -P
 grub-install
 grub-mkconfig -o /boot/grub/grub.cfg
 EOF
+else
+	cat > /tmp/mnt/root/chroot.sh <<- EOF
+#!/bin/bash
+mkinitcpio -P
+grub-install ${ROOT_DRIVE}
+grub-mkconfig -o /boot/grub/grub.cfg
+EOF
+fi;
 	chroot /tmp/mnt/root /chroot.sh;
 fi;
