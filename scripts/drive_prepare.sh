@@ -58,41 +58,41 @@ if isTrue ${RAID:-}; then
   sync
   echo "Creating raids...";
   if [[ "${BIOSTYPE}" == "EFI" ]]; then
-    RAIDRESULT=$(echo yes | mdadm --create /dev/md/raid_efi --metadata=0.90 --level=1 --raid-devices=2 ${DRIVE_ROOT_A}1 ${DRIVE_ROOT_B}1)
+    RAIDRESULT=$(echo yes | mdadm --create /dev/md0 --metadata=0.90 --level=1 --raid-devices=2 ${DRIVE_ROOT_A}1 ${DRIVE_ROOT_B}1)
     if [ $? -ne 0 ]; then
 	  logLine "Failed to prepare raid_efi. aborting."
       exit
     fi;
-    RAIDRESULT=$(echo yes | mdadm --create /dev/md/raid_boot --metadata=0.90 --level=1 --raid-devices=2 ${DRIVE_ROOT_A}2 ${DRIVE_ROOT_B}2)
+    RAIDRESULT=$(echo yes | mdadm --create /dev/md1 --metadata=0.90 --level=1 --raid-devices=2 ${DRIVE_ROOT_A}2 ${DRIVE_ROOT_B}2)
     if [ $? -ne 0 ]; then
 	  logLine "Failed to prepare raid_boot. aborting."
 	  exit
     fi;
-	RAIDRESULT=$(echo yes | mdadm --create /dev/md/raid_root --level=1 --raid-devices=2 ${DRIVE_ROOT_A}3 ${DRIVE_ROOT_B}3)
+	RAIDRESULT=$(echo yes | mdadm --create /dev/md2 --level=1 --raid-devices=2 ${DRIVE_ROOT_A}3 ${DRIVE_ROOT_B}3)
     if [ $? -ne 0 ]; then
 	  logLine "Failed to prepare raid_root. aborting."
 	  exit
     fi;
 	
     # Remember partitions
-	export PART_EFI="/dev/md/raid_efi";
-	export PART_BOOT="/dev/md/raid_boot";
-	export PART_SYSTEM="/dev/md/raid_root";
+	export PART_EFI="/dev/md0";
+	export PART_BOOT="/dev/md1";
+	export PART_SYSTEM="/dev/md2";
   else
-    RAIDRESULT=$(echo yes | mdadm --create /dev/md/raid_boot --metadata=0.90 --level=1 --raid-devices=2 ${DRIVE_ROOT_A}1 ${DRIVE_ROOT_B}1)
+    RAIDRESULT=$(echo yes | mdadm --create /dev/md0 --metadata=0.90 --level=1 --raid-devices=2 ${DRIVE_ROOT_A}1 ${DRIVE_ROOT_B}1)
     if [ $? -ne 0 ]; then
 	  logLine "Failed to prepare raid_boot. aborting."
 	  exit
     fi;
-	RAIDRESULT=$(echo yes | mdadm --create /dev/md/raid_root --level=1 --raid-devices=2 ${DRIVE_ROOT_A}2 ${DRIVE_ROOT_B}2)
+	RAIDRESULT=$(echo yes | mdadm --create /dev/md1 --level=1 --raid-devices=2 ${DRIVE_ROOT_A}2 ${DRIVE_ROOT_B}2)
     if [ $? -ne 0 ]; then
 	  logLine "Failed to prepare raid_root. aborting."
 	  exit
     fi;
 	
 	export PART_EFI="";
-	export PART_BOOT="/dev/md/raid_boot";
-	export PART_SYSTEM="/dev/md/raid_root";
+	export PART_BOOT="/dev/md0";
+	export PART_SYSTEM="/dev/md1";
   fi;
 else
 	# Format drives
