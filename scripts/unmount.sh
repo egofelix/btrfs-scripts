@@ -13,5 +13,8 @@ rm -rf /tmp/mnt &> /dev/null || true
 
 cryptsetup close cryptsystem &> /dev/null || true
 cryptsetup close cryptbackup &> /dev/null || true
+mdadm --stop /dev/md/raid_root &> /dev/null || true
+mdadm --stop /dev/md/raid_boot &> /dev/null || true
+mdadm --stop /dev/md/raid_efi &> /dev/null || true
 mdadm --stop /dev/md/raid &> /dev/null || true
 mdadm --stop /dev/md* &> /dev/null || true
