@@ -1,11 +1,19 @@
 #!/bin/bash
 # Scan HDDs
-HDDS=`LANG=C fdisk -l | grep 'Disk \/dev\/' | grep -v 'loop' | awk '{print $2}' | awk -F':' '{print $1}'`
+HDDS=$(LANG=C fdisk -l | grep 'Disk \/dev\/' | grep -v 'loop' | awk '{print $2}' | awk -F':' '{print $1}')
 HDD_COUNT=$(countLines "${HDDS}")
 
 if [[ ${HDD_COUNT} -eq 0 ]]; then
 	logLine "No drives present. Aborting"
 	exit
+fi;
+
+if [[ ! -z ${DRIVE_ROOT:-} ]]; then
+  HDDEXISTS=$(LANG=C fdisk -l | grep 'Disk \/dev\/' | grep -v 'loop' | grep "${DRIVE_ROOT}")
+  if [[ -z ${HDDEXISTS} ]]; then
+    echo Drive ${DRIVE_ROOT} cannot be found.
+	exit
+  fi;
 fi;
 
 # Detect ROOT-Drive

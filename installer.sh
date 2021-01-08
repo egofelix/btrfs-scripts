@@ -17,6 +17,7 @@ while [[ "$#" -gt 0 ]]; do
 	-nc|--nocrypt) CRYPTED="false"; ;;
 	--debug) DEBUG="true"; ;;
 	-d|--distro) DISTRO="${2^^}"; shift ;;
+	-dev|--device) DRIVE_ROOT="$2"; shift ;;
 	-h|--help) 
 	  SELFNAME=$(basename $BASH_SOURCE) 
 	  echo "Usage: ${SELFNAME} [-q|--quiet] [-nc|--nocrypt] [-d|--distro <distro>]";
