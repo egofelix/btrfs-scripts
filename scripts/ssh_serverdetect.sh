@@ -80,7 +80,7 @@ if [[ ${SSH_URI} = *@* ]]; then
   export SSH_USERNAME=$(echo ${SSH_URI} | cut -d'/' -f3 | cut -d'@' -f1)
   export SSH_HOSTNAME=$(echo ${SSH_URI} | cut -d'/' -f3 | cut -d'@' -f2)
 else
-  if [[ -z "${HOSTNAME:-}" ]]; then HOSTNAME=$(cat /proc/sys/kernel/hostname) fi;
+  if [[ -z "${HOSTNAME:-}" ]]; then HOSTNAME=$(cat /proc/sys/kernel/hostname); fi;
   MY_HOSTNAME=$(echo "${HOSTNAME}" | awk -F'.' '{print $1}')
   export SSH_USERNAME="${MY_HOSTNAME}"
   export SSH_HOSTNAME=$(echo ${SSH_URI} | cut -d'/' -f3)
