@@ -64,19 +64,20 @@ EOF
 else
 	logLine "Setting up Bootmanager (GRUB)";
 
-if [[ "${BIOSTYPE}" == "EFI" ]]; then	
-    # Install Grub
-	cat > /tmp/mnt/root/chroot.sh <<- EOF
+	if [[ "${BIOSTYPE}" == "EFI" ]]; then	
+		# Install Grub
+		cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 pacman -S --noconfirm grub efibootmgr
 EOF
-else
-    # Install Grub
-	cat > /tmp/mnt/root/chroot.sh <<- EOF
+	else
+		# Install Grub
+		cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 pacman -S --noconfirm grub
 EOF
-fi;
+	fi;
+	
 	chmod +x /tmp/mnt/root/chroot.sh;
 	chroot /tmp/mnt/root /chroot.sh;
 
@@ -87,20 +88,20 @@ fi;
 	fi;
 
 	# Setup Grub
-if [[ "${BIOSTYPE}" == "EFI" ]]; then
-	cat > /tmp/mnt/root/chroot.sh <<- EOF
+	if [[ "${BIOSTYPE}" == "EFI" ]]; then
+		cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 mkinitcpio -P
 grub-install
 grub-mkconfig -o /boot/grub/grub.cfg
 EOF
-else
-	cat > /tmp/mnt/root/chroot.sh <<- EOF
+	else
+		cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 mkinitcpio -P
-grub-install ${ROOT_DRIVE}
+grub-install ${DRIVE_ROOT}
 grub-mkconfig -o /boot/grub/grub.cfg
 EOF
-fi;
+	fi;
 	chroot /tmp/mnt/root /chroot.sh;
 fi;
