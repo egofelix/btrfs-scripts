@@ -16,24 +16,16 @@ while [[ "$#" -gt 0 ]]; do
     -q|--quiet) QUIET="true"; QUIETPS=" &>/dev/null"; ;;
 	-nc|--nocrypt) CRYPTED="false"; ;;
 	--debug) DEBUG="true"; ;;
-	-d|--distro) DISTRO="${2^^}"; shift ;;
-	-dev|--device) DRIVE_ROOT="$2"; shift ;;
+	-t|--target) DRIVE_ROOT="$2"; shift ;;
 	-h|--help) 
 	  SELFNAME=$(basename $BASH_SOURCE) 
-	  echo "Usage: ${SELFNAME} [-q|--quiet] [-nc|--nocrypt] [-d|--distro <distro>]";
+	  echo "Usage: ${SELFNAME} [-q|--quiet] [-nc|--nocrypt] [-t|--target <targetdevice>]";
 	  echo "";
 	  echo "    ${SELFNAME}";
 	  echo "      Will install encrypted arch linux.";
 	  echo "";
-	  echo "    ${SELFNAME} -d ubuntu";
-	  echo "      Will install encrypted ubuntu.";
-	  echo "";
-	  echo "    ${SELFNAME} -nc -d debian.";
-	  echo "      Will install unencrypted debian.";
-	  echo "";
-	  echo "Supported distros are: archlinux, debian, ubuntu";
-	  echo "";
-	  echo "If you ommit the <distro> then the script will use archlinux.";
+	  echo "    ${SELFNAME} -nc.";
+	  echo "      Will install unencrypted arch linux.";
 	  echo "";
 	  exit 0;
 	  ;;
