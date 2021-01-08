@@ -25,8 +25,9 @@ fi;
 # Setup Grub
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
-mkinitcpio -P
-grub-install
-grub-mkconfig -o /boot/grub/grub.cfg
+#mkinitcpio -P
+/usr/sbin/grub-install --no-nvram
+/usr/sbin/grub-install
+/usr/sbin/grub-mkconfig -o /boot/grub/grub.cfg
 EOF
 chroot /tmp/mnt/root /chroot.sh;
