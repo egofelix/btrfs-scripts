@@ -6,7 +6,7 @@ if isTrue ${RAID:-}; then
   DRIVE_ROOT=/dev/md/raid
   
   echo "Preparing raid...";
-  RAIDRESULT=$(echo yes | mdadm --create /dev/md/raid --level=1 --raid-devices=2 ${DRIVE_ROOT_A} ${DRIVE_ROOT_B})
+  RAIDRESULT=$(echo yes | mdadm --create /dev/md/raid --metadata=1.0 --level=1 --raid-devices=2 ${DRIVE_ROOT_A} ${DRIVE_ROOT_B})
   if [ $? -ne 0 ]; then
 		logLine "Failed to prepare raid. aborting."
 		exit
