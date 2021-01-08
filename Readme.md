@@ -1,9 +1,16 @@
 How to run this?
 
-wget -q -O /tmp/installer.sh https://raw.githubusercontent.com/egofelix/installer/master/installer.sh && chmod +x /tmp/installer.sh && /tmp/installer.sh --hostname newhost
+To install:
 
-wget -q -O /tmp/installer.sh https://raw.githubusercontent.com/egofelix/installer/master/installer.sh && chmod +x /tmp/installer.sh && /tmp/installer.sh --hostname newhost --backup ssh://cubie.fritz.box/srv/backups/%hostname%/
-wget -q -O /tmp/installer.sh https://raw.githubusercontent.com/egofelix/installer/master/installer.sh && chmod +x /tmp/installer.sh && /tmp/installer.sh --hostname newhost --restore ssh://cubie.fritz.box/srv/backups/%hostname%/
+pacman -Sy --noconfirm git
+git clone https://github.com/egofelix/btrfs-scripts.git
+btrfs-scripts/installer.sh
+
+
+
+To restore:
+
+
 
 after install the boot password is test1234
 
