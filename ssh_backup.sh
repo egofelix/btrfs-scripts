@@ -29,7 +29,7 @@ while [[ "$#" -gt 0 ]]; do
 	  echo "    ${SELFNAME}";
 	  echo "      Send Backups to autodetected server.";
 	  echo "";
-	  echo "    ${SELFNAME} -c check-latest --volume root.data";
+	  echo "    ${SELFNAME} -c check-latest --volume root-data";
 	  echo "      Get timestamp of latest backup-volume root-data.";
 	  echo "";
 	  echo "    ${SELFNAME} -t ssh://user@server:port/";
@@ -149,7 +149,7 @@ fi;
 if [[ "${COMMAND,,}" = "check-latest" ]]; then
   for VOLUME in ${VOLUMES}; do
     logDebug "Checking volume: ${VOLUME}...";
-    CHECKRESULT=$(${SSH_CALL} "list-volume" "${VOLUME}" | sort | tail -1)
+    CHECKRESULT=$(${SSH_CALL} "list-snapshots" "${VOLUME}" | sort | tail -1)
 	if [[ $? -ne 0 ]]; then logError "Could not check-volume \"${VOLUME}\": ${CHECKRESULT}."; exit 1; fi;
 	echo "${VOLUME}: ${CHECKRESULT}";
   done
