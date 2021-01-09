@@ -215,15 +215,14 @@ cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$' | while read LI
   if [[ "${LINEDEV}" == "/dev/mapper/cryptsystem" ]] || [[ "${LINEDEV}" == "LABEL=system" ]]; then
     # Mount simple volume
     logDebug "Mounting ${LINESUBVOL} at ${LINEMOUNT}...";
-    MOUNTRESULT=$(mount -o "subvol=${LINESUBVOL}" /dev/mapper/cryptsystem "/tmp/mnt/root${LINEMOUNT}" 2>&1);
-	if [[ $? -ne 0 ]]; then logLine "Failed to mount. Command \"mount -o \"subvol=${LINESUBVOL}\" /dev/mapper/cryptsystem \"/tmp/mnt/root${LINEMOUNT}\"\", Result \"${MOUNTRESULT}\"."; exit 1; fi;
+    MOUNTRESULT=$(mount -o "subvol=${LINESUBVOL}" "${PART_SYSTEM}" "/tmp/mnt/root${LINEMOUNT}" 2>&1);
+	if [[ $? -ne 0 ]]; then logLine "Failed to mount. Command \"mount -o \"subvol=${LINESUBVOL}\" \"${PART_SYSTEM}\" \"/tmp/mnt/root${LINEMOUNT}\"\", Result \"${MOUNTRESULT}\"."; exit 1; fi;
   elif [[ "${LINEMOUNT}" == "/boot" ]]; then
     # Mount boot partition
     MOUNTRESULT=$(mount ${PART_BOOT} "/tmp/mnt/root${LINEMOUNT}" 2>&1);
 	if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
   elif [[ "${LINEMOUNT}" == "/boot/efi" ]]; then
     # Mount efi partition
-    if [[ -z "${PART_EFI}" ]]; then logWarn "Skipping efi partiton as we are restoring to bios"; continue; fi;
 	if ! runCmd mkdir /tmp/mnt/root${LINEMOUNT}; then logError "Failed to create efi directory."; exit 1; fi;
     MOUNTRESULT=$(mount ${PART_EFI} "/tmp/mnt/root${LINEMOUNT}" 2>&1);
 	if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
