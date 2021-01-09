@@ -185,9 +185,6 @@ if [[ $REPLY =~ ^[Yy]$ ]] || [[ $REPLY =~ ^$ ]]; then
 	exit 0;
 fi
 
-# Cleanup
-#source "${BASH_SOURCE%/*}/cleanup.sh";
-
 # Finish
 sync
 logLine "Your system is ready! Type reboot to boot it.";
