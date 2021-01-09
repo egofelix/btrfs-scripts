@@ -26,7 +26,7 @@ EOF
 	sed -i "s#BINARIES=.*#${BINARIES}#g" /tmp/mnt/root/etc/mkinitcpio.conf
 	
 	# Get current hooks
-	HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && echo ${HOOKS[@]))"
+	HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && echo ${HOOKS[@]}))"
 	
 	# Remove these hooks
     HOOKS=${HOOKS/keyboard/}
@@ -53,7 +53,7 @@ EOF
 	fi;
 else
 	# Remove HOOKS netconf tinyssh encryptssh
-	HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && echo ${HOOKS[@]))"
+	HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && echo ${HOOKS[@]}))"
 	HOOKS=${HOOKS/netconf/}
 	HOOKS=${HOOKS/tinyssh/}
 	HOOKS=${HOOKS/encryptssh/}
