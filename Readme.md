@@ -54,6 +54,8 @@ Also you have to allow the user `mymachinebackup` to call `sudo /opt/btrfs-scrip
 
 Thats all and the backup server should be ready!
 
+You can now send backups to this server from `mymachine` by calling `/opt/btrfs-scripts/ssh_backup.sh --target ssh://mymachinebackup@backupserver/`
+
 
 ### Default values
 Default login: `root`
