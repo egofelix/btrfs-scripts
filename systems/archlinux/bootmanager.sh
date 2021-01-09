@@ -1,20 +1,11 @@
 #!/bin/bash
 logLine "Setting up Bootmanager (GRUB)";
 
-# Install Grub & efibootmgr
-if isEfiSystem; then
-	# Install Grub
-	cat > /tmp/mnt/root/chroot.sh <<- EOF
+# Install kernel & grub & efibootmgr
+cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
-pacman -S --noconfirm grub efibootmgr
+pacman -S --noconfirm linux grub efibootmgr
 EOF
-else
-	# Install Grub
-	cat > /tmp/mnt/root/chroot.sh <<- EOF
-#!/bin/bash
-pacman -S --noconfirm grub
-EOF
-fi;
 chmod +x /tmp/mnt/root/chroot.sh;
 chroot /tmp/mnt/root /chroot.sh;
 
@@ -54,19 +45,9 @@ if [[ ! -z $(LANG=C mount | grep ' /tmp/mnt/root/usr type ') ]]; then
 fi;
 
 # Install Grub
-if isEfiSystem; then
-	cat > /tmp/mnt/root/chroot.sh <<- EOF
-#!/bin/bash
-mkinitcpio -P
-grub-install
-grub-mkconfig -o /boot/grub/grub.cfg
-EOF
-else
-	cat > /tmp/mnt/root/chroot.sh <<- EOF
-#!/bin/bash
+cat > /tmp/mnt/root/chroot.sh <<- EOF
 mkinitcpio -P
 grub-install ${DRIVE_ROOT}
 grub-mkconfig -o /boot/grub/grub.cfg
 EOF
-fi;
 chroot /tmp/mnt/root /chroot.sh;

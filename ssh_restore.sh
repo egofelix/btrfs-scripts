@@ -260,10 +260,6 @@ logDebug "Preparing chroot...";
 rm -f /tmp/mnt/root/etc/resolv.conf;
 source "${BASH_SOURCE%/*}/scripts/chroot_prepare.sh";
 
-# Reinstall Packages
-logDebug "Restoring packages...";
-source "${BASH_SOURCE%/*}/scripts/restorepackages.sh";
-
 # Reinstall BootManager
 logDebug "Restoring Bootmanager...";
 source "${BASH_SOURCE%/*}/scripts/bootmanager.sh";
