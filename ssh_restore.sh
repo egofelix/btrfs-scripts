@@ -248,6 +248,13 @@ if isTrue "${CRYPTED}"; then
   if ! runCmd cp /tmp/crypto.header /tmp/mnt/root/etc/; then logLine "Failed to copy crypto.header"; exit; fi;
 fi;
 
+# Fix fstab if we restored a crypted to uncrypted or vice versa
+if isTrue "${CRYPTED}"; then
+  sed -i "s#LABEL=system#/dev/mapper/cryptsystem#g" ${FSTABPATH}
+else
+  sed -i "s#/dev/mapper/cryptsystem#LABEL=system#g" ${FSTABPATH}
+fi;
+
 # Prepare ChRoot
 logDebug "Preparing chroot...";
 rm -f /tmp/mnt/root/etc/resolv.conf;

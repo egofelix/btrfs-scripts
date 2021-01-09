@@ -27,32 +27,7 @@ echo -e "root\nroot" | passwd root
 # Needed Packages
 pacman -S --noconfirm btrfs-progs openssh linux-firmware
 EOF
-if isTrue "${CRYPTED}"; then
-	cat >> /tmp/mnt/root/chroot.sh <<- EOF
-pacman -S --noconfirm cryptsetup mkinitcpio-netconf mkinitcpio-tinyssh mkinitcpio-utils
-EOF
-fi;
 chroot /tmp/mnt/root /chroot.sh;
-
-# Setup crypto
-if isTrue "${CRYPTED}"; then
-    # Create crypttab
-	echo cryptsystem PARTLABEL=system none luks > /tmp/mnt/root/etc/crypttab
-	
-	# Add the /usr/lib/libgcc_s.so.1 to BINARIES in /etc/mkinitcpio.conf
-	BINARIES="BINARIES=($(source /tmp/mnt/root/etc/mkinitcpio.conf && if [[ ${BINARIES[@]} != *"/usr/lib/libgcc_s.so.1"* ]]; then BINARIES+=(/usr/lib/libgcc_s.so.1); fi && echo ${BINARIES[@]} | xargs echo -n))"
-	sed -i "s#BINARIES=.*#${BINARIES}#g" /tmp/mnt/root/etc/mkinitcpio.conf
-	
-	# Setup HOOKS
-	HOOKS="HOOKS=(base udev autodetect modconf block keyboard keymap netconf tinyssh encryptssh filesystems fsck)"
-	sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
-fi;
-
-# Add usr hook to mkinitcpio.conf if usr is on a subvolume
-if [[ ${SUBVOLUMES} == *"usr"* ]]; then
-	HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && if [[ ${HOOKS[@]} != *"usr"* ]]; then HOOKS+=(usr); fi && echo ${HOOKS[@]} | xargs echo -n))"
-	sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
-fi;
 
 # Setup sshd
 sed -i 's/^#PermitRootLogin .*/PermitRootLogin yes/' /tmp/mnt/root/etc/ssh/sshd_config
