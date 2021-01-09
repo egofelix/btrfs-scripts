@@ -54,7 +54,9 @@ Thats all and the backup server should be ready!
 
 ### Default values
 Default login: `root`
+
 Default password: `root`
+
 Default passphrase to unlock luks: `test1234`
 
 To change the luks passphrase you can call `cryptsetup luksChangeKey /dev/sda4`.
