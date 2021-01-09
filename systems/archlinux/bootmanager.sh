@@ -25,22 +25,38 @@ EOF
 	BINARIES="BINARIES=($(source /tmp/mnt/root/etc/mkinitcpio.conf && if [[ ${BINARIES[@]} != *"/usr/lib/libgcc_s.so.1"* ]]; then BINARIES+=(/usr/lib/libgcc_s.so.1); fi && echo ${BINARIES[@]} | xargs echo -n))"
 	sed -i "s#BINARIES=.*#${BINARIES}#g" /tmp/mnt/root/etc/mkinitcpio.conf
 	
-	# Setup HOOKS
-	HOOKS="HOOKS=(base udev autodetect modconf block keyboard keymap netconf tinyssh encryptssh filesystems fsck)"
+	# Get current hooks
+	HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && echo ${HOOKS[@]))"
+	
+	# Remove these hooks
+    HOOKS=${HOOKS/keyboard/}
+	HOOKS=${HOOKS/keymap/}
+	HOOKS=${HOOKS/netconf/}
+	HOOKS=${HOOKS/tinyssh/}
+	HOOKS=${HOOKS/encryptssh/}
+	
+	# Insert hooks before filesystems
+	HOOKS=${HOOKS/filesystems/keyboard keymap netconf tinyssh encryptssh filesystems}
 	sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
 	
-	# Setup Grub for Cryptsetup
-	sed -i "s/#GRUB_ENABLE_CRYPTODISK/GRUB_ENABLE_CRYPTODISK/g" /tmp/mnt/root/etc/default/grub
+	# Setup GRUB_ENABLE_CRYPTODISK=y in /etc/default/grub
+	if [[ -z $(cat /tmp/mnt/root/etc/default/grub | grep "^GRUB_ENABLE_CRYPTODISK") ]]; then
+		sed -i "s/#GRUB_ENABLE_CRYPTODISK=y/GRUB_ENABLE_CRYPTODISK=y/g" /tmp/mnt/root/etc/default/grub
+	fi;
+	if [[ -z $(cat /tmp/mnt/root/etc/default/grub | grep "^GRUB_ENABLE_CRYPTODISK") ]]; then
+		echo "GRUB_ENABLE_CRYPTODISK=y" >> /tmp/mnt/root/etc/default/grub
+	fi;
 	
 	# Setup CMDLINE
 	if [[ -z $(cat /tmp/mnt/root/etc/default/grub | grep 'GRUB_CMDLINE_LINUX=\"cryptdevice\=') ]]; then
 		sed -i "s/GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"cryptdevice=PARTLABEL=system:cryptsystem ip=:::::eth0:dhcp\"/g" /tmp/mnt/root/etc/default/grub
 	fi;
-fi;
-
-# Add usr hook to mkinitcpio.conf if usr is on a subvolume
-if [[ ! -z $(LANG=C mount | grep ' /tmp/mnt/root/usr type ') ]]; then
-	HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && if [[ ${HOOKS[@]} != *"usr"* ]]; then HOOKS+=(usr); fi && echo ${HOOKS[@]} | xargs echo -n))"
+else
+	# Remove HOOKS netconf tinyssh encryptssh
+	HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && echo ${HOOKS[@]))"
+	HOOKS=${HOOKS/netconf/}
+	HOOKS=${HOOKS/tinyssh/}
+	HOOKS=${HOOKS/encryptssh/}
 	sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
 fi;
 

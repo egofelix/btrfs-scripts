@@ -9,6 +9,12 @@ EOF
 chmod +x /tmp/mnt/root/chroot.sh
 chroot /tmp/mnt/root /chroot.sh;
 
+# Add usr hook to mkinitcpio.conf if usr is on a subvolume
+if [[ ! -z $(LANG=C mount | grep ' /tmp/mnt/root/usr type ') ]]; then
+	HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && if [[ ${HOOKS[@]} != *"usr"* ]]; then HOOKS+=(usr); fi && echo ${HOOKS[@]} | xargs echo -n))"
+	sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
+fi;
+
 # Reset root password
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 echo -e "root\nroot" | passwd root
