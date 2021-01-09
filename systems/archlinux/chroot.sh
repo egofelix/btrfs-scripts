@@ -68,6 +68,7 @@ cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 systemctl enable systemd-networkd
 systemctl enable systemd-resolved
+systemctl enable systemd-timesyncd
 systemctl enable sshd
 EOF
 chroot /tmp/mnt/root /chroot.sh &> /dev/null
@@ -85,10 +86,6 @@ Name=eth*
 [Network]
 DHCP=yes
 EOM
-
-# Restore resolv.conf
-rm -f /tmp/mnt/root/etc/resolv.conf
-ln -s /run/systemd/resolve/stub-resolv.conf /tmp/mnt/root/etc/resolv.conf
 
 # Remove chroot file
 rm -f /tmp/mnt/root/chroot.sh

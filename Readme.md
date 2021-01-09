@@ -23,4 +23,4 @@ To restore:
 after install the boot password is test1234
 
 you can change this with the following command:
-cryptsetup luksChangeKey /dev/sda3
+cryptsetup luksChangeKey /dev/sda4
