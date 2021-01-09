@@ -17,8 +17,11 @@ After that you can call installer.sh and it will guide you through the installat
 This repository will be automatically cloned into /opt/btrfs-scripts/ on your new system.
 
 In short:
+
 `pacman -Sy --noconfirm git`
+
 `git clone https://github.com/egofelix/btrfs-scripts.git`
+
 `btrfs-scripts/installer.sh`
 
 #### How do I create a snapshot of my system?
