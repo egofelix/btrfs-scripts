@@ -59,9 +59,3 @@ if ! which sed &> /dev/null; then
 	logDebug "Installing dependency sed";
 	pacman -Sy --noconfirm sed &> /dev/null;
 fi;
-
-# Install debootstrap
-if ! which debootstrap &> /dev/null; then
-  logDebug "Installing dependency debootstrap";
-  pacman -Sy --noconfirm debootstrap &> /dev/null;
-fi;
