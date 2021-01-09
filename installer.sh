@@ -77,9 +77,10 @@ source "${BASH_SOURCE%/*}/scripts/drive_prepare.sh"
 
 # Create Subvolumes
 logLine "Creating BTRFS-Subvolumes on SYSTEM-Partition...";
-if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@snapshots; then echo "Failed to create btrfs SNAPSHOTS-Volume"; exit; fi;
-if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@swap; then echo "Failed to create btrfs SWAP-Volume"; exit; fi;
-if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@logs; then echo "Failed to create btrfs LOGS-Volume"; exit; fi;
+if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@snapshots; then echo "Failed to create btrfs @SNAPSHOTS-Volume"; exit; fi;
+if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@swap; then echo "Failed to create btrfs @SWAP-Volume"; exit; fi;
+if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@logs; then echo "Failed to create btrfs @LOGS-Volume"; exit; fi;
+if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@tmp; then echo "Failed to create btrfs @TMP-Volume"; exit; fi;
 if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/root-data; then echo "Failed to create btrfs ROOT-DATA-Volume"; exit; fi;
 for subvolName in ${SUBVOLUMES}
 do
@@ -116,9 +117,13 @@ do
 	if ! runCmd mount -o subvol=/${subvolName,,}-data ${PART_SYSTEM} /tmp/mnt/root/${subvolName,,}; then echo "Failed to Mount Subvolume ${subvolName^^}-DATA at /tmp/mnt/root/${subvolName,,}"; exit; fi;
 done;
 
-# Mount logs
-mkdir -p /tmp/mnt/root/var/log
-if ! runCmd mount -o subvol=/@logs ${PART_SYSTEM} /tmp/mnt/root/var/log; then echo "Failed to Mount Subvolume LOGS-Volume at /tmp/mnt/root/var/log"; exit; fi;
+# Mount /var/logs
+if ! runCmd mkdir -p /tmp/mnt/root/var/log; then logError "Failed to create /tmp/mnt/root/var/log"; exit 1; fi;
+if ! runCmd mount -o subvol=/@logs ${PART_SYSTEM} /tmp/mnt/root/var/log; then echo "Failed to Mount Subvolume @LOGS-Volume at /tmp/mnt/root/var/log"; exit; fi;
+
+# Mount /var/tmp
+if ! runCmd mkdir -p /tmp/mnt/root/var/tmp; then logError "Failed to create /tmp/mnt/root/var/tmp"; exit 1; fi;
+if ! runCmd mount -o subvol=/@tmp ${PART_SYSTEM} /tmp/mnt/root/var/tmp; then echo "Failed to Mount Subvolume @TMP-Volume at /tmp/mnt/root/var/tmp"; exit; fi;
 
 # Install base system
 logLine "Installing Base-System (${DISTRO^^})...";
