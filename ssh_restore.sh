@@ -147,15 +147,10 @@ do
   if ! runCmd mkdir /tmp/mnt/disks/system/@snapshots/${VOLUME}; then logError "Failed to create snapshot directory for volume \"${VOLUME}\"."; exit 1; fi;
   
   logDebug ${SSH_CALL} "download-snapshot" "${VOLUME}" "${TARGETSNAPSHOT}";
-  logDebug btrfs receive -q /tmp/mnt/disks/system/@snapshots/${VOLUME};
-  
-  if [[ $(getSystemName) = "ARCHLINUX" ]]; then
-	${SSH_CALL} "download-snapshot" "${VOLUME}" "${TARGETSNAPSHOT}" | btrfs receive -q /tmp/mnt/disks/system/@snapshots/${VOLUME};
-  else
-    # Other tools does not support quiet receive.
-    ${SSH_CALL} "download-snapshot" "${VOLUME}" "${TARGETSNAPSHOT}" | btrfs receive /tmp/mnt/disks/system/@snapshots/${VOLUME};
-  fi;
-  
+  logDebug btrfs receive /tmp/mnt/disks/system/@snapshots/${VOLUME};
+
+  # Receive Snapshot
+  ${SSH_CALL} "download-snapshot" "${VOLUME}" "${TARGETSNAPSHOT}" | btrfs receive /tmp/mnt/disks/system/@snapshots/${VOLUME};
   if [[ $? -ne 0 ]]; then logError "Failed to receive the snapshot for volume \"${VOLUME}\"."; exit 1; fi;
   
   # Restore ROOTVOLUME

@@ -92,6 +92,8 @@ mkdir -p /tmp/mnt/root
 if ! runCmd mount -o subvol=/root-data ${PART_SYSTEM} /tmp/mnt/root; then echo "Failed to Mount Subvolume ROOT-DATA at /tmp/mnt/root"; exit; fi;
 mkdir -p /tmp/mnt/root/boot
 if ! runCmd mount ${PART_BOOT} /tmp/mnt/root/boot; then echo "Failed to mount BOOT-Partition"; exit; fi;
+if ! runCmd mkdir -p /tmp/mnt/root/boot/efi; then echo "Failed to create efi directory at /tmp/mnt/root/boot/efi"; exit 1; fi;
+if ! runCmd mount ${PART_EFI} /tmp/mnt/root/boot/efi; then echo "Failed to mount EFI-Partition"; exit 1; fi;
 
 # Create Snapshot-Volume
 mkdir -p /tmp/mnt/root/.snapshots
@@ -99,21 +101,13 @@ if ! runCmd mount -o subvol=@snapshots ${PART_SYSTEM} /tmp/mnt/root/.snapshots; 
 
 # Create Swap-Volume and Swap-File
 mkdir -p /tmp/mnt/root/.swap
-if ! runCmd mount -o subvol=@swap ${PART_SYSTEM} /tmp/mnt/root/.swap; then echo "Failed to Mount Swap-Volume at /tmp/mnt/root/.swap"; exit; fi;
-if ! runCmd truncate -s 0 /tmp/mnt/root/.swap/swapfile; then echo "Failed to truncate Swap-File at /tmp/mnt/root/.swap/swapfile"; exit; fi;
-if ! runCmd chattr +C /tmp/mnt/root/.swap/swapfile; then echo "Failed to chattr Swap-File at /tmp/mnt/root/.swap/swapfile"; exit; fi;
-if ! runCmd chmod 600 /tmp/mnt/root/.swap/swapfile; then echo "Failed to chmod Swap-File at /tmp/mnt/root/.swap/swapfile"; exit; fi;
-if ! runCmd btrfs property set /tmp/mnt/root/.swap/swapfile compression none; then echo "Failed to disable compression for Swap-File at /tmp/mnt/root/.swap/swapfile"; exit; fi;
-if ! runCmd fallocate /tmp/mnt/root/.swap/swapfile -l2g; then echo "Failed to fallocate 2G Swap-File at /tmp/mnt/root/.swap/swapfile"; exit; fi;
-if ! runCmd mkswap /tmp/mnt/root/.swap/swapfile; then echo "Failed to mkswap for Swap-File at /tmp/mnt/root/.swap/swapfile"; exit; fi;
-
-# Mount EFI
-if [[ "${BIOSTYPE}" == "EFI" ]]; then
-	mkdir -p /tmp/mnt/root/boot/efi
-	if isEfiSystem; then
-		if ! runCmd mount ${PART_EFI} /tmp/mnt/root/boot/efi; then echo "Failed to mount BOOT-Partition"; exit; fi;
-	fi;
-fi;
+if ! runCmd mount -o subvol=@swap ${PART_SYSTEM} /tmp/mnt/root/.swap; then echo "Failed to Mount Swap-Volume at /tmp/mnt/root/.swap"; exit 1; fi;
+if ! runCmd truncate -s 0 /tmp/mnt/root/.swap/swapfile; then echo "Failed to truncate Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
+if ! runCmd chattr +C /tmp/mnt/root/.swap/swapfile; then echo "Failed to chattr Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
+if ! runCmd chmod 600 /tmp/mnt/root/.swap/swapfile; then echo "Failed to chmod Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
+if ! runCmd btrfs property set /tmp/mnt/root/.swap/swapfile compression none; then echo "Failed to disable compression for Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
+if ! runCmd fallocate /tmp/mnt/root/.swap/swapfile -l2g; then echo "Failed to fallocate 2G Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
+if ! runCmd mkswap /tmp/mnt/root/.swap/swapfile; then echo "Failed to mkswap for Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
 
 # Mount Subvolumes
 for subvolName in ${SUBVOLUMES}
