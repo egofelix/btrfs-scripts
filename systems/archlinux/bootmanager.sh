@@ -1,12 +1,13 @@
 #!/bin/bash
-logLine "Setting up Bootmanager (GRUB)";
-
 # Install kernel & bootmanager
 if [[ $(getSystemModel) = "CUBIETRUCK" ]]; then
+	logLine "Setting up Bootmanager (UBOOT)";
 	cat > /tmp/mnt/root/chroot.sh <<- EOF
 pacman -S --noconfirm linux-armv7 efibootmgr
 yes | pacman -S --noconfigm uboot-cubietruck uboot-tools
 EOF
+	chmod +x /tmp/mnt/root/chroot.sh;
+	chroot /tmp/mnt/root /chroot.sh;
 
 	cat > /tmp/mnt/root/boot/boot.txt <<- EOF
 # After modifying, run ./mkscr
@@ -14,11 +15,11 @@ setenv bootpart 2;
 EOF
 	if isTrue "${CRYPTED}"; then
 		cat >> /tmp/mnt/root/boot/boot.txt <<- EOF
-setenv bootargs console=${console} cryptdevice=PARTLABEL=system:cryptsystem root=/dev/mapper/cryptsystem rw rootwait;
+setenv bootargs console=\${console} cryptdevice=PARTLABEL=system:cryptsystem root=/dev/mapper/cryptsystem rw rootwait;
 EOF
 	else
 		cat >> /tmp/mnt/root/boot/boot.txt <<- EOF
-setenv bootargs console=${console} root=PARTLABEL=system rw rootwait;
+setenv bootargs console=\${console} root=PARTLABEL=system rw rootwait;
 EOF
 	fi;
 	
@@ -41,13 +42,13 @@ cd /boot
 EOF
 	chroot /tmp/mnt/root /chroot.sh
 else
+	logLine "Setting up Bootmanager (GRUB)";
 	cat > /tmp/mnt/root/chroot.sh <<- EOF
 pacman -S --noconfirm linux grub efibootmgr
 EOF
+	chmod +x /tmp/mnt/root/chroot.sh;
+	chroot /tmp/mnt/root /chroot.sh;
 fi;
-
-chmod +x /tmp/mnt/root/chroot.sh;
-chroot /tmp/mnt/root /chroot.sh;
 
 if isTrue "${CRYPTED}"; then
     # Install crypt tools
