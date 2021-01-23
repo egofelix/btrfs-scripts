@@ -1,10 +1,11 @@
 #!/bin/bash
 
-# create script
+# Setup bootmanager
+source "${BASH_SOURCE%/*}/bootmanager.sh"
 
 # Install Kernel & Software
 cat > /tmp/mnt/root/chroot.sh <<- EOF
-pacman -Sy --noconfirm linux linux-firmware btrfs-progs openssh git
+pacman -Sy --noconfirm linux-firmware btrfs-progs openssh git
 EOF
 chmod +x /tmp/mnt/root/chroot.sh
 chroot /tmp/mnt/root /chroot.sh;
@@ -52,9 +53,6 @@ Name=eth* en*
 [Network]
 DHCP=yes
 EOM
-
-# Setup bootmanager
-source "${BASH_SOURCE%/*}/bootmanager.sh"
 
 # Remove chroot file
 rm -f /tmp/mnt/root/chroot.sh
