@@ -4,7 +4,7 @@ if [[ $(getSystemModel) = "CUBIETRUCK" ]]; then
 	logLine "Setting up Bootmanager (UBOOT)";
 	cat > /tmp/mnt/root/chroot.sh <<- EOF
 pacman -S --noconfirm linux-armv7 efibootmgr
-yes | pacman -S --noconfigm uboot-cubietruck uboot-tools
+yes | pacman -S --noconfirm uboot-cubietruck uboot-tools
 EOF
 	chmod +x /tmp/mnt/root/chroot.sh;
 	chroot /tmp/mnt/root /chroot.sh;
