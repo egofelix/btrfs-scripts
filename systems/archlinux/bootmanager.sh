@@ -4,7 +4,7 @@ logLine "Setting up Bootmanager (GRUB)";
 # Install kernel & bootmanager
 if [[ $(getSystemModel) = "CUBIETRUCK" ]]; then
 	cat > /tmp/mnt/root/chroot.sh <<- EOF
-pacman -S --noconfirm linux-armv7 grub efibootmgr
+pacman -S --noconfirm linux-armv7 efibootmgr
 yes | pacman -S --noconfigm uboot-cubietruck uboot-tools
 EOF
 
@@ -97,6 +97,12 @@ else
 	HOOKS=${HOOKS/netconf/}
 	HOOKS=${HOOKS/tinyssh/}
 	HOOKS=${HOOKS/encryptssh/}
+	sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
+fi;
+
+# Add usr hook to mkinitcpio.conf if usr is on a subvolume
+if [[ ! -z $(LANG=C mount | grep ' /tmp/mnt/root/usr type ') ]]; then
+	HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && if [[ ${HOOKS[@]} != *"usr"* ]]; then HOOKS+=(usr); fi && echo ${HOOKS[@]} | xargs echo -n))"
 	sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
 fi;
 
