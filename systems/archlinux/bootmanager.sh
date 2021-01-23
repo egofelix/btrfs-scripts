@@ -2,7 +2,7 @@
 logLine "Setting up Bootmanager (GRUB)";
 
 # Install kernel & bootmanager
-if [[ getSystemModel = "CUBIETRUCK" ]]; then
+if [[ $(getSystemModel) = "CUBIETRUCK" ]]; then
 	cat > /tmp/mnt/root/chroot.sh <<- EOF
 pacman -S --noconfirm linux-armv7 grub efibootmgr
 yes | pacman -S --noconfigm uboot-cubietruck uboot-tools
