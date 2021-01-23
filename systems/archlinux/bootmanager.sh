@@ -11,7 +11,7 @@ EOF
 
 	cat > /tmp/mnt/root/boot/boot.txt <<- EOF
 # After modifying, run ./mkscr
-setenv bootpart 2;
+setenv bootpart 3;
 EOF
 	if isTrue "${CRYPTED}"; then
 		cat >> /tmp/mnt/root/boot/boot.txt <<- EOF
