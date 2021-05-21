@@ -8,7 +8,19 @@ function getSystemName {
     echo -n "ARCHLINUX";
   elif [[ "${SYSNAME^^}" = *"DEBIAN"* ]]; then
     echo -n "DEBIAN";
+  elif [[ "${SYSNAME^^}" = *"ALPINE"* ]]; then
+    echo -n "ALPINE";
   else
-    echo -n "UNKNOWN";
+    local SYSNAME=$(cat /etc/os-release)
+
+    if [[ "${SYSNAME^^}" = *"ARCH"* ]]; then
+      echo -n "ARCHLINUX";
+    elif [[ "${SYSNAME^^}" = *"DEBIAN"* ]]; then
+      echo -n "DEBIAN";
+    elif [[ "${SYSNAME^^}" = *"ALPINE"* ]]; then
+      echo -n "ALPINE";
+    else
+      echo -n "UNKNOWN";
+    fi;
   fi;
 }

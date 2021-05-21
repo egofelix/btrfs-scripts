@@ -1,10 +1,10 @@
 #!/bin/bash
-set -uo pipefail
+set -uo pipefail;
 
 ############### Main Script ################
 
 ## Load Functions
-source "${BASH_SOURCE%/*}/includes/functions.sh"
+source "${BASH_SOURCE%/*}/includes/functions.sh";
 
 # Load Variables
 VOLUMES="";

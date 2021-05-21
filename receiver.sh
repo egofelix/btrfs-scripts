@@ -1,10 +1,10 @@
 #!/bin/bash
-set -uo pipefail
+set -uo pipefail;
 
 ############### Main Script ################
 
 ## Load Functions
-source "${BASH_SOURCE%/*}/includes/functions.sh"
+source "${BASH_SOURCE%/*}/includes/functions.sh";
 
 # Load Variables
 QUIET="false"; QUIETPS="";
@@ -15,18 +15,18 @@ SNAPSHOTSPATH=""
 while [[ "$#" -gt 0 ]]; do
   case $1 in
     -q|--quiet) QUIET="true"; QUIETPS=" &>/dev/null"; ;;
-	--debug) DEBUG="true"; ;;
+	  --debug) DEBUG="true"; ;;
     -t|--target) SNAPSHOTSPATH=$(removeTrailingChar "$2" "/"); shift ;;
-	-c|--command) COMMAND="$2"; shift ;;
-	-h|--help) 
-	  SELFNAME=$(basename $BASH_SOURCE) 
-	  echo "Usage: ${SELFNAME} --target <targetdirectory> --command <command>]";
-	  echo "";
-	  echo "    ${SELFNAME} --target /.backups/user --command testReceiver";
-	  echo "      Returns success if the receiver should be working.";
-	  echo "";
-	  exit 0;
-	  ;;
+	  -c|--command) COMMAND="$2"; shift ;;
+	  -h|--help) 
+	    SELFNAME=$(basename $BASH_SOURCE) 
+	    echo "Usage: ${SELFNAME} --target <targetdirectory> --command <command>]";
+	    echo "";
+	    echo "    ${SELFNAME} --target /.backups/user --command testReceiver";
+	    echo "      Returns success if the receiver should be working.";
+	    echo "";
+	    exit 0;
+	    ;;
     *) echo "unknown parameter passed: ${1}."; exit 1;;
   esac
   shift

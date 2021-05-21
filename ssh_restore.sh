@@ -1,50 +1,50 @@
 #!/bin/bash
-set -uo pipefail
+set -uo pipefail;
 
 ############### Main Script ################
 
 ## Load Functions
-source "${BASH_SOURCE%/*}/includes/functions.sh"
+source "${BASH_SOURCE%/*}/includes/functions.sh";
 
 # Load Variables
-source "${BASH_SOURCE%/*}/includes/defaults.sh"
+source "${BASH_SOURCE%/*}/includes/defaults.sh";
 
 # Scan arguments
 while [[ "$#" -gt 0 ]]; do
   case $1 in
     -q|--quiet) QUIET="true"; QUIETPS=" &>/dev/null"; ;;
-	--debug) DEBUG="true"; ;;
-	-nc|--nocrypt) CRYPTED="false"; ;;
+	  --debug) DEBUG="true"; ;;
+	  -nc|--nocrypt) CRYPTED="false"; ;;
     -t|--target) DRIVE_ROOT=$(removeTrailingChar "$2" "/"); shift ;;
-	-n|--name) HOSTNAME="$2"; shift ;;
-	-s|--snapshot) TARGETSNAPSHOT="$2"; shift ;;
-	--source) SSH_URI="$2"; shift ;;
-	--ssh-accept-key) SSH_INSECURE="TRUE"; ;;
-	--test) ISTEST="true"; ;;
-	-h|--help) 
-	  SELFNAME=$(basename $BASH_SOURCE) 
-	  echo "Usage: ${SELFNAME} [-q|--quiet] [-t|--target <targetdrive>] [-n|--name <clientname>] [-s|--snapshot <snapshot>] [--test] [-nc|--nocrypt] [--source ssh://user@host:port]";
-	  echo "";
-	  echo "    ${SELFNAME}";
-	  echo "      Automatic restore.";
-	  echo "";
-	  echo "    ${SELFNAME} --target /dev/sdb";
-	  echo "      Restore to drive /dev/sdb.";
-	  echo "";
-	  echo "    ${SELFNAME} --name my.host.net";
-	  echo "      Use given hostname for discovery.";
-	  echo "";
-	  echo "    ${SELFNAME} --source ssh://myuser@my.host.net:12345/";
-	  echo "      Recover from specified server with myuser.";
-	  echo "";
-	  echo "    ${SELFNAME} --snapshot 2020-12-23_12-03-26";
-	  echo "      Restore snapshot with name 2020-12-23_12-03-26.";
-	  echo "";
-	  echo "    ${SELFNAME} --test";
-	  echo "      Test if latest snapshot exists for every volume.";
-	  echo "";
-	  exit 0;
-	  ;;
+	  -n|--name) HOSTNAME="$2"; shift ;;
+	  -s|--snapshot) TARGETSNAPSHOT="$2"; shift ;;
+	  --source) SSH_URI="$2"; shift ;;
+	  --ssh-accept-key) SSH_INSECURE="TRUE"; ;;
+	  --test) ISTEST="true"; ;;
+	  -h|--help) 
+	    SELFNAME=$(basename $BASH_SOURCE) 
+	    echo "Usage: ${SELFNAME} [-q|--quiet] [-t|--target <targetdrive>] [-n|--name <clientname>] [-s|--snapshot <snapshot>] [--test] [-nc|--nocrypt] [--source ssh://user@host:port]";
+	    echo "";
+	    echo "    ${SELFNAME}";
+	    echo "      Automatic restore.";
+	    echo "";
+	    echo "    ${SELFNAME} --target /dev/sdb";
+	    echo "      Restore to drive /dev/sdb.";
+	    echo "";
+	    echo "    ${SELFNAME} --name my.host.net";
+	    echo "      Use given hostname for discovery.";
+	    echo "";
+	    echo "    ${SELFNAME} --source ssh://myuser@my.host.net:12345/";
+	    echo "      Recover from specified server with myuser.";
+	    echo "";
+	    echo "    ${SELFNAME} --snapshot 2020-12-23_12-03-26";
+	    echo "      Restore snapshot with name 2020-12-23_12-03-26.";
+	    echo "";
+	    echo "    ${SELFNAME} --test";
+	    echo "      Test if latest snapshot exists for every volume.";
+	    echo "";
+	    exit 0;
+	    ;;
     *) echo "unknown parameter passed: ${1}."; exit 1;;
   esac
   shift
@@ -60,7 +60,7 @@ fi;
 # Prechecks when not in testmode
 if ! isTrue ${ISTEST:-}; then
   # Install Dependencies
-  source "${BASH_SOURCE%/*}/scripts/dependencies.sh"
+  source "${BASH_SOURCE%/*}/scripts/dependencies.sh";
   
   # Detect ROOT-Drive
   source "${BASH_SOURCE%/*}/scripts/drive_detect.sh";
@@ -82,7 +82,7 @@ if [[ -z "${TARGETSNAPSHOT:-}" ]]; then
     SNAPSHOTS=$(${SSH_CALL} "list-snapshots" "${VOLUME}");
     LASTSNAPSHOT=$(echo "${SNAPSHOTS}" | sort | tail -1);
     logDebug "Latest Snapshot for volume \"${VOLUME}\" is: \"${LASTSNAPSHOT}\"";
-	TARGETSNAPSHOT=$(echo -e "${LASTSNAPSHOT}\n${TARGETSNAPSHOT:-}" | sort | tail -1);
+	  TARGETSNAPSHOT=$(echo -e "${LASTSNAPSHOT}\n${TARGETSNAPSHOT:-}" | sort | tail -1);
   done;
 fi;
 
@@ -100,14 +100,13 @@ do
   SNAPSHOTS=$(${SSH_CALL} "list-snapshots" "${VOLUME}");
   SNAPSHOT=$(echo "${SNAPSHOTS}" | grep "${TARGETSNAPSHOT}");
   if [[ -z "${SNAPSHOT}" ]]; then
-  
     if isTrue ${ISTEST:-}; then
-	  logError "\"${TARGETSNAPSHOT}\" for volume \"${VOLUME}\" does not exist.";
-	  HASERROR="true";
-	else
+	    logError "\"${TARGETSNAPSHOT}\" for volume \"${VOLUME}\" does not exist.";
+	    HASERROR="true";
+	  else
       logError "Cannot restore \"${TARGETSNAPSHOT}\" as volume \"${VOLUME}\" does not have this snapshot.";
-	  exit 1;
-	fi;
+	    exit 1;
+	  fi;
   fi;
 done;
 
@@ -115,10 +114,10 @@ done;
 if isTrue ${ISTEST:-}; then 
   if isFalse ${HASERROR}; then
     if isTrue ${QUIET:-}; then
-	  echo ${TARGETSNAPSHOT}; exit 0;
-	else
-	  logLine "Latest snapshot \"${TARGETSNAPSHOT}\" is ok."; exit 0; 
-	fi;
+	    echo ${TARGETSNAPSHOT}; exit 0;
+	  else
+	    logLine "Latest snapshot \"${TARGETSNAPSHOT}\" is ok."; exit 0; 
+	  fi;
   else
     logError "Latest snapshot \"${TARGETSNAPSHOT}\" is not ok."; exit 1;
   fi;
@@ -128,9 +127,9 @@ fi;
 read -p "Will restore ${TARGETSNAPSHOT} to ${DRIVE_ROOT}. Is this ok? [Yn]: " -n 1 -r
 echo    # (optional) move to a new line
 if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ ! $REPLY =~ ^$ ]]; then
-    # TODO: Build selection here
-    logLine "Script canceled by user";
-    exit 1;
+  # TODO: Build selection here
+  logLine "Script canceled by user";
+  exit 1;
 fi
 
 # Prepare disk

@@ -27,19 +27,19 @@ if isEmpty "${SSH_URI:-}"; then
     logDebug "Unkown Domain, trying to detect Domain";
 	
     # If not try to get the dns server and make a reverse lookup to it
-	DNSSERVER=$(LANG=C systemd-resolve --status | grep 'Current DNS Server' | grep -o -E '[0-9\.]+')
+	  DNSSERVER=$(LANG=C systemd-resolve --status | grep 'Current DNS Server' | grep -o -E '[0-9\.]+')
 	
-	if [[ ! -z "${DNSSERVER}" ]]; then
+	  if [[ ! -z "${DNSSERVER}" ]]; then
       DNS_HOSTNAME=$(dig @${DNSSERVER} -x ${DNSSERVER} +short)
 	  
-	  if [[ ! -z "${DNS_HOSTNAME}" ]]; then
-	    # Split
-		MY_DOMAIN=$(echo "${DNS_HOSTNAME}" | cut -d'.' -f2-)
+	    if [[ ! -z "${DNS_HOSTNAME}" ]]; then
+	      # Split
+		    MY_DOMAIN=$(echo "${DNS_HOSTNAME}" | cut -d'.' -f2-)
 		
-		# Remove trailing .
-		MY_DOMAIN="${MY_DOMAIN::-1}"
+		    # Remove trailing .
+		    MY_DOMAIN="${MY_DOMAIN::-1}"
+	    fi;
 	  fi;
-	fi;
   fi;
   logDebug "Detected Domain: ${MY_DOMAIN}";
 
@@ -53,14 +53,14 @@ if isEmpty "${SSH_URI:-}"; then
   
   if [[ -z "${DNS_RESULT}" ]]; then
     RECORD_TO_CHECK="_backup._ssh.${MY_DOMAIN}"
-	logDebug "Looking up SRV-Record: ${RECORD_TO_CHECK}";
+	  logDebug "Looking up SRV-Record: ${RECORD_TO_CHECK}";
     DNS_RESULT=$(dig srv ${RECORD_TO_CHECK} +short 2> /dev/null)
   fi;
 
   # Could not detect
   if [[ -z "${DNS_RESULT}" ]]; then
-	logError "Could not autodetect backup server. Please provide SSH_HOSTNAME or another HOSTNAME";
-	exit 1;
+	  logError "Could not autodetect backup server. Please provide SSH_HOSTNAME or another HOSTNAME";
+	  exit 1;
   fi;
 
   export SSH_PORT=$(echo ${DNS_RESULT} | awk '{print $3}');
@@ -107,13 +107,13 @@ TESTRESULT=$(${SSH_CALL} "testReceiver")
 if [[ $? -ne 0 ]]; then
   # Test ssh without key (User auth)
   if isTrue ${SSH_INSECURE}; then
-	export SSH_CALL="ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+	  export SSH_CALL="ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
   else
     export SSH_CALL="ssh -o PasswordAuthentication=no -o VerifyHostKeyDNS=yes -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
   fi;
   TESTRESULT=$(${SSH_CALL} "testReceiver")
   if [[ $? -ne 0 ]]; then
-	logError "Cannot connect to ${SSH_URI}";
-	exit 1;
+	  logError "Cannot connect to ${SSH_URI}";
+	  exit 1;
   fi;
 fi;
