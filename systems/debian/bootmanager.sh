@@ -4,7 +4,7 @@ if [[ $(getSystemModel) = "CUBIETRUCK" ]]; then
   logLine "Setting up Bootmanager (UBOOT)";
   cat > /tmp/mnt/root/chroot.sh <<- EOF
 DEBIAN_FRONTEND=noninteractive apt-get -yq install efibootmgr
-#yes | pacman -S --noconfirm uboot-cubietruck uboot-tools
+yes | DEBIAN_FRONTEND=noninteractive apt-get -yq install uboot-cubietruck uboot-tools
 EOF
   chmod +x /tmp/mnt/root/chroot.sh;
   chroot /tmp/mnt/root /chroot.sh;
@@ -43,8 +43,11 @@ EOF
   chroot /tmp/mnt/root /chroot.sh
 else
   logLine "Setting up Bootmanager (GRUB)";
+
+  # TODO: Detect Platform and install right kernel
   cat > /tmp/mnt/root/chroot.sh <<- EOF
-DEBIAN_FRONTEND=noninteractive apt-get -yq install linux grub efibootmgr
+#!/bin/bash
+DEBIAN_FRONTEND=noninteractive apt-get -yq install linux-image-amd64 grub2 efibootmgr
 EOF
   chmod +x /tmp/mnt/root/chroot.sh;
   chroot /tmp/mnt/root /chroot.sh;
@@ -53,6 +56,7 @@ fi;
 if isTrue "${CRYPTED}"; then
   # Install crypt tools
   cat > /tmp/mnt/root/chroot.sh <<- EOF
+#!/bin/bash
 pacman -S --noconfirm cryptsetup mkinitcpio-netconf mkinitcpio-tinyssh mkinitcpio-utils
 EOF
   chroot /tmp/mnt/root /chroot.sh;
@@ -109,7 +113,8 @@ fi;
 
 # Install Grub
 cat > /tmp/mnt/root/chroot.sh <<- EOF
-mkinitcpio -P
+#!/bin/bash
+update-initramfs -u
 grub-install ${DRIVE_ROOT}
 grub-mkconfig -o /boot/grub/grub.cfg
 EOF
