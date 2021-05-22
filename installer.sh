@@ -78,9 +78,6 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
   exit 1;
 fi
 
-
-exit;
-
 # Prepare drive
 source "${BASH_SOURCE%/*}/scripts/drive_prepare.sh";
 
