@@ -102,3 +102,11 @@ if ! which chattr &> /dev/null; then
   logDebug "Installing dependency e2fsprogs-extra";
   if ! runCmd apk add e2fsprogs-extra; then logError "Failed to install dependency e2fsprogs-extra"; exit 1; fi;
 fi;
+
+# Install debootstrap
+if [[ ${DISTRO^^} = "DEBIAN" ]]; then
+  if ! which debootstrap &> /dev/null; then
+    logDebug "Installing dependency debootstrap";
+    if ! runCmd apk add debootstrap perl; then logError "Failed to install dependency debootstrap"; exit 1; fi;
+  fi;
+fi;
