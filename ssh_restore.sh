@@ -133,8 +133,8 @@ if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ ! $REPLY =~ ^$ ]]; then
 fi
 
 # Prepare disk
-source "${BASH_SOURCE%/*}/scripts/unmount.sh"
-source "${BASH_SOURCE%/*}/scripts/drive_prepare.sh"
+source "${BASH_SOURCE%/*}/scripts/unmount.sh";
+source "${BASH_SOURCE%/*}/scripts/drive_prepare.sh";
 
 # Create system snapshot volume
 if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@snapshots; then logError "Failed to create btrfs @snapshots-volume"; exit 1; fi;
@@ -153,7 +153,7 @@ do
   if [[ $? -ne 0 ]]; then logError "Failed to receive the snapshot for volume \"${VOLUME}\"."; exit 1; fi;
   
   # Restore ROOTVOLUME
-  RESTORERESULT=$(btrfs subvol snapshot /tmp/mnt/disks/system/@snapshots/${VOLUME}/${TARGETSNAPSHOT} /tmp/mnt/disks/system/${VOLUME} 2>&1)
+  RESTORERESULT=$(btrfs subvol snapshot /tmp/mnt/disks/system/@snapshots/${VOLUME}/${TARGETSNAPSHOT} /tmp/mnt/disks/system/${VOLUME} 2>&1);
   if [[ $? -ne 0 ]]; then logError "Failed to restore the snapshot for volume \"${VOLUME}\": ${RESTORERESULT}."; exit 1; fi;
 done;
 
@@ -166,9 +166,9 @@ do
   
   if [[ -f "/tmp/mnt/disks/system/${VOLUME}/etc/fstab" ]]; then
     if [[ ! -z "${FSTABPATH}" ]]; then
-	  logError "Multiple fstab files found. Aborting.";
-	  exit 1;
-	fi;
+	    logError "Multiple fstab files found. Aborting.";
+	    exit 1;
+	  fi;
 	
     FSTABPATH="/tmp/mnt/disks/system/${VOLUME}/etc/fstab";
   fi;
@@ -201,9 +201,9 @@ cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$' | while read LI
   LINESUBVOL=$(echo "$LINE" | awk '{print $4}' | grep -o -P 'subvol\=[^\s\,\)]*' | awk -F'=' '{print $2}');
   
   # Fix for broken fstab (mount is there multiple times, so we check if this is mounted already here)
-  LINEDEVREGEX=$(echo "${LINEDEV}" | sed -e 's/[\.&]/\\&/g') # | sed -e 's/[\/&]/\\&/g')
-  LINEMOUNTREGEX=$(echo "/tmp/mnt/root${LINEMOUNT}" | sed -e 's/[\.&]/\\&/g') # | sed -e 's/[\/&]/\\&/g')
-  LINESUBVOLREGEX=$(echo "${LINESUBVOL}" | sed -e 's/[\.&]/\\&/g') # | sed -e 's/[\/&]/\\&/g')
+  LINEDEVREGEX=$(echo "${LINEDEV}" | sed -e 's/[\.&]/\\&/g');
+  LINEMOUNTREGEX=$(echo "/tmp/mnt/root${LINEMOUNT}" | sed -e 's/[\.&]/\\&/g');
+  LINESUBVOLREGEX=$(echo "${LINESUBVOL}" | sed -e 's/[\.&]/\\&/g');
   MOUNTTEST=$(LANG=C mount | grep -P "${LINEDEVREGEX}[\s]+on[\s]+${LINEMOUNTREGEX}\s.*subvol\=[/]{0,1}${LINESUBVOLREGEX}");
   if ! isEmpty "${MOUNTTEST}"; then
     logDebug "Skipping line, as it is mounted already (Double check)";
@@ -222,18 +222,18 @@ cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$' | while read LI
 	if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
   elif [[ "${LINEMOUNT}" == "/boot/efi" ]]; then
     # Mount efi partition
-	if ! runCmd mkdir /tmp/mnt/root${LINEMOUNT}; then logError "Failed to create efi directory."; exit 1; fi;
+	  if ! runCmd mkdir /tmp/mnt/root${LINEMOUNT}; then logError "Failed to create efi directory."; exit 1; fi;
     MOUNTRESULT=$(mount ${PART_EFI} "/tmp/mnt/root${LINEMOUNT}" 2>&1);
 	if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
   elif [[ "${LINEMOUNT,,}" == "none" ]] && [[ "${LINEFS,,}" == "swap" ]]; then
     # Create swapfile
-	logDebug "Creating new swapfile...";
-	if ! runCmd truncate -s 0 /tmp/mnt/root${LINEDEV}; then logError "Failed to truncate Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
-	if ! runCmd chattr +C /tmp/mnt/root${LINEDEV}; then logError "Failed to chattr Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
-	if ! runCmd chmod 600 /tmp/mnt/root${LINEDEV}; then logError "Failed to chmod Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
-	if ! runCmd btrfs property set /tmp/mnt/root${LINEDEV} compression none; then logError "Failed to disable compression for Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
-	if ! runCmd fallocate /tmp/mnt/root${LINEDEV} -l2g; then logError "Failed to fallocate 2G Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
-	if ! runCmd mkswap /tmp/mnt/root${LINEDEV}; then logError "Failed to mkswap for Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
+	  logDebug "Creating new swapfile...";
+	  if ! runCmd truncate -s 0 /tmp/mnt/root${LINEDEV}; then logError "Failed to truncate Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
+	  if ! runCmd chattr +C /tmp/mnt/root${LINEDEV}; then logError "Failed to chattr Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
+	  if ! runCmd chmod 600 /tmp/mnt/root${LINEDEV}; then logError "Failed to chmod Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
+	  if ! runCmd btrfs property set /tmp/mnt/root${LINEDEV} compression none; then logError "Failed to disable compression for Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
+	  if ! runCmd fallocate /tmp/mnt/root${LINEDEV} -l2g; then logError "Failed to fallocate 2G Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
+	  if ! runCmd mkswap /tmp/mnt/root${LINEDEV}; then logError "Failed to mkswap for Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
   else
     # unknown, we skip it here
     logWarn "Skipping unknown mount ${LINEMOUNT}.";
@@ -243,15 +243,15 @@ done;
 # Reinstall new crypto keys and backup header
 if isTrue "${CRYPTED}"; then
   logDebug "Installing new crypto key...";
-  if ! runCmd cp /tmp/crypto.key /tmp/mnt/root/etc/; then logLine "Failed to copy crypto.key"; exit; fi;
-  if ! runCmd cp /tmp/crypto.header /tmp/mnt/root/etc/; then logLine "Failed to copy crypto.header"; exit; fi;
+  if ! runCmd cp /tmp/crypto.key /tmp/mnt/root/etc/; then logError "Failed to copy crypto.key"; exit 1; fi;
+  if ! runCmd cp /tmp/crypto.header /tmp/mnt/root/etc/; then logError "Failed to copy crypto.header"; exit 1; fi;
 fi;
 
 # Fix fstab if we restored a crypted to uncrypted or vice versa
 if isTrue "${CRYPTED}"; then
-  sed -i "s#LABEL=system#/dev/mapper/cryptsystem#g" ${FSTABPATH}
+  sed -i "s#LABEL=system#/dev/mapper/cryptsystem#g" ${FSTABPATH};
 else
-  sed -i "s#/dev/mapper/cryptsystem#LABEL=system#g" ${FSTABPATH}
+  sed -i "s#/dev/mapper/cryptsystem#LABEL=system#g" ${FSTABPATH};
 fi;
 
 # Prepare ChRoot
@@ -264,12 +264,12 @@ logDebug "Restoring Bootmanager...";
 source "${BASH_SOURCE%/*}/scripts/bootmanager.sh";
 
 # Question for CHROOT
-sync
+sync;
 read -p "Your system has been restored. Do you want to chroot into the restored system now and make changes? [yN]: " -n 1 -r;
-echo    # (optional) move to a new line
+echo;    # (optional) move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-    logLine "Entering chroot...";
-    chroot /tmp/mnt/root /bin/bash;
+  logLine "Entering chroot...";
+  chroot /tmp/mnt/root /bin/bash;
 	sync;
 fi
 
