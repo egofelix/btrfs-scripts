@@ -1,9 +1,7 @@
 #!/bin/bash
 if ! runCmd debootstrap stable /tmp/mnt/root; then
   # Guess arch
-  ARCH=$(uname -a)
-
-  if [[ $ARCH = "x86_64" ]]; then
+  if [[ $(getSystemType) = "AMD64" ]]; then
     ARCH="amd64"
   else
     logError "Failed to guess arch"; exit 1;
