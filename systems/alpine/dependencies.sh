@@ -84,3 +84,21 @@ if ! which dig &> /dev/null; then
   logDebug "Installing dependency bind-tools";
   if ! runCmd apk add bind-tools; then logError "Failed to install dependency bind-tools"; exit 1; fi;
 fi;
+
+# Install fatlabel
+if ! which fatlabel &> /dev/null; then
+  logDebug "Installing dependency dosfstools";
+  if ! runCmd apk add dosfstools; then logError "Failed to install dependency dosfstools"; exit 1; fi;
+fi;
+
+# Install mkfs.ext2
+if ! which mkfs.ext2 &> /dev/null; then
+  logDebug "Installing dependency e2fsprogs";
+  if ! runCmd apk add e2fsprogs; then logError "Failed to install dependency e2fsprogs"; exit 1; fi;
+fi;
+
+# Install chattr
+if ! which chattr &> /dev/null; then
+  logDebug "Installing dependency e2fsprogs-extra";
+  if ! runCmd apk add e2fsprogs-extra; then logError "Failed to install dependency e2fsprogs-extra"; exit 1; fi;
+fi;
