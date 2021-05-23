@@ -2,6 +2,7 @@
 
 # Install Kernel & Software
 cat > /tmp/mnt/root/chroot.sh <<- EOF
+#!/bin/bash
 DEBIAN_FRONTEND=noninteractive apt-get -yq install btrfs-progs openssh git
 EOF
 chmod +x /tmp/mnt/root/chroot.sh;
@@ -9,6 +10,7 @@ chroot /tmp/mnt/root /chroot.sh;
 
 # Reset root password
 cat > /tmp/mnt/root/chroot.sh <<- EOF
+#!/bin/bash
 echo -e "root\nroot" | passwd root
 EOF
 chroot /tmp/mnt/root /chroot.sh;
@@ -23,12 +25,14 @@ rm -f /tmp/mnt/root/etc/network/interfaces.d/*;
 
 # Install btrfs-scripts
 cat > /tmp/mnt/root/chroot.sh <<- EOF
+#!/bin/bash
 git clone https://github.com/egofelix/btrfs-scripts.git /opt/btrfs-scripts
 EOF
 chroot /tmp/mnt/root /chroot.sh &> /dev/null;
 
 # Enable services
 cat > /tmp/mnt/root/chroot.sh <<- EOF
+#!/bin/bash
 systemctl enable systemd-networkd
 systemctl enable systemd-resolved
 systemctl enable systemd-timesyncd
