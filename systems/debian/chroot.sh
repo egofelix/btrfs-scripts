@@ -4,10 +4,12 @@
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 source /etc/profile
-DEBIAN_FRONTEND=noninteractive apt-get -yq locales
+DEBIAN_FRONTEND=noninteractive apt-get -yq install locales
 EOF
 chmod +x /tmp/mnt/root/chroot.sh;
 chroot /tmp/mnt/root /chroot.sh;
+
+# Locale-gen
 cat > /tmp/mnt/root/etc/locale.gen <<- EOF
 de_DE ISO-8859-1
 de_DE.UTF-8 UTF-8
@@ -37,6 +39,7 @@ chroot /tmp/mnt/root /chroot.sh;
 # Reset root password
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
+source /etc/profile
 echo -e "root\nroot" | passwd root
 EOF
 chroot /tmp/mnt/root /chroot.sh;
@@ -52,6 +55,7 @@ rm -f /tmp/mnt/root/etc/network/interfaces.d/*;
 # Install btrfs-scripts
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
+source /etc/profile
 git clone https://github.com/egofelix/btrfs-scripts.git /opt/btrfs-scripts
 EOF
 chroot /tmp/mnt/root /chroot.sh &> /dev/null;
@@ -59,6 +63,7 @@ chroot /tmp/mnt/root /chroot.sh &> /dev/null;
 # Enable services
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
+source /etc/profile
 systemctl enable systemd-networkd
 systemctl enable systemd-resolved
 systemctl enable systemd-timesyncd
