@@ -11,6 +11,7 @@ function runCmd {
 	  logLine "Failed Command: $@";
     return 1;
   else
+    logDebug "Executed $@ Output: ${RESULT}";
     return 0;
   fi;
 }
