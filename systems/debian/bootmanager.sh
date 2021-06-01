@@ -8,10 +8,17 @@ else
 
   # TODO: Detect Platform and install right kernel
   if [[ $(getSystemType) = "AMD64" ]]; then
-    cat > /tmp/mnt/root/chroot.sh <<- EOF
+    if isEfiSystem; then
+      cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
-DEBIAN_FRONTEND=noninteractive apt-get -yq install linux-image-amd64 grub grub-efi efibootmgr
+DEBIAN_FRONTEND=noninteractive apt-get -yq install linux-image-amd64 grub-efi efibootmgr
 EOF
+    else
+      cat > /tmp/mnt/root/chroot.sh <<- EOF
+#!/bin/bash
+DEBIAN_FRONTEND=noninteractive apt-get -yq install linux-image-amd64 grub
+EOF
+    fi;
   else
     logError "Unsupported System Type: $(getSystemType)";
     exit 1;
