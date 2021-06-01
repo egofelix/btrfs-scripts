@@ -50,6 +50,11 @@ EOF
   if [[ -z $(cat /tmp/mnt/root/etc/default/grub | grep "^GRUB_ENABLE_CRYPTODISK") ]]; then
     echo "GRUB_ENABLE_CRYPTODISK=y" >> /tmp/mnt/root/etc/default/grub;
   fi;
+
+  # Enable hyperv_keyboard in /etc/initramfs-tools/modules
+  if [[ -z $(cat /etc/initramfs-tools/modules | grep "^hyperv_keyboard$") ]]; then
+    echo "^hyperv_keyboard$" >> /etc/initramfs-tools/modules;
+  fi;
 	
   # Setup CMDLINE
   if [[ -z $(cat /tmp/mnt/root/etc/default/grub | grep 'GRUB_CMDLINE_LINUX=\"cryptdevice\=') ]]; then
