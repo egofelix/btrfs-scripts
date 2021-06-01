@@ -18,4 +18,5 @@ esac
 
 # delete authorized_keys(5) file to forbid new SSH sessions
 #rm -f ~root/.ssh/authorized_keys
-echo "STOP TINYSSH HERE";
+#echo "STOP TINYSSH HERE";
+/bin/killall tcpsvd

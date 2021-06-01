@@ -36,7 +36,8 @@ run_tinyssh() {
     echo "exec /bin/tcpsvd -l localhost 0 22 /usr/sbin/tinysshd -v /etc/tinyssh/sshkeydir"
     log_begin_msg "exec /bin/tcpsvd -l localhost 0 22 /usr/sbin/tinysshd -v /etc/tinyssh/sshkeydir"
     exec /bin/nc -ll -p $ssh_port -e /usr/sbin/tinysshd -$flags ${TINYSSH_OPTIONS-} /etc/tinyssh/sshkeydir  
-    #exec /bin/tcpsvd -l localhost 0 22 /usr/sbin/tinysshd -v /etc/tinyssh/sshkeydir
+    echo "exec /bin/tcpsvd -l localhost 0 222 /usr/sbin/tinysshd -v /etc/tinyssh/sshkeydir"
+    exec /bin/tcpsvd -l localhost 0 222 /usr/sbin/tinysshd -v /etc/tinyssh/sshkeydir
 }
 
 if [ -e /etc/tinyssh/config ]; then
