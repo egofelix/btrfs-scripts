@@ -59,3 +59,11 @@ if ! which sed &> /dev/null; then
   logDebug "Installing dependency sed";
   pacman -Sy --noconfirm sed &> /dev/null;
 fi;
+
+# Install debootstrap
+if [[ ${DISTRO^^} = "DEBIAN" ]]; then
+  if ! which debootstrap &> /dev/null; then
+    logDebug "Installing dependency debootstrap";
+    if ! runCmd pacman -Sy --noconfirm debootstrap &> /dev/null;; then logError "Failed to install dependency debootstrap"; exit 1; fi;
+  fi;
+fi;
