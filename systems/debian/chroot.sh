@@ -4,7 +4,7 @@
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 source /etc/profile
-DEBIAN_FRONTEND=noninteractive apt-get -yq locale
+DEBIAN_FRONTEND=noninteractive apt-get -yq locales
 EOF
 chmod +x /tmp/mnt/root/chroot.sh;
 chroot /tmp/mnt/root /chroot.sh;
