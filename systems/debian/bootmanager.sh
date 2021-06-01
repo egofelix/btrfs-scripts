@@ -10,7 +10,7 @@ else
   if [[ $(getSystemType) = "AMD64" ]]; then
     cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
-DEBIAN_FRONTEND=noninteractive apt-get -yq install linux-image-amd64 grub2 efibootmgr
+DEBIAN_FRONTEND=noninteractive apt-get -yq install linux-image-amd64 grub grub-efi efibootmgr
 EOF
   else
     logError "Unsupported System Type: $(getSystemType)";

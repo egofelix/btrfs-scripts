@@ -107,6 +107,11 @@ fi;
 if [[ ${DISTRO^^} = "DEBIAN" ]]; then
   if ! which debootstrap &> /dev/null; then
     logDebug "Installing dependency debootstrap";
-    if ! runCmd apk add debootstrap perl; then logError "Failed to install dependency debootstrap"; exit 1; fi;
+    if ! runCmd apk add debootstrap; then logError "Failed to install dependency debootstrap"; exit 1; fi;
+  fi;
+
+  if ! which perl &> /dev/null; then
+    logDebug "Installing dependency perl";
+    if ! runCmd apk add perl; then logError "Failed to install dependency perl"; exit 1; fi;
   fi;
 fi;
