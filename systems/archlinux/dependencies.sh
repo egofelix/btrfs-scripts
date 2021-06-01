@@ -64,6 +64,6 @@ fi;
 if [[ ${DISTRO^^} = "DEBIAN" ]]; then
   if ! which debootstrap &> /dev/null; then
     logDebug "Installing dependency debootstrap";
-    if ! runCmd pacman -Sy --noconfirm debootstrap &> /dev/null;; then logError "Failed to install dependency debootstrap"; exit 1; fi;
+    if ! runCmd pacman -Sy --noconfirm debootstrap; then logError "Failed to install dependency debootstrap"; exit 1; fi;
   fi;
 fi;
