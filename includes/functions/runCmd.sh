@@ -1,6 +1,6 @@
 #!/bin/bash
 function runCmd {
-  logDebug "Executing $@";
+  logDebug "Executing \`$@\`";
 
   RESULT=$($@ 2>&1);
 
