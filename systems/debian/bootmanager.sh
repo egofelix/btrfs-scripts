@@ -78,6 +78,7 @@ EOF
   cp "${BASH_SOURCE%/*}/tinyssh.config" /tmp/mnt/root/etc/tinyssh-initramfs/config;
   chmod +x /tmp/mnt/root/etc/initramfs-tools/hooks/tinyssh;
   cp "${BASH_SOURCE%/*}/tinyssh.bottom.sh" /tmp/mnt/root/etc/initramfs-tools/scripts/init-bottom/tinyssh;
+  chmod +x /tmp/mnt/root/etc/initramfs-tools/scripts/init-bottom/tinyssh;
 
   echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAgFSDgzV9FfLaJy1aIcfyJU7h3tgQT5WXe+R6Gtbb7R 45:f4:90:7d:d9:a1:8b:1e:fb:06:b8:70:bf:0c:7e:0e felix@windows" > /tmp/mnt/root/etc/tinyssh-initramfs/authorized_keys;
 fi;
