@@ -27,16 +27,16 @@ run_tinyssh() {
     # mounts this has been done already
     [ "$BOOT" = nfs ] || configure_networking
 
-    echo "Starting tinyssh";
-    log_begin_msg "Starting tinysshd"
+    echo "AStarting tinyssh";
+    log_begin_msg "BStarting tinysshd"
     # using exec and keeping tinyssh in the foreground enables the
     # init-bottom script to kill the remaining ipconfig processes if
     # someone unlocks the rootfs from the console while the network is
     # being configured
-    exec /bin/nc -ll -p $ssh_port -e /usr/sbin/tinysshd -$flags ${TINYSSH_OPTIONS-} /etc/tinyssh/sshkeydir
-    echo exec /bin/tcpsvd -l localhost 0 22 /usr/sbin/tinysshd -v /etc/tinyssh/sshkeydir &
-    #exec /bin/tcpsvd -l localhost 0 22 /usr/sbin/tinysshd -v /etc/tinyssh/sshkeydir &
-    
+    echo "exec /bin/tcpsvd -l localhost 0 22 /usr/sbin/tinysshd -v /etc/tinyssh/sshkeydir"
+    log_begin_msg "exec /bin/tcpsvd -l localhost 0 22 /usr/sbin/tinysshd -v /etc/tinyssh/sshkeydir"
+    exec /bin/nc -ll -p $ssh_port -e /usr/sbin/tinysshd -$flags ${TINYSSH_OPTIONS-} /etc/tinyssh/sshkeydir  
+    #exec /bin/tcpsvd -l localhost 0 22 /usr/sbin/tinysshd -v /etc/tinyssh/sshkeydir
 }
 
 if [ -e /etc/tinyssh/config ]; then
