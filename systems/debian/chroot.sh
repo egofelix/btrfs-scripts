@@ -3,7 +3,7 @@
 # Install Kernel & Software
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
-DEBIAN_FRONTEND=noninteractive apt-get -yq install btrfs-progs openssh git
+DEBIAN_FRONTEND=noninteractive apt-get -yq install btrfs-progs openssh-server git
 EOF
 chmod +x /tmp/mnt/root/chroot.sh;
 chroot /tmp/mnt/root /chroot.sh;
