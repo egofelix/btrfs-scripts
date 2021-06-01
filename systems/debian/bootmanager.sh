@@ -40,12 +40,24 @@ EOF
     echo cryptsystem PARTLABEL=system none luks > /tmp/mnt/root/etc/crypttab
   fi;
 
-  mkdir -p /tmp/mnt/root/etc/initramfs-tools/hooks/ /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/ /tmp/mnt/root/etc/tinyssh-initramfs/
+  # Setup GRUB_ENABLE_CRYPTODISK=y in /etc/default/grub
+  if [[ -z $(cat /tmp/mnt/root/etc/default/grub | grep "^GRUB_ENABLE_CRYPTODISK") ]]; then
+    sed -i "s/#GRUB_ENABLE_CRYPTODISK=y/GRUB_ENABLE_CRYPTODISK=y/g" /tmp/mnt/root/etc/default/grub
+  fi;
+  if [[ -z $(cat /tmp/mnt/root/etc/default/grub | grep "^GRUB_ENABLE_CRYPTODISK") ]]; then
+    echo "GRUB_ENABLE_CRYPTODISK=y" >> /tmp/mnt/root/etc/default/grub
+  fi;
+	
+  # Setup CMDLINE
+  if [[ -z $(cat /tmp/mnt/root/etc/default/grub | grep 'GRUB_CMDLINE_LINUX=\"cryptdevice\=') ]]; then
+    sed -i "s/GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"cryptdevice=PARTLABEL=system:cryptsystem ip=:::::eth0:dhcp\"/g" /tmp/mnt/root/etc/default/grub
+  fi;
 
+  # Install TinySSH Hook
+  mkdir -p /tmp/mnt/root/etc/initramfs-tools/hooks/ /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/ /tmp/mnt/root/etc/tinyssh-initramfs/
   cp "${BASH_SOURCE%/*}/tinyssh.hook" /tmp/mnt/root/etc/initramfs-tools/hooks/tinyssh
   cp "${BASH_SOURCE%/*}/tinyssh.premount" /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/tinyssh
   cp "${BASH_SOURCE%/*}/tinyssh.config" /tmp/mnt/root/etc/tinyssh-initramfs/config
-
 fi;
 
 # Install Grub
