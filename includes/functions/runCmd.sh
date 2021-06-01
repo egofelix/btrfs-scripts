@@ -8,11 +8,12 @@ function runCmd {
 
   if [ ${RESULTCODE} -ne 0 ]; then
     logError "Failed Command: \`$@\` Result: ${RESULT}";
-	  #logLine "Failed Command: \`$@\`";
     return 1;
   else
     if [ ! -z "${RESULT}" ]; then
-      logDebug "Executed \`$@\` Output: ${RESULT}";
+      logSuccess "Executed \`$@\` Output: ${RESULT}";
+    else
+      logSuccess "Executed \`$@\`";
     fi;
 
     return 0;

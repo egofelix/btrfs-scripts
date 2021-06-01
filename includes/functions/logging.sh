@@ -1,6 +1,12 @@
 #!/bin/bash
 function logDebug {
   if isTrue "${DEBUG:-}"; then
+    echo -en "\033[01;95m" && echo -n "[DEBUG] $@" && echo -e "\e[0m";
+  fi;
+}
+
+function logSuccess {
+  if isTrue "${DEBUG:-}"; then
     echo -en "\033[01;92m" && echo -n "[DEBUG] $@" && echo -e "\e[0m";
   fi;
 }
