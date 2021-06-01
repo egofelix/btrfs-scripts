@@ -68,7 +68,8 @@ cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 source /etc/profile
 update-initramfs -u
-grub-install ${DRIVE_ROOT}
-grub-mkconfig -o /boot/grub/grub.cfg
+grub-install --removeable ${DRIVE_ROOT}
+update-grub
 EOF
+#grub-mkconfig -o /boot/grub/grub.cfg
 chroot /tmp/mnt/root /chroot.sh;
