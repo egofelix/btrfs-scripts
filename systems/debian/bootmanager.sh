@@ -60,6 +60,7 @@ EOF
   cat > /tmp/mnt/root/chroot.sh <<- EOF
 !/bin/bash
 source /etc/profile
+DEBIAN_FRONTEND=noninteractive apt-get -yq remove dropbear-initramfs
 DEBIAN_FRONTEND=noninteractive apt-get -yq install tinysshd
 EOF
   chroot /tmp/mnt/root /chroot.sh;
@@ -75,10 +76,9 @@ fi;
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 source /etc/profile
-update-initramfs -u
 grub-install ${DRIVE_ROOT}
 update-grub
-update-initramfs -u
+update-initramfs -u -k all
 EOF
 #grub-mkconfig -o /boot/grub/grub.cfg
 chroot /tmp/mnt/root /chroot.sh;
