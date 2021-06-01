@@ -11,7 +11,10 @@ function runCmd {
 	  logLine "Failed Command: $@";
     return 1;
   else
-    logDebug "Executed $@ Output: ${RESULT}";
+    if [ ! -z "${RESULT}" ]; then
+      logDebug "Executed $@ Output: ${RESULT}";
+    fi;
+    
     return 0;
   fi;
 }
