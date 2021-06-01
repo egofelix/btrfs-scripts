@@ -55,8 +55,8 @@ EOF
 
   # Install TinySSH Hook
   mkdir -p /tmp/mnt/root/etc/initramfs-tools/hooks/ /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/ /tmp/mnt/root/etc/tinyssh-initramfs/
-  cp "${BASH_SOURCE%/*}/tinyssh.hook" /tmp/mnt/root/etc/initramfs-tools/hooks/tinyssh
-  cp "${BASH_SOURCE%/*}/tinyssh.premount" /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/tinyssh
+  cp "${BASH_SOURCE%/*}/tinyssh.hook.sh" /tmp/mnt/root/etc/initramfs-tools/hooks/tinyssh
+  cp "${BASH_SOURCE%/*}/tinyssh.premount.sh" /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/tinyssh
   cp "${BASH_SOURCE%/*}/tinyssh.config" /tmp/mnt/root/etc/tinyssh-initramfs/config
 fi;
 
