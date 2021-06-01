@@ -12,13 +12,13 @@ else
       cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 source /etc/profile
-DEBIAN_FRONTEND=noninteractive apt-get -yq install linux-image-amd64 grub2 efibootmgr
+DEBIAN_FRONTEND=noninteractive apt-get -yq install linux-image-amd64 grub-efi efibootmgr
 EOF
     else
       cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 source /etc/profile
-DEBIAN_FRONTEND=noninteractive apt-get -yq install linux-image-amd64 grub2 efibootmgr
+DEBIAN_FRONTEND=noninteractive apt-get -yq install linux-image-amd64 grub-pc efibootmgr
 EOF
     fi;
   else
