@@ -41,11 +41,6 @@ copy_openssh_keys() {
 
     local return_code=1
 
-    if [ ! -x /usr/local/bin/tinyssh-convert ];then
-	echo "tinyssh-convert script missing"
-	exit 1
-    fi
-
     if [ ! -d $destdir -a -x /usr/bin/tinyssh-convert ]; then
 	mkdir $destdir
     fi
@@ -78,6 +73,7 @@ display_fingerprints() {
 
 
 copy_exec /usr/sbin/tinysshd /sbin
+copy_exec /usr/bin/tcpsvd /bin
 LIBC_DIR=$(ldd /usr/sbin/tinysshd | sed -nr 's#.* => (/lib.*)/libc\.so\.[0-9.-]+ \(0x[[:xdigit:]]+\)$#\1#p')
 find -L "$LIBC_DIR" -maxdepth 1 -name 'libnss_files.*' -type f | while read so; do
     copy_exec "$so"

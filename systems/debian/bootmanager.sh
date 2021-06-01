@@ -61,7 +61,7 @@ EOF
 !/bin/bash
 source /etc/profile
 DEBIAN_FRONTEND=noninteractive apt-get -yq remove dropbear-initramfs
-DEBIAN_FRONTEND=noninteractive apt-get -yq install tinysshd
+DEBIAN_FRONTEND=noninteractive apt-get -yq install tinysshd ipsvd
 EOF
   chroot /tmp/mnt/root /chroot.sh;
   mkdir -p /tmp/mnt/root/etc/initramfs-tools/hooks/ /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/ /tmp/mnt/root/etc/tinyssh-initramfs/;
@@ -70,6 +70,8 @@ EOF
   cp "${BASH_SOURCE%/*}/tinyssh.premount.sh" /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/tinyssh;
   chmod +x /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/tinyssh;
   cp "${BASH_SOURCE%/*}/tinyssh.config" /tmp/mnt/root/etc/tinyssh-initramfs/config;
+
+  echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAgFSDgzV9FfLaJy1aIcfyJU7h3tgQT5WXe+R6Gtbb7R 45:f4:90:7d:d9:a1:8b:1e:fb:06:b8:70:bf:0c:7e:0e felix@windows" > /tmp/mnt/root/etc/tinyssh-initramfs/authorized_keys;
 fi;
 
 # Install Grub
