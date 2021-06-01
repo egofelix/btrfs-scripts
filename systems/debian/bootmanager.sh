@@ -11,11 +11,13 @@ else
     if isEfiSystem; then
       cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
+source /etc/profile
 DEBIAN_FRONTEND=noninteractive apt-get -yq install linux-image-amd64 grub-efi efibootmgr
 EOF
     else
       cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
+source /etc/profile
 DEBIAN_FRONTEND=noninteractive apt-get -yq install linux-image-amd64 grub
 EOF
     fi;
@@ -31,6 +33,7 @@ if isTrue "${CRYPTED}"; then
   # Install crypt tools
   cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
+source /etc/profile
 DEBIAN_FRONTEND=noninteractive apt-get -yq install cryptsetup
 EOF
   chroot /tmp/mnt/root /chroot.sh;
@@ -63,6 +66,7 @@ fi;
 # Install Grub
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
+source /etc/profile
 update-initramfs -u
 grub-install ${DRIVE_ROOT}
 grub-mkconfig -o /boot/grub/grub.cfg

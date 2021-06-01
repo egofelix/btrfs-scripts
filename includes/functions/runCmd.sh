@@ -7,7 +7,7 @@ function runCmd {
   RESULTCODE=$?;
 
   if [ ${RESULTCODE} -ne 0 ]; then
-    logLine "Error: ${RESULT}";
+    logDebug "Failed Command: $@ Result: ${RESULT}";
 	  logLine "Failed Command: $@";
     return 1;
   else
