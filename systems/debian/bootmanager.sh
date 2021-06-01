@@ -34,35 +34,35 @@ if isTrue "${CRYPTED}"; then
   cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 source /etc/profile
-DEBIAN_FRONTEND=noninteractive apt-get -yq install cryptsetup
+DEBIAN_FRONTEND=noninteractive apt-get -yq install cryptsetup dropbear-initramfs
 EOF
   chroot /tmp/mnt/root /chroot.sh;
 
   # Append cryptsystem in crypttab
   if [[ -z $(cat /tmp/mnt/root/etc/crypttab | grep 'cryptsystem ') ]]; then
-    echo cryptsystem PARTLABEL=system none luks > /tmp/mnt/root/etc/crypttab
+    echo cryptsystem PARTLABEL=system none luks > /tmp/mnt/root/etc/crypttab;
   fi;
 
   # Setup GRUB_ENABLE_CRYPTODISK=y in /etc/default/grub
   if [[ -z $(cat /tmp/mnt/root/etc/default/grub | grep "^GRUB_ENABLE_CRYPTODISK") ]]; then
-    sed -i "s/#GRUB_ENABLE_CRYPTODISK=y/GRUB_ENABLE_CRYPTODISK=y/g" /tmp/mnt/root/etc/default/grub
+    sed -i "s/#GRUB_ENABLE_CRYPTODISK=y/GRUB_ENABLE_CRYPTODISK=y/g" /tmp/mnt/root/etc/default/grub;
   fi;
   if [[ -z $(cat /tmp/mnt/root/etc/default/grub | grep "^GRUB_ENABLE_CRYPTODISK") ]]; then
-    echo "GRUB_ENABLE_CRYPTODISK=y" >> /tmp/mnt/root/etc/default/grub
+    echo "GRUB_ENABLE_CRYPTODISK=y" >> /tmp/mnt/root/etc/default/grub;
   fi;
 	
   # Setup CMDLINE
   if [[ -z $(cat /tmp/mnt/root/etc/default/grub | grep 'GRUB_CMDLINE_LINUX=\"cryptdevice\=') ]]; then
-    sed -i "s/GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"cryptdevice=PARTLABEL=system:cryptsystem ip=:::::eth0:dhcp\"/g" /tmp/mnt/root/etc/default/grub
+    sed -i "s/GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"cryptdevice=PARTLABEL=system:cryptsystem ip=:::::eth0:dhcp\"/g" /tmp/mnt/root/etc/default/grub;
   fi;
 
   # Install TinySSH Hook
-  mkdir -p /tmp/mnt/root/etc/initramfs-tools/hooks/ /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/ /tmp/mnt/root/etc/tinyssh-initramfs/
-  cp "${BASH_SOURCE%/*}/tinyssh.hook.sh" /tmp/mnt/root/etc/initramfs-tools/hooks/tinyssh
-  chmod +x /tmp/mnt/root/etc/initramfs-tools/hooks/tinyssh
-  cp "${BASH_SOURCE%/*}/tinyssh.premount.sh" /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/tinyssh
-  chmod +x /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/tinyssh
-  cp "${BASH_SOURCE%/*}/tinyssh.config" /tmp/mnt/root/etc/tinyssh-initramfs/config
+  #mkdir -p /tmp/mnt/root/etc/initramfs-tools/hooks/ /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/ /tmp/mnt/root/etc/tinyssh-initramfs/;
+  #cp "${BASH_SOURCE%/*}/tinyssh.hook.sh" /tmp/mnt/root/etc/initramfs-tools/hooks/tinyssh;
+  #chmod +x /tmp/mnt/root/etc/initramfs-tools/hooks/tinyssh;
+  #cp "${BASH_SOURCE%/*}/tinyssh.premount.sh" /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/tinyssh;
+  #chmod +x /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/tinyssh;
+  #cp "${BASH_SOURCE%/*}/tinyssh.config" /tmp/mnt/root/etc/tinyssh-initramfs/config;
 fi;
 
 # Install Grub
