@@ -148,8 +148,8 @@ fi;
 
 if ! runCmd sed -i 's/,subvolid=[0-9]*//g' /tmp/mnt/root/etc/fstab; then logError "Failed to modify fstab"; exit 1; fi;
 
-# Todo: Check if there are more subvol defined
-if runCmd grep -E '\,subvol=[^\/][A-Za-z]+' /etc/fstab
+# Check if there are more subvol defined and remove ones starting with / if so
+if runCmd grep -E '\,subvol=[^\/][A-Za-z]+' /etc/fstab; then
   if ! runCmd sed -i 's/,subvol=\/[^,]*//g' /tmp/mnt/root/etc/fstab; then logError "Failed to modify fstab"; exit 1; fi;
 fi;
 
