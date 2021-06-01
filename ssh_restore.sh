@@ -23,7 +23,7 @@ while [[ "$#" -gt 0 ]]; do
 	  --test) ISTEST="true"; ;;
 	  -h|--help) 
 	    SELFNAME=$(basename $BASH_SOURCE) 
-	    echo "Usage: ${SELFNAME} [-q|--quiet] [-t|--target <targetdrive>] [-n|--name <clientname>] [-s|--snapshot <snapshot>] [--test] [-nc|--nocrypt] [--source ssh://user@host:port]";
+	    echo "Usage: ${SELFNAME} [-q|--quiet] [-t|--target <targetdrive>] [-n|--name <clientname>] [-s|--snapshot <snapshot> [<volume>] [<targetvolume>]] [--test] [-nc|--nocrypt] [--source ssh://user@host:port]";
 	    echo "";
 	    echo "    ${SELFNAME}";
 	    echo "      Automatic restore.";
@@ -39,6 +39,13 @@ while [[ "$#" -gt 0 ]]; do
 	    echo "";
 	    echo "    ${SELFNAME} --snapshot 2020-12-23_12-03-26";
 	    echo "      Restore snapshot with name 2020-12-23_12-03-26.";
+
+      echo "    ${SELFNAME} --snapshot 2020-12-23_12-03-26 srv-data";
+	    echo "      Restore snapshot with name 2020-12-23_12-03-26. Only restores srv-data with local name srv-data";
+
+      echo "    ${SELFNAME} --snapshot 2020-12-23_12-03-26 srv-data srv-new-data";
+	    echo "      Restore snapshot with name 2020-12-23_12-03-26. Only restores srv-data with local name srv-new-data";
+
 	    echo "";
 	    echo "    ${SELFNAME} --test";
 	    echo "      Test if latest snapshot exists for every volume.";
