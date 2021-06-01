@@ -56,13 +56,19 @@ EOF
     sed -i "s/GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"cryptdevice=PARTLABEL=system:cryptsystem ip=:::::eth0:dhcp\"/g" /tmp/mnt/root/etc/default/grub;
   fi;
 
-  # Install TinySSH Hook
-  #mkdir -p /tmp/mnt/root/etc/initramfs-tools/hooks/ /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/ /tmp/mnt/root/etc/tinyssh-initramfs/;
-  #cp "${BASH_SOURCE%/*}/tinyssh.hook.sh" /tmp/mnt/root/etc/initramfs-tools/hooks/tinyssh;
-  #chmod +x /tmp/mnt/root/etc/initramfs-tools/hooks/tinyssh;
-  #cp "${BASH_SOURCE%/*}/tinyssh.premount.sh" /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/tinyssh;
-  #chmod +x /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/tinyssh;
-  #cp "${BASH_SOURCE%/*}/tinyssh.config" /tmp/mnt/root/etc/tinyssh-initramfs/config;
+  # Install TinySSH
+  cat > /tmp/mnt/root/chroot.sh <<- EOF
+!/bin/bash
+source /etc/profile
+DEBIAN_FRONTEND=noninteractive apt-get -yq install tinysshd
+EOF
+  chroot /tmp/mnt/root /chroot.sh;
+  mkdir -p /tmp/mnt/root/etc/initramfs-tools/hooks/ /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/ /tmp/mnt/root/etc/tinyssh-initramfs/;
+  cp "${BASH_SOURCE%/*}/tinyssh.hook.sh" /tmp/mnt/root/etc/initramfs-tools/hooks/tinyssh;
+  chmod +x /tmp/mnt/root/etc/initramfs-tools/hooks/tinyssh;
+  cp "${BASH_SOURCE%/*}/tinyssh.premount.sh" /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/tinyssh;
+  chmod +x /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/tinyssh;
+  cp "${BASH_SOURCE%/*}/tinyssh.config" /tmp/mnt/root/etc/tinyssh-initramfs/config;
 fi;
 
 # Install Grub
@@ -72,6 +78,7 @@ source /etc/profile
 update-initramfs -u
 grub-install ${DRIVE_ROOT}
 update-grub
+update-initramfs -u
 EOF
 #grub-mkconfig -o /boot/grub/grub.cfg
 chroot /tmp/mnt/root /chroot.sh;
