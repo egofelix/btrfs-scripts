@@ -52,8 +52,8 @@ EOF
   fi;
 
   # Enable hyperv_keyboard in /etc/initramfs-tools/modules
-  if [[ -z $(cat /etc/initramfs-tools/modules | grep "^hyperv_keyboard$") ]]; then
-    echo "^hyperv_keyboard$" >> /etc/initramfs-tools/modules;
+  if [[ -z $(cat /tmp/mnt/root/etc/initramfs-tools/modules | grep "^hyperv_keyboard$") ]]; then
+    echo "^hyperv_keyboard$" >> /tmp/mnt/root/etc/initramfs-tools/modules;
   fi;
 	
   # Setup CMDLINE
