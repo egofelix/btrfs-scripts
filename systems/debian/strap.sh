@@ -1,5 +1,5 @@
 #!/bin/bash
-if ! runCmd debootstrap stable /tmp/mnt/root; then
+if ! runCmd debootstrap stable /tmp/mnt/root http://debian.egofelix.de/; then
   # Guess arch
   if [[ $(getSystemType) = "AMD64" ]]; then
     ARCH="amd64"
@@ -8,7 +8,7 @@ if ! runCmd debootstrap stable /tmp/mnt/root; then
   fi;
 
   
-  if ! runCmd debootstrap --arch $ARCH stable /tmp/mnt/root; then
+  if ! runCmd debootstrap --arch $ARCH stable /tmp/mnt/root http://debian.egofelix.de/; then
     logError "Failed to install Base-System"; exit 1;
   fi;
 fi;
