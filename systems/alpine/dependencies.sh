@@ -46,7 +46,14 @@ fi;
 # Install genfstab
 if ! which genfstab &> /dev/null; then
   logDebug "Installing dependency arch-install-scripts";
-  if ! runCmd apk add arch-install-scripts; then logError "Failed to install dependency arch-install-scripts"; exit 1; fi;
+  if ! runCmd apk add arch-install-scripts; then
+    cat /etc/apk/repositories | grep -E '\/main$' | sed 's:/main:/community:g' >> /etc/apk/repositories
+    runCmd apk update
+
+    if ! runCmd apk add arch-install-scripts; then
+      logError "Failed to install dependency arch-install-scripts"; exit 1; 
+    fi;
+  fi;
 fi;
 
 # Install xargs
