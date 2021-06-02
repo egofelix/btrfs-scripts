@@ -28,6 +28,9 @@ while [[ "$#" -gt 0 ]]; do
 	  -h|--help) 
       # Print command list here
       echo "PRint help here"; exit 0;;
+    -*)
+      echo "Unknown Argument: $1";
+      echo "PRint help here"; exit 1;;
     *)
       COMMAND="${1}";
       break;;
