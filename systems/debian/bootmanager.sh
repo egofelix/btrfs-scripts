@@ -67,7 +67,7 @@ EOF
   cat > /tmp/mnt/root/chroot.sh <<- EOF
 !/bin/bash
 source /etc/profile
-#DEBIAN_FRONTEND=noninteractive apt-get -yq remove dropbear-initramfs
+DEBIAN_FRONTEND=noninteractive apt-get -yq remove dropbear-initramfs
 DEBIAN_FRONTEND=noninteractive apt-get -yq install tinysshd ipsvd
 systemctl disable tinysshd.socket
 EOF
