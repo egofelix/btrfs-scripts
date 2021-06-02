@@ -29,19 +29,17 @@ while [[ "$#" -gt 0 ]]; do
       # Print command list here
       echo "PRint help here"; exit 0;;
     *)
-      if [[ -z "${COMMAND}" ]]; then
-        COMMAND="${1}";
-      else
-        echo "unknown argument: ${1}."; exit 1;
-      fi;;
+      COMMAND="${1}";
+      break;;
   esac
   shift
 done
 
-
-
-echo "${COMMAND:-}";
-exit 0;
+case ${COMMAND,,} in
+  drive) echo "DriveCommand";;
+  snapshot) echo "SnapShotCommand";;
+  *) echo "Unknown Command: ${COMMAND}"; exit 1;;
+esac
 
 # Scan arguments
 while [[ "$#" -gt 0 ]]; do
