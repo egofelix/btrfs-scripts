@@ -29,7 +29,7 @@ while [[ "$#" -gt 0 ]]; do
       # Print command list here
       echo "PRint help here"; exit 0;;
     *)
-      if [ -z "${COMMAND}"]; then
+      if [[ -z "${COMMAND}" ]]; then
         COMMAND="${1}";
       else
         echo "unknown argument: ${1}."; exit 1;
