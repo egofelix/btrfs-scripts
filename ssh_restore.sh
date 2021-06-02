@@ -18,6 +18,7 @@ source "${BASH_SOURCE%/*}/includes/defaults.sh";
 # /ssh_restore.sh [-q|--quiet] [-n|--name <clienthostname>] [-s|--source ssh://user@host:port] snapshot [--target <targetvolume>] [-s|--snapshot <snapshot>] [--test] <volume>
 
 # Scan arguments & command
+COMMAND=""
 while [[ "$#" -gt 0 ]]; do
   case $1 in
     --debug) DEBUG="true"; ;;
@@ -27,12 +28,17 @@ while [[ "$#" -gt 0 ]]; do
 	  -h|--help) 
       # Print command list here
       echo "PRint help here"; exit 0;;
-    *) 
-      COMMAND="${1}";
-      break;;
+    *)
+      if [ -z "${COMMAND}"]; then
+        COMMAND="${1}";
+      else
+        echo "unknown argument: ${1}."; exit 1;;
+      fi;
   esac
   shift
 done
+
+
 
 echo "${COMMAND:-}";
 exit 0;
