@@ -32,8 +32,8 @@ while [[ "$#" -gt 0 ]]; do
       if [ -z "${COMMAND}"]; then
         COMMAND="${1}";
       else
-        echo "unknown argument: ${1}."; exit 1;;
-      fi;
+        echo "unknown argument: ${1}."; exit 1;
+      fi;;
   esac
   shift
 done
