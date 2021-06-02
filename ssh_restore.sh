@@ -9,6 +9,34 @@ source "${BASH_SOURCE%/*}/includes/functions.sh";
 # Load Variables
 source "${BASH_SOURCE%/*}/includes/defaults.sh";
 
+# /ssh_restore.sh [-q|--quiet] [-n|--name <clienthostname>] [-s|--source ssh://user@host:port] <command>
+    
+# Command drive
+# /ssh_restore.sh [-q|--quiet] [-n|--name <clienthostname>] [-s|--source ssh://user@host:port] drive [--target <targetdrive>] [-s|--snapshot <snapshot>] [-nc|--nocrypt] [--test]
+
+# Command snapshot
+# /ssh_restore.sh [-q|--quiet] [-n|--name <clienthostname>] [-s|--source ssh://user@host:port] snapshot [--target <targetvolume>] [-s|--snapshot <snapshot>] [--test] <volume>
+
+# Scan arguments & command
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    --debug) DEBUG="true"; ;;
+    -q|--quiet) QUIET="true"; QUIETPS=" &>/dev/null"; ;;
+	  -n|--name) CLIENTHOSTNAME="$2"; shift ;;
+	  -s|--source) SSH_URI="$2"; shift ;;
+	  -h|--help) 
+      # Print command list here
+      echo "PRint help here"; exit 0;;
+    *) 
+      COMMAND="${1}";
+      break;;
+  esac
+  shift
+done
+
+echo "${COMMAND:-}";
+exit 0;
+
 # Scan arguments
 while [[ "$#" -gt 0 ]]; do
   case $1 in
@@ -22,8 +50,16 @@ while [[ "$#" -gt 0 ]]; do
 	  --ssh-accept-key) SSH_INSECURE="TRUE"; ;;
 	  --test) ISTEST="true"; ;;
 	  -h|--help) 
+    # /ssh_restore.sh [-q|--quiet] [-n|--name <clienthostname>] [-s|--source ssh://user@host:port] <command>
+    
+    # Command drive
+    # /ssh_restore.sh [-q|--quiet] [-n|--name <clienthostname>] [-s|--source ssh://user@host:port] drive [--target <targetdrive>] [-s|--snapshot <snapshot>] [-nc|--nocrypt] [--test]
+
+    # Command snapshot
+    # /ssh_restore.sh [-q|--quiet] [-n|--name <clienthostname>] [-s|--source ssh://user@host:port] snapshot [--target <targetvolume>] [-s|--snapshot <snapshot>] [--test] <volume>
+
 	    SELFNAME=$(basename $BASH_SOURCE) 
-	    echo "Usage: ${SELFNAME} [-q|--quiet] [-t|--target <targetdrive>] [-n|--name <clientname>] [-s|--snapshot <snapshot> [<volume>] [<targetvolume>]] [--test] [-nc|--nocrypt] [--source ssh://user@host:port]";
+	    echo "Usage: ${SELFNAME} [-q|--quiet] [-t|--target <targetdrive>] [-n|--name <clientname>] [-s|--snapshot <snapshot> [<volume>] [<targetvolume>]] [--test] [-nc|--nocrypt] ";
 	    echo "";
 	    echo "    ${SELFNAME}";
 	    echo "      Automatic restore.";
