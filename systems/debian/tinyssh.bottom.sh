@@ -16,4 +16,3 @@ esac
 . /scripts/functions
 
 /bin/killall tcpsvd
-/bin/killall tinysshd
