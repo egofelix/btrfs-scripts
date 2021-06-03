@@ -2,7 +2,7 @@
 # Command manager
 # /manager.sh [-q|--quiet] [-n|--name <clienthostname>] [-s|--server ssh://user@host:port] receiver
 # Command receiver
-# [-t|--target <snapshotvolume>] -c|--command <command>
+# --username <username> <receiver-command>
 function printReceiverHelp() {
     echo "TODO";
     echo "Usage: ${ENTRY_SCRIPT} [-q|--quiet] ${ENTRY_COMMAND} [-t|--target <snapshotvolume>] <receiver-command>";
@@ -10,57 +10,44 @@ function printReceiverHelp() {
     echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND} --target /.backups/user test";
     echo "      Returns success if the receiver works.";
     echo "";
+    
+    echo "";
+    echo "Possible commands are:";
+    printCommandLineProxyHelp --command-path "${BASH_SOURCE}";
     exit 0;
 }
 
 function receiver() {
     # Scan Arguments
-    local SNAPSHOTVOLUME="";
+    #local SNAPSHOTVOLUME="";
+    local USERNAME="";
     local RECEIVER_COMMAND="";
     while [[ "$#" -gt 0 ]]; do
         case $1 in
-            -t|--target) SNAPSHOTVOLUME="$2"; shift;;
+            -u|--username) USERNAME="$2"; shift;;
             -h|--help) printReceiverHelp; exit 0;;
-            -*) logError "Unknown Argument: $1"; printManagerHelp; exit 1;;
+            -*) logError "Unknown Argument: $1"; printReceiverHelp; exit 1;;
             *) RECEIVER_COMMAND="${1}"; shift; break;;
         esac;
         shift;
     done;
     
+    # Debug Variables
+    logFunction "receiver#arguments --username \`${USERNAME}\` \`${RECEIVER_COMMAND}\`";
+    
+    # Validate
     if [[ -z "${RECEIVER_COMMAND}" ]]; then
         logError "No command specified";
-        printManagerHelp;
+        printReceiverHelp;
         exit 1;
     fi;
     
-    # Debug Variables
-    logFunction "receiver#arguments --target \`${SNAPSHOTVOLUME}\` \`${RECEIVER_COMMAND}\`";
-    
-    # Auto Detect SNAPSHOTVOLUME
-    loadFunction autodetect-snapshotvolume;
-    autodetect-snapshotvolume;
-    
-    # Debug
-    logFunction "receiver#expandedArguments --target \`${SNAPSHOTVOLUME}\` \`${RECEIVER_COMMAND}\`";
+    if [[ -z "${USERNAME}" ]]; then logError "<username> cannot be empty"; exit 1; fi;
+    if containsIllegalCharacter "${USERNAME}"; then logError "Illegal character detected in <username> \"${USERNAME}\"."; return 1; fi;
     
     # Proxy
-    loadFunction commandLineProxy;
-    if ! commandLineProxy --command-name "receiver-command" --command-value "${RECEIVER_COMMAND:-}" --command-path "${BASH_SOURCE}"; then printReceiverHelp; exit 1; fi;
+    if ! commandLineProxy --command-name "receiver-command" --command-value "${RECEIVER_COMMAND:-}" --command-path "${BASH_SOURCE}" $@; then printReceiverHelp; exit 1; fi;
     exit 0;
-    
-    # Command create-volume
-    if [[ "${RECEIVER_COMMAND,,}" = "create-volume" ]]; then
-        # Test <volume> parameter
-        VOLUME=$(LC_ALL=C echo "${COMMAND}" | awk '{print $2}');
-        if [[ -z "${VOLUME}" ]]; then logError "Usage: create-volume <volume>"; exit 1; fi;
-        
-        # Aquire lock
-        source "${BASH_SOURCE%/*}/includes/lockfile.sh";
-        
-        # Create directory
-        if ! runCmd mkdir -p ${SNAPSHOTSPATH}/${VOLUME}; then logError "Failed to create volume directory."; exit 1; fi;
-        echo "success"; exit 0;
-    fi;
     
     # Command check-volume
     if [[ "${COMMAND_NAME,,}" = "check-volume" ]]; then

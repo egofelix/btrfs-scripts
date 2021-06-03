@@ -4,7 +4,6 @@ export LOCKFD=-1;
 
 function createLockFile() {
     # Scan Arguments
-    logFunction "createLockFile#Scanning Arguments";
     local LOCKFILE="";
     while [[ "$#" -gt 0 ]]; do
         case $1 in

@@ -32,3 +32,11 @@ function logVerbose {
 function logError {
     echo -en "\033[01;31m" && echo -n "[ERROR] $@" && echo -e "\e[0m";
 }
+
+function printUsage {
+    while [[ "$#" -gt 0 ]]; do
+        echo -en "\033[04;92m" && echo -n "${1}" && echo -en "\e[0m ";
+        shift;
+    done;
+    echo "";
+}

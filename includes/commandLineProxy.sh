@@ -50,3 +50,49 @@ function commandLineProxy {
     source "${COMMAND_SCRIPT}";
     return 0;
 }
+
+#printCommandLineProxyHelp --command-path <command-path> args
+function printCommandLineProxyHelp {
+    # Scan Arguments
+    local COMMAND_PATH="";
+    
+    while [[ "$#" -gt 0 ]]; do
+        case $1 in
+            --command-path) COMMAND_PATH="$2"; shift;;
+            *) logError "Unknown Argument: $1"; exit 1;;
+        esac;
+        shift;
+    done;
+    
+    # Debug Variables
+    logFunction "printCommandLineProxyHelp#arguments --command-path \"${COMMAND_PATH}\" $@";
+    
+    # Validate Variables
+    if isEmpty "${COMMAND_PATH}"; then logError "<command-path> must be provided."; exit 1; fi;
+    
+    # Check if subcommand exists
+    if [ -f "${COMMAND_PATH}" ]; then
+        # via router
+        local ROUTER=$(basename $COMMAND_PATH);
+        local ROUTERNAME="${ROUTER%.*}";
+        local ROUTERNAMELEN=${#ROUTERNAME};
+        local F="";
+        for F in $(LC_ALL=C ls "${COMMAND_PATH%/*}" | sort); do
+            if [[ "${F}" == "${ROUTERNAME}.sh" ]]; then continue; fi;
+            if [[ "${F}" == "${ROUTERNAME}."* ]]; then
+                F=${F%.*};
+                F=${F:${ROUTERNAMELEN}};
+                F=${F:1};
+                echo "- ${F}";
+            fi;
+        done;
+    else
+        # via entry
+        local F="";
+        for F in $(LC_ALL=C ls "${COMMAND_PATH%.*}" | sort); do
+            if containsIllegalCharacter "${F%.*}"; then continue; fi;
+            echo "- ${F%.*}";
+        done;
+    fi;
+    
+}

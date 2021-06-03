@@ -19,3 +19,10 @@ function runCmd {
         return 0;
     fi;
 }
+
+function ensureRoot {
+    # Force root
+    if [[ "${EUID:-}" -ne 0 ]]; then
+        logError "Please run as root"; exit 1;
+    fi;
+}

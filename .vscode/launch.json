@@ -3,7 +3,48 @@
         {
             "type": "bashdb",
             "request": "launch",
-            "name": "receiver --command test",
+            "name": "--help",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/manager.sh",
+            "args": [
+                "--debug",
+                "--help"
+            ],
+            "terminalKind": "integrated"
+        },
+        {
+            "type": "bashdb",
+            "request": "launch",
+            "name": "receiver --help",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/manager.sh",
+            "args": [
+                "--debug",
+                "receiver",
+                "--help"
+            ],
+            "terminalKind": "integrated"
+        },
+        {
+            "type": "bashdb",
+            "request": "launch",
+            "name": "receiver create-volume haha-data",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/manager.sh",
+            "args": [
+                "--debug",
+                "receiver",
+                "--username",
+                "testUser",
+                "create-volume",
+                "testVolume"
+            ],
+            "terminalKind": "integrated"
+        },
+        {
+            "type": "bashdb",
+            "request": "launch",
+            "name": "receiver test",
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/manager.sh",
             "args": [

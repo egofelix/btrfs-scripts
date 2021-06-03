@@ -2,7 +2,7 @@
 
 # serverDetect [--hostname "<hostname>"] [--uri "<uri>"]
 # Sets: SSH_CALL, SSH_USERNAME, SSH_HOSTNAME, SSH_PORT
-function serverDetect {
+function autodetect-server {
     if [[ ! -z "${SSH_CALL:-}" ]]; then
         logDebug "Skipping serverDetect, using Cache...";
         return 0;
