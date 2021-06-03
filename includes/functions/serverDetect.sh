@@ -99,18 +99,37 @@ function createSnapshot {
 }
 
 createSnapshot $@;
-exit 0;fi;
-TESTRESULT=$(${SSH_CALL} "testReceiver")
-if [[ $? -ne 0 ]]; then
-    # Test ssh without key (User auth)
-    if isTrue ${SSH_INSECURE}; then
-        export SSH_CALL="ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+exit 0;    if [[ ${SSH_HOSTNAME} = *:* ]]; then
+        export SSH_PORT=$(echo ${SSH_HOSTNAME} | cut -d':' -f2)
+        export SSH_HOSTNAME=$(echo ${SSH_HOSTNAME} | cut -d':' -f1)
     else
-        export SSH_CALL="ssh -o PasswordAuthentication=no -o VerifyHostKeyDNS=yes -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+        export SSH_PORT="22"
     fi;
-    TESTRESULT=$(${SSH_CALL} "testReceiver")
+    
+    
+    # Test SSH
+    logDebug "Testing ssh access: ${SSH_USERNAME}@${SSH_HOSTNAME}:${SSH_PORT}...";
+    
+    # Try with local key
+    if isTrue ${SSH_ACCEPT_NEW_HOSTKEY:-}; then
+        export SSH_CALL="ssh -o IdentityFile=/etc/ssh/ssh_host_ed25519_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+    else
+        export SSH_CALL="ssh -o IdentityFile=/etc/ssh/ssh_host_ed25519_key -o IdentitiesOnly=yes -o VerifyHostKeyDNS=yes -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+    fi;
+    local TESTRESULT=$(${SSH_CALL} "testReceiver")
     if [[ $? -ne 0 ]]; then
-        logError "Cannot connect to ${SSH_URI}";
-        exit 1;
+        # Test ssh without key (User auth)
+        if isTrue ${SSH_INSECURE}; then
+            export SSH_CALL="ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+        else
+            export SSH_CALL="ssh -o PasswordAuthentication=no -o VerifyHostKeyDNS=yes -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+        fi;
+        TESTRESULT=$(${SSH_CALL} "testReceiver")
+        if [[ $? -ne 0 ]]; then
+            logError "Cannot connect to ${SSH_URI}";
+            exit 1;
+        fi;
     fi;
-fi;
+    
+    logSuccess "Discovered Server: ${SSH_USERNAME}@${SSH_HOSTNAME}:${SSH_PORT}";
+}

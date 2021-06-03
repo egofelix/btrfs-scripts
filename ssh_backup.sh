@@ -1,109 +1,105 @@
-#!/bin/bash
-set -uo pipefail;
+# Command manager
+# /manager.sh [-q|--quiet] [-n|--name <clienthostname>] [-s|--server ssh://user@host:port] create-snapshot
+# Command create-snapshot
+# [-v|--volume <volume>] [-t|--target <snapshotvolume>]
+function printCreateSnapshotHelp {
+    echo "Usage: ${ENTRY_SCRIPT} [-q|--quiet] ${ENTRY_COMMAND} [-t|--target <snapshotvolume>] [-v|--volume <volume>]";
+    echo "";
+    echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND}";
+    echo "      Create snapshots of every mounted volume.";
+    echo "";
+    echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND} --target /.snapshots";
+    echo "      Create snapshots of every mounted volume in \"/.snapshorts\".";
+    echo "";
+    echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND} --volume root-data --volume usr-data";
+    echo "      Create a snapshot of volumes root-data and usr-data.";
+    echo "";
+    echo "If you ommit the <targetdirectory> then the script will try to locate it with the subvolume name @snapshots.";
+    echo "";
+}
+function createSnapshot {
+    # Scan Arguments
+    local SNAPSHOTVOLUME="";
+    local VOLUMES="";
+    while [[ "$#" -gt 0 ]]; do
+        case $1 in
+            -t|--target) SNAPSHOTVOLUME="$2"; shift;;
+            -v|--volume) if [[ -z ${VOLUMES} ]]; then VOLUMES="$2"; else VOLUMES="${VOLUMES} $2"; fi; shift ;;
+            #-v|--volume) VOLUMES="$2"; shift;;
+            -h|--help) printCreateSnapshotHelp; exit 0;;
+            *) logError "Unknown Argument: $1"; exit 1;;
+        esac;
+        shift;
+    done;
+    
+    # Debug Variables
+    logFunction "createSnapshot#arguments --target \`${SNAPSHOTVOLUME}\` --volume \`${VOLUMES}\`";
+    
+    # Lockfile (Only one simultan instance is allowed)
+    stopIfNotElevated;
+    loadFunction "createLockFile"
+    if ! createLockFile; then logError "Failed to lock lockfile. Maybe another action is running already?"; exit 1; fi;
+    logDebug "Lock-File created";
+    
+    # Auto Detect SNAPSHOTVOLUME and VOLUMES
+    loadFunction autodetect-snapshotvolume autodetect-volumes;
+    autodetect-snapshotvolume;
+    autodetect-volumes;
+    
+    # Debug
+    logFunction "createSnapshot#expandedArguments --target \`${SNAPSHOTVOLUME}\` --volume \`$(echo ${VOLUMES})\`";
+    
+    # Test if VOLUMES are btrfs subvol's
+    local VOLUME;
+    for VOLUME in ${VOLUMES}
+    do
+        VOLUME=$(removeLeadingChar "${VOLUME}" "/");
+        if [[ -z "${VOLUME}" ]]; then continue; fi;
+        if [[ "${VOLUME}" = "@"* ]]; then continue; fi;
+        
+        logDebug "Testing btrfs on VOLUME: ${VOLUME}";
+        if isEmpty $(LC_ALL=C mount | grep -P "[\(\,](subvol\=[/]{0,1}${VOLUME})[\)\,]" | grep 'type btrfs'); then logError "Source \"${VOLUME}\" could not be found."; exit 1; fi;
+    done;
+    
+    # Current time
+    local STAMP=$(date -u +"%Y-%m-%d_%H-%M-%S");
+    
+    # Backup
+    logLine "Target Directory: ${SNAPSHOTVOLUME}";
+    for VOLUME in ${VOLUMES}
+    do
+        VOLUME=$(removeLeadingChar "${VOLUME}" "/");
+        if [[ -z "${VOLUME}" ]]; then continue; fi;
+        if [[ "${VOLUME}" = "@"* ]]; then logDebug "Skipping Volume ${VOLUME}"; continue; fi;
+        
+        # Find the first mountpoint for the volume
+        VOLUMEMOUNTPOINT=$(LC_ALL=C mount | grep -P "[\(\,](subvol\=[/]{0,1}${VOLUME})[\)\,]" | grep -o -P 'on(\s)+[^\s]*' | awk '{print $2}' | head -1);
+        
+        # Create Directory for this volume
+        if [[ ! -d "${SNAPSHOTVOLUME}/${VOLUME}" ]]; then
+            if ! runCmd mkdir -p ${SNAPSHOTVOLUME}/${VOLUME}; then logError "Failed to create directory ${SNAPSHOTVOLUME}/${VOLUME}."; exit 1; fi;
+        fi;
+        
+        # Create Snapshot
+        if [[ -d "${SNAPSHOTVOLUME}/${VOLUME}/${STAMP}" ]]; then
+            logLine "Snapshot already exists. Aborting";
+        else
+            logLine "Creating Snapshot ${SNAPSHOTVOLUME}/${VOLUME}/${STAMP}";
+            if ! runCmd btrfs subvolume snapshot -r ${VOLUMEMOUNTPOINT} ${SNAPSHOTVOLUME}/${VOLUME}/${STAMP}; then
+                logError "Failed to create snapshot of ${SNAPSHOTVOLUME}/${VOLUME}/${STAMP}";
+                exit 1;
+            fi;
+            logVerbose "Created Snapshot ${SNAPSHOTVOLUME}/${VOLUME}/${STAMP}";
+        fi;
+    done;
+    
+    # Finish
+    sync;
+    logLine "Snapshots done.";
+}
 
-############### Main Script ################
-
-## Load Functions
-source "${BASH_SOURCE%/*}/includes/functions.sh";
-
-# Load Variables
-source "${BASH_SOURCE%/*}/includes/defaults.sh";
-COMMAND="send";
-VOLUMES="";
-QUIET="false";
-
-# Scan arguments
-while [[ "$#" -gt 0 ]]; do
-  case $1 in
-    -q|--quiet) QUIET="true"; QUIETPS=" &>/dev/null"; ;;
-	--debug) DEBUG="true"; ;;
-    -s|--source) SNAPSHOTSPATH=$(removeTrailingChar "$2" "/"); shift ;;
-	-c|--command) COMMAND="$2"; shift ;;
-	-v|--volume) if [[ -z ${VOLUMES} ]]; then VOLUMES="$2"; else VOLUMES="${VOLUMES} $2"; fi; shift ;;
-	-t|--target) SSH_URI="$2"; shift ;;
-	--ssh-accept-key) SSH_INSECURE="TRUE"; ;;
-	-h|--help) 
-	  SELFNAME=$(basename $BASH_SOURCE) 
-	  echo "Usage: ${SELFNAME} [-q|--quiet] [-s|--source <sourcevolume>] [-v|--volume <volume>] [-t|--target <targetserver>] [-c|--command <command>]";
-	  echo "";
-	  echo "    ${SELFNAME}";
-	  echo "      Send Backups to autodetected server.";
-	  echo "";
-	  echo "    ${SELFNAME} -c check-latest --volume root-data";
-	  echo "      Get timestamp of latest backup-volume root-data.";
-	  echo "";
-	  echo "    ${SELFNAME} -t ssh://user@server:port/";
-	  echo "      Send backups to specific server.";
-	  echo "";
-	  echo "Supported commands are: check-latest, send, test";
-	  echo "The default command is: send";
-	  echo "";
-	  echo "If you ommit the <targetserver> then the script will try to locate it via srv-records in dns.";
-	  echo "";
-	  exit 0;
-	  ;;
-    *) echo "unknown parameter passed: ${1}."; exit 1;;
-  esac
-  shift
-done
-
-## Script must be started as root
-if [[ "$EUID" -ne 0 ]]; then logError "Please run as root"; exit 1; fi;
-
-# Search snapshot volume
-if isEmpty "${SNAPSHOTSPATH:-}"; then SNAPSHOTSPATH=$(LANG=C mount | grep '@snapshots' | grep -o 'on /\..* type btrfs' | awk '{print $2}'); fi;
-if isEmpty "${SNAPSHOTSPATH:-}"; then logError "Cannot find snapshot directory"; exit 1; fi;
-
-# Test if SNAPSHOTSPATH is a btrfs subvol
-logDebug "SNAPSHOTSPATH: ${SNAPSHOTSPATH}";
-if isEmpty $(LANG=C mount | grep "${SNAPSHOTSPATH}" | grep 'type btrfs'); then logError "Source \"${SNAPSHOTSPATH}\" must be a btrfs volume"; exit 1; fi;
-
-# Search volumes
-if isEmpty "${VOLUMES:-}"; then VOLUMES=$(LANG=C mount | grep -o -P 'subvol\=[^\s\,\)]*' | awk -F'=' '{print $2}' | sort | uniq); fi;
-if isEmpty "${VOLUMES}"; then logError "Could not detect volumes to backup"; exit 1; fi;
-
-# Test if VOLUMES are btrfs subvol's
-for VOLUME in ${VOLUMES}
-do
-  VOLUME=$(removeLeadingChar "${VOLUME}" "/")
-  if [[ -z "${VOLUME}" ]]; then continue; fi;
-  if [[ "${VOLUME}" = "@"* ]]; then continue; fi;
-  logDebug "Testing VOLUME: ${VOLUME}";
-  if isEmpty $(LANG=C mount | grep -P "[\(\,](subvol\=[/]{0,1}${VOLUME})[\)\,]" | grep 'type btrfs'); then logError "Source \"${VOLUME}\" could not be found."; exit 1; fi;
-done;
-
-# Detect SSH-Server
-source "${BASH_SOURCE%/*}/scripts/ssh_serverdetect.sh"
-
-# Test Command
-if [[ "${COMMAND,,}" = "test" ]]; then logLine "Test passed"; exit 0; fi;
-
-# Lockfile (Only one simultan instance is allowed)
-LOCKFILE="/var/lock/$(basename $BASH_SOURCE)"
-source "${BASH_SOURCE%/*}/includes/lockfile.sh";
-
-# Send Command
-if [[ "${COMMAND,,}" = "send" ]]; then
-  logLine "Source Directory: ${SNAPSHOTSPATH}";
-  for VOLUME in ${VOLUMES}; do
-    # Skip @volumes
-    VOLUME=$(removeLeadingChar "${VOLUME}" "/")
-	if [[ -z "${VOLUME}" ]]; then continue; fi;
-	if [[ "${VOLUME}" = "@"* ]]; then logDebug "Skipping Volume ${VOLUME}"; continue; fi;
-	
-	# Check if there are any snapshots for this volume
-	SNAPSHOTS=$(LANG=C ls ${SNAPSHOTSPATH}/${VOLUME}/)
-	if [[ -z "${SNAPSHOTS}" ]]; then
-       logLine "No snapshots available to transfer for volume \"${VOLUME}\".";
-       continue;
-	fi;
-	
-	#SNAPSHOTCOUNT=$(LANG=C ls ${SNAPSHOTSPATH}/${VOLUME}/ | sort | wc -l)
-	FIRSTSNAPSHOT=$(LANG=C ls ${SNAPSHOTSPATH}/${VOLUME}/ | sort | head -1)
-	OTHERSNAPSHOTS=$(LANG=C ls ${SNAPSHOTSPATH}/${VOLUME}/ | sort | tail -n +2) # Includes last SNAPSHOT
-	LASTSNAPSHOT=$(LANG=C ls ${SNAPSHOTSPATH}/${VOLUME}/ | sort | tail -1)
-	logDebug "FIRSTSNAPSHOT: ${FIRSTSNAPSHOT}";
-	logDebug "LASTSNAPSHOT: ${LASTSNAPSHOT}";
+createSnapshot $@;
+exit 0;	logDebug "LASTSNAPSHOT: ${LASTSNAPSHOT}";
 	logDebug OTHERSNAPSHOTS: $(removeTrailingChar $(echo "${OTHERSNAPSHOTS}" | tr '\n' ',') ',');
 	
 	# Create Directory for this volume on the backup server

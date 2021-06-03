@@ -99,18 +99,4 @@ function createSnapshot {
 }
 
 createSnapshot $@;
-exit 0;fi;
-TESTRESULT=$(${SSH_CALL} "testReceiver")
-if [[ $? -ne 0 ]]; then
-    # Test ssh without key (User auth)
-    if isTrue ${SSH_INSECURE}; then
-        export SSH_CALL="ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
-    else
-        export SSH_CALL="ssh -o PasswordAuthentication=no -o VerifyHostKeyDNS=yes -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
-    fi;
-    TESTRESULT=$(${SSH_CALL} "testReceiver")
-    if [[ $? -ne 0 ]]; then
-        logError "Cannot connect to ${SSH_URI}";
-        exit 1;
-    fi;
-fi;
+exit 0;

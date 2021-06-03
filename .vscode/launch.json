@@ -3,10 +3,41 @@
         {
             "type": "bashdb",
             "request": "launch",
-            "name": "Bash-Debug (hardcoded script name)",
+            "name": "create-snapshot",
             "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/test.sh",
-            "args": [],
+            "program": "${workspaceFolder}/manager.sh",
+            "args": [
+                "--debug",
+                "create-snapshot"
+            ],
+            "terminalKind": "integrated"
+        },
+        {
+            "type": "bashdb",
+            "request": "launch",
+            "name": "send-snapshot",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/manager.sh",
+            "args": [
+                "--debug",
+                "send-snapshot"
+            ],
+            "terminalKind": "integrated"
+        },
+        {
+            "type": "bashdb",
+            "request": "launch",
+            "name": "create-snapshot --volume home-data",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/manager.sh",
+            "args": [
+                "--debug",
+                "--server",
+                "ssh://pluto@jupiter.egofelix.de:22222/",
+                "create-snapshot",
+                "--volume",
+                "home-data"
+            ],
             "terminalKind": "integrated"
         }
     ]
