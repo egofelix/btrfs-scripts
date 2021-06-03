@@ -1,3 +1,4 @@
+#!/bin/bash
 # Command send-snapshot
 # /manager [-q|--quiet] [-n|--name <clienthostname>] [-s|--server ssh://user@host:port] send-snapshot [--target <targetvolume>] [-s|--snapshot <snapshot>] [--test] <volume>
 

@@ -1,3 +1,4 @@
+#!/bin/bash
 # Command manager
 # /manager.sh [-q|--quiet] [-n|--name <clienthostname>] [-s|--server ssh://user@host:port] restore-snapshot
 # Command restore-snapshot

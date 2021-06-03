@@ -3,6 +3,19 @@
         {
             "type": "bashdb",
             "request": "launch",
+            "name": "receiver --command test",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/manager.sh",
+            "args": [
+                "--debug",
+                "receiver",
+                "test"
+            ],
+            "terminalKind": "integrated"
+        },
+        {
+            "type": "bashdb",
+            "request": "launch",
             "name": "create-snapshot",
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/manager.sh",
