@@ -1,105 +1,109 @@
-# Command manager
-# /manager.sh [-q|--quiet] [-n|--name <clienthostname>] [-s|--server ssh://user@host:port] create-snapshot
-# Command create-snapshot
-# [-v|--volume <volume>] [-t|--target <snapshotvolume>]
-function printCreateSnapshotHelp {
-    echo "Usage: ${ENTRY_SCRIPT} [-q|--quiet] ${ENTRY_COMMAND} [-t|--target <snapshotvolume>] [-v|--volume <volume>]";
-    echo "";
-    echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND}";
-    echo "      Create snapshots of every mounted volume.";
-    echo "";
-    echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND} --target /.snapshots";
-    echo "      Create snapshots of every mounted volume in \"/.snapshorts\".";
-    echo "";
-    echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND} --volume root-data --volume usr-data";
-    echo "      Create a snapshot of volumes root-data and usr-data.";
-    echo "";
-    echo "If you ommit the <targetdirectory> then the script will try to locate it with the subvolume name @snapshots.";
-    echo "";
-}
-function createSnapshot {
+#!/bin/bash
+
+# serverDetect [--hostname "<hostname>"] [--uri "<uri>"]
+# Sets: SSH_CALL, SSH_USERNAME, SSH_HOSTNAME, SSH_PORT
+function serverDetect {
+    if [[ ! -z "${SSH_CALL:-}" ]]; then
+        logDebug "Skipping serverDetect, using Cache...";
+        return 0;
+    fi;
+    
     # Scan Arguments
-    local SNAPSHOTVOLUME="";
-    local VOLUMES="";
+    logFunction "serverDetect#Scanning Arguments";
+    local URI="";
+    local HOSTNAME="";
     while [[ "$#" -gt 0 ]]; do
         case $1 in
-            -t|--target) SNAPSHOTVOLUME="$2"; shift;;
-            -v|--volume) if [[ -z ${VOLUMES} ]]; then VOLUMES="$2"; else VOLUMES="${VOLUMES} $2"; fi; shift ;;
-            #-v|--volume) VOLUMES="$2"; shift;;
-            -h|--help) printCreateSnapshotHelp; exit 0;;
-            *) logError "Unknown Argument: $1"; exit 1;;
+            --uri) URI="$2"; shift;;
+            --hostname) HOSTNAME="$2"; shift;;
+            *) logError "serverDetect#Unknown Argument: $1"; return 1;;
         esac;
         shift;
     done;
     
     # Debug Variables
-    logFunction "createSnapshot#arguments --target \`${SNAPSHOTVOLUME}\` --volume \`${VOLUMES}\`";
+    logFunction "serverDetect --uri \"${URI}\" --hostname \"${HOSTNAME}\"";
     
-    # Lockfile (Only one simultan instance is allowed)
-    stopIfNotElevated;
-    loadFunction "createLockFile"
-    if ! createLockFile; then logError "Failed to lock lockfile. Maybe another action is running already?"; exit 1; fi;
-    logDebug "Lock-File created";
+    # Validate Variables
+    if ! isEmpty "${URI:-}"; then
+        if [[ "${URI,,}" != "ssh://"* ]]; then echo "SSH_URI must start with ssh://"; exit 1; fi;
+    fi;
     
-    # Auto Detect SNAPSHOTVOLUME and VOLUMES
-    loadFunction autodetect-snapshotvolume autodetect-volumes;
-    autodetect-snapshotvolume;
-    autodetect-volumes;
-    
-    # Debug
-    logFunction "createSnapshot#expandedArguments --target \`${SNAPSHOTVOLUME}\` --volume \`$(echo ${VOLUMES})\`";
-    
-    # Test if VOLUMES are btrfs subvol's
-    local VOLUME;
-    for VOLUME in ${VOLUMES}
-    do
-        VOLUME=$(removeLeadingChar "${VOLUME}" "/");
-        if [[ -z "${VOLUME}" ]]; then continue; fi;
-        if [[ "${VOLUME}" = "@"* ]]; then continue; fi;
+    # Try autodetect URI
+    if isEmpty "${URI:-}"; then
         
-        logDebug "Testing btrfs on VOLUME: ${VOLUME}";
-        if isEmpty $(LC_ALL=C mount | grep -P "[\(\,](subvol\=[/]{0,1}${VOLUME})[\)\,]" | grep 'type btrfs'); then logError "Source \"${VOLUME}\" could not be found."; exit 1; fi;
-    done;
-    
-    # Current time
-    local STAMP=$(date -u +"%Y-%m-%d_%H-%M-%S");
-    
-    # Backup
-    logLine "Target Directory: ${SNAPSHOTVOLUME}";
-    for VOLUME in ${VOLUMES}
-    do
-        VOLUME=$(removeLeadingChar "${VOLUME}" "/");
-        if [[ -z "${VOLUME}" ]]; then continue; fi;
-        if [[ "${VOLUME}" = "@"* ]]; then logDebug "Skipping Volume ${VOLUME}"; continue; fi;
-        
-        # Find the first mountpoint for the volume
-        VOLUMEMOUNTPOINT=$(LC_ALL=C mount | grep -P "[\(\,](subvol\=[/]{0,1}${VOLUME})[\)\,]" | grep -o -P 'on(\s)+[^\s]*' | awk '{print $2}' | head -1);
-        
-        # Create Directory for this volume
-        if [[ ! -d "${SNAPSHOTVOLUME}/${VOLUME}" ]]; then
-            if ! runCmd mkdir -p ${SNAPSHOTVOLUME}/${VOLUME}; then logError "Failed to create directory ${SNAPSHOTVOLUME}/${VOLUME}."; exit 1; fi;
+        # Get hostname, if none is specified
+        if [[ -z "${HOSTNAME:-}" ]]; then
+            HOSTNAME=$(cat /proc/sys/kernel/hostname)
         fi;
         
-        # Create Snapshot
-        if [[ -d "${SNAPSHOTVOLUME}/${VOLUME}/${STAMP}" ]]; then
-            logLine "Snapshot already exists. Aborting";
-        else
-            logLine "Creating Snapshot ${SNAPSHOTVOLUME}/${VOLUME}/${STAMP}";
-            if ! runCmd btrfs subvolume snapshot -r ${VOLUMEMOUNTPOINT} ${SNAPSHOTVOLUME}/${VOLUME}/${STAMP}; then
-                logError "Failed to create snapshot of ${SNAPSHOTVOLUME}/${VOLUME}/${STAMP}";
-                exit 1;
+        # Message for Debug-User
+        logDebug "serverDetect#Trying autodetection of URI with current hostname: ${HOSTNAME}";
+        
+        local MY_HOSTNAME=$(echo "${HOSTNAME}" | awk -F'.' '{print $1}');
+        export SSH_HOSTNAME="";
+        export SSH_PORT="22";
+        export SSH_USERNAME="${MY_HOSTNAME}";
+        local MY_DOMAIN="";
+        if [[ ${HOSTNAME} = *"."*"."* ]]; then
+            MY_DOMAIN=$(echo "${HOSTNAME}" | cut -d'.' -f2-)
+        fi;
+        
+        # If we didnt detected a domain
+        if [[ -z "${MY_DOMAIN}" ]]; then
+            logDebug "serverDetect#Could not detect Domain from Hostname, trying to detect Domain";
+            
+            # If not try to get the dns server and make a reverse lookup to it
+            local DNSSERVER=$(LC_ALL=C systemd-resolve --status | grep 'Current DNS Server' | grep -o -E '[0-9\.]+')
+            if [[ ! -z "${DNSSERVER}" ]]; then
+                local DNS_HOSTNAME=$(dig @${DNSSERVER} -x ${DNSSERVER} +short)
+                
+                if [[ ! -z "${DNS_HOSTNAME}" ]]; then
+                    # Split
+                    MY_DOMAIN=$(echo "${DNS_HOSTNAME}" | cut -d'.' -f2-)
+                    
+                    # Remove trailing .
+                    MY_DOMAIN="${MY_DOMAIN::-1}"
+                fi;
             fi;
-            logVerbose "Created Snapshot ${SNAPSHOTVOLUME}/${VOLUME}/${STAMP}";
         fi;
-    done;
+        
+        # Debug User Log
+        logDebug "serverDetect#Detected Domain: ${MY_DOMAIN}";
+        
+        # Check DNS Records
+        local HOST_RECORD="_${MY_HOSTNAME}._backup._ssh.${MY_DOMAIN}";
+        local DOMAIN_RECORD="_backup._ssh.${MY_DOMAIN}";
+        local DNS_RESULT=""
+        if ! dnsResolveSrv --hostname ${HOST_RECORD}; then
+            if ! dnsResolveSrv --hostname ${DOMAIN_RECORD}; then
+                logLine "autodetect not possible, consider installing bind-tools";
+                return 1;
+            fi;
+        fi;
+        
+        export SSH_HOSTNAME="${DNS_HOSTNAME}"
+        logLine "Autodetected Backup Server: ${SSH_USERNAME}@${DNS_HOSTNAME}:${DNS_PORT}";
+        export SSH_URI="ssh://${SSH_USERNAME}@${DNS_HOSTNAME}:${DNS_PORT}";
+    fi;
     
-    # Finish
-    sync;
-    logLine "Snapshots done.";
-}
-
-createSnapshot $@;
-exit 0;    if [[ ${SSH_HOSTNAME} = *:* ]]; then
+    # Split SSH-URI
+    if [[ ${SSH_URI} != ssh://* ]]; then
+        logError "Only ssh:// protocol is supported";
+        exit 1;
+    fi;
+    
+    if [[ ${SSH_URI} = *@* ]]; then
+        export SSH_USERNAME=$(echo ${SSH_URI} | cut -d'/' -f3 | cut -d'@' -f1)
+        export SSH_HOSTNAME=$(echo ${SSH_URI} | cut -d'/' -f3 | cut -d'@' -f2)
+    else
+        if [[ -z "${HOSTNAME:-}" ]]; then HOSTNAME=$(cat /proc/sys/kernel/hostname); fi;
+        MY_HOSTNAME=$(echo "${HOSTNAME}" | awk -F'.' '{print $1}')
+        export SSH_USERNAME="${MY_HOSTNAME}"
+        export SSH_HOSTNAME=$(echo ${SSH_URI} | cut -d'/' -f3)
+    fi;
+    
+    if [[ ${SSH_HOSTNAME} = *:* ]]; then
         export SSH_PORT=$(echo ${SSH_HOSTNAME} | cut -d':' -f2)
         export SSH_HOSTNAME=$(echo ${SSH_HOSTNAME} | cut -d':' -f1)
     else
