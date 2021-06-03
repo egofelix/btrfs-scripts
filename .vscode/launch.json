@@ -28,14 +28,14 @@
         {
             "type": "bashdb",
             "request": "launch",
-            "name": "receiver create-volume haha-data",
+            "name": "receiver --target /.backups/test/ create-volume haha-data",
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/manager.sh",
             "args": [
                 "--debug",
                 "receiver",
-                "--username",
-                "testUser",
+                "--target",
+                "/.backups/test/",
                 "create-volume",
                 "testVolume"
             ],

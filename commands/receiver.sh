@@ -5,7 +5,7 @@
 # --username <username> <receiver-command>
 function printReceiverHelp() {
     echo "TODO";
-    echo "Usage: ${ENTRY_SCRIPT} [-q|--quiet] ${ENTRY_COMMAND} [-t|--target <snapshotvolume>] <receiver-command>";
+    echo "Usage: ${ENTRY_SCRIPT} [-q|--quiet] ${ENTRY_COMMAND} -t|--target <backupvolume> <receiver-command>";
     echo "";
     echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND} --target /.backups/user test";
     echo "      Returns success if the receiver works.";
@@ -20,11 +20,12 @@ function printReceiverHelp() {
 function receiver() {
     # Scan Arguments
     #local SNAPSHOTVOLUME="";
-    local USERNAME="";
+    #local USERNAME="";
+    local BACKUPVOLUME="";
     local RECEIVER_COMMAND="";
     while [[ "$#" -gt 0 ]]; do
         case $1 in
-            -u|--username) USERNAME="$2"; shift;;
+            -t|--target) BACKUPVOLUME="$2"; shift;;
             -h|--help) printReceiverHelp; exit 0;;
             -*) logError "Unknown Argument: $1"; printReceiverHelp; exit 1;;
             *) RECEIVER_COMMAND="${1}"; shift; break;;
@@ -33,7 +34,7 @@ function receiver() {
     done;
     
     # Debug Variables
-    logFunction "receiver#arguments --username \`${USERNAME}\` \`${RECEIVER_COMMAND}\`";
+    logFunction "receiver#arguments \`${RECEIVER_COMMAND}\`";
     
     # Validate
     if [[ -z "${RECEIVER_COMMAND}" ]]; then
@@ -42,8 +43,10 @@ function receiver() {
         exit 1;
     fi;
     
-    if [[ -z "${USERNAME}" ]]; then logError "<username> cannot be empty"; exit 1; fi;
-    if containsIllegalCharacter "${USERNAME}"; then logError "Illegal character detected in <username> \"${USERNAME}\"."; return 1; fi;
+    # Validate
+    if ! validate-backupvolume; then logError "<backupvolume> cannot be empty"; exit 1; fi;
+    #if [[ -z "${USERNAME}" ]]; then logError "<username> cannot be empty"; exit 1; fi;
+    #if containsIllegalCharacter "${USERNAME}"; then logError "Illegal character detected in <username> \"${USERNAME}\"."; return 1; fi;
     
     # Proxy
     if ! commandLineProxy --command-name "receiver-command" --command-value "${RECEIVER_COMMAND:-}" --command-path "${BASH_SOURCE}" $@; then printReceiverHelp; exit 1; fi;

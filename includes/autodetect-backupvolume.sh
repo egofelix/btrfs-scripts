@@ -3,14 +3,25 @@ function autodetect-backupvolume() {
         logDebug "Skipping autodetect-backupvolume, using Cache...";
         return 0;
     fi;
-    
+}
+
+function validate-backupvolume() {
     # Search BACKUPVOLUME via Environment or AutoDetect
-    if isEmpty "${BACKUPVOLUME:-}"; then export BACKUPVOLUME=$(LC_ALL=C mount | grep '@backups' | grep -o 'on /\..* type btrfs' | awk '{print $2}'); fi;
-    if isEmpty "${BACKUPVOLUME}"; then logError "Cannot find @backups directory"; exit 1; fi;
+    #if isEmpty "${BACKUPVOLUME:-}"; then export BACKUPVOLUME=$(LC_ALL=C mount | grep '@backups' | grep -o 'on /\..* type btrfs' | awk '{print $2}'); fi;
+    export BACKUPVOLUME=$(removeTrailingChar "${BACKUPVOLUME}" "/");
+    if isEmpty "${BACKUPVOLUME}"; then return 1; fi;
     
     # Test if SNAPSHOTSPATH is a btrfs subvol
-    logDebug "BACKUPVOLUME: ${BACKUPVOLUME}";
-    if isEmpty $(LC_ALL=C mount | grep "${BACKUPVOLUME}" | grep 'type btrfs'); then logError "<backupvolume> \"${BACKUPVOLUME}\" must be a btrfs volume"; exit 1; fi;
+    logDebug "Validating BACKUPVOLUME: ${BACKUPVOLUME}";
+    #if isEmpty $(LC_ALL=C mount | grep "${BACKUPVOLUME}" | grep 'type btrfs'); then logError "<backupvolume> \"${BACKUPVOLUME}\" must be a btrfs volume"; exit 1; fi;
+    
+    local SUBFOLDER="";
+    if [[ ! -d ${BACKUPVOLUME} ]]; then
+        SUBFOLDER=$(basename ${BACKUPVOLUME});
+        #echo $SUBFOLDER
+        #echo ${BACKUPVOLUME};
+        BACKUPVOLUME="${BACKUPVOLUME%/*}";
+    fi;
     
     # Get Volumename from Path
     local TESTMOUNT=$(LC_ALL=C findmnt -n -o SOURCE --target "${BACKUPVOLUME}")
@@ -26,6 +37,14 @@ function autodetect-backupvolume() {
         logWarn "The target directory relies on volume \"${TESTVOLUME}\" which will also be snapshotted/backuped, consider using a targetvolume with an @ name...";
     fi;
     
-    return 0;
+    if [[ -z "${SUBFOLDER}" ]]; then return 0; fi;
+    
+    if [[ -d "${BACKUPVOLUME}/${SUBFOLDER}" ]]; then return 0; fi;
+    
+    
+    if runCmd mkdir "${BACKUPVOLUME}/${SUBFOLDER}"; then return 0; fi;
+    
+    logError "Failed to create directory \"${BACKUPVOLUME}/${SUBFOLDER}\".";
+    
     
 }
