@@ -2,9 +2,13 @@
 set -uo pipefail;
 
 ############### Main Script ################
+function printManagerArgs() {
+    echo -n "[-q|--quiet] [-v|--verbose] [-d|--debug] <command> [<commandargs>]";
+}
+
 function printManagerHelp() {
     echo -en "Usage: ";
-    printUsage ${ENTRY_SCRIPT} "[-q|--quiet]" "[-v|--verbose]" "[-d|--debug]" "<command>" "[<commandargs>]";
+    printUsage ${ENTRY_SCRIPT} $(printManagerArgs);
     
     echo "";
     echo -en "To get more information about commands try: ";
@@ -33,6 +37,7 @@ function manager() {
     local ENTRY_PATH="${SCRIPT_SOURCE%/*}";
     local ENTRY_SCRIPT=$(basename $BASH_SOURCE);
     local ENTRY_COMMAND="";
+    local ENTRY_ARGS="$(printManagerArgs)";
     while [[ "$#" -gt 0 ]]; do
         case $1 in
             -d|--debug) if isTrue ${LOGDEFINED}; then logError "Cannot mix --debug with --verbose or --quiet"; exit 1; fi; LOGDEFINED="true"; DEBUG="true"; VERBOSE="true";;

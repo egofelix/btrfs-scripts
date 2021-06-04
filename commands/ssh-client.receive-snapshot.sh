@@ -3,9 +3,7 @@ function printReceiverSubCommandHelp() {
     echo "Todo";
 }
 
-#!/bin/bash
-# Command receiver check-volume
-# /manager receiver receive-volume -v|--volume <volume> -s|--snapshot <snapshot>
+# receive-snapshot -v|--volume <volume> -s|--snapshot <snapshot>
 function receiverSubCommand() {
     # Scan Arguments
     local VOLUME="";

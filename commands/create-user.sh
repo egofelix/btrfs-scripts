@@ -1,7 +1,11 @@
 #!/bin/bash
 # Command create-user [-b|--backupvolume <backupvolume>] [-u|--username] <username>
 function printCreateUserHelp {
-    echo "Usage: ${ENTRY_SCRIPT} ${ENTRY_COMMAND} [-b|--backupvolume <backupvolume>] [-u|--username] <username>";
+    local MYARGS="[-b|--backupvolume <backupvolume>] [-u|--username] <username>";
+    local ARGS=${ENTRY_ARGS};
+    ARGS="${ARGS/\<command\>/${ENTRY_COMMAND}}";
+    ARGS="${ARGS/\[\<commandargs\>\]/${MYARGS}}";
+    echo "Usage: ${ENTRY_SCRIPT} ${ARGS}";
     echo "";
     echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND} test";
     echo "      Create a local user test for backup usage.";

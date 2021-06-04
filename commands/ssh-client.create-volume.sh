@@ -1,13 +1,9 @@
 #!/bin/bash
-
 function printReceiverSubCommandHelp() {
     echo "Todo";
 }
 
-# Command manager
-# /manager.sh receiver --target <backupvolume> create-volume --volume <volume>
-# Command create-volume
-# <volume>
+# create-volume [-v|--volume <volume>]
 function receiverSubCommand() {
     # Scan Arguments
     local VOLUME="";

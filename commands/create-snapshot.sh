@@ -1,7 +1,10 @@
 #!/bin/bash
-# create-snapshot [-t|--target <snapshotvolume>] [-v|--volume] <volume> (... <volume>)
 function printCreateSnapshotHelp {
-    echo "Usage: ${ENTRY_SCRIPT} ${ENTRY_COMMAND} [-t|--target <snapshotvolume>] [-v|--volume] <volume>";
+    local MYARGS="[-t|--target <snapshotvolume>] [-v|--volume] <volume>";
+    local ARGS=${ENTRY_ARGS};
+    ARGS="${ARGS/\<command\>/${ENTRY_COMMAND}}";
+    ARGS="${ARGS/\[\<commandargs\>\]/${MYARGS}}";
+    echo "Usage: ${ENTRY_SCRIPT} ${ARGS}";
     echo "";
     echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND}";
     echo "      Create snapshots of every mounted volume.";
@@ -21,6 +24,8 @@ function printCreateSnapshotHelp {
     echo "If you omit the <snapshotvolume> then the script will try to locate it with the subvolume name @snapshots.";
     echo "";
 }
+
+# create-snapshot [-t|--target <snapshotvolume>] [-v|--volume] <volume> (... <volume>)
 function createSnapshot {
     # Scan Arguments
     local SNAPSHOTVOLUME="";

@@ -1,12 +1,11 @@
 #!/bin/bash
 function printReceiverSubCommandHelp() {
-    echo "Usage:";
+    echo "Usage: ${ENTRY_SCRIPT} ${ENTRY_COMMAND} test";
     echo "";
-    echo -en "    ";
-    printUsage ${ENTRY_SCRIPT} ${ENTRY_COMMAND} "test";
-    echo "      Returns success if the receiver works.";
-    echo "";
+    echo "Returns success if the client works.";
 }
+
+# test
 function receiverSubCommand() {
     # Scan Arguments
     while [[ "$#" -gt 0 ]]; do
@@ -16,7 +15,7 @@ function receiverSubCommand() {
         esac;
         shift;
     done;
-      
+    
     # all fine
     logLine "success";
     exit 0;
