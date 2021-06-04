@@ -18,17 +18,52 @@ function printSendSnapshotHelp {
     echo "";
 }
 
+function isSuccess {
+    # Filter Output just for a line of true | false
+    local CHECKRESULT=$(echo "$1" | grep -P '^true$|^false$|^yes$|^no$|^success$|^failed$|^error$')
+    if [[ "${CHECKRESULT,,}" == "true" ]]; then return 0; fi;
+    if [[ "${CHECKRESULT,,}" == "yes" ]]; then return 0; fi;
+    if [[ "${CHECKRESULT,,}" == "success" ]]; then return 0; fi;
+    
+    return 1;
+}
+
+function sendSnapshotData {
+    logLine "Sending --volume "${1}" --snapshot "${2}""
+    local SENDRESULT="";
+    
+    SENDRESULT=$(btrfs send -q ${SNAPSHOTVOLUME}/${1}/${2} | ${SSH_CALL} receive-volume-snapshot --volume "${1}" --snapshot "${2}");
+    
+    if [[ $? -ne 0 ]]; then logError "SSH-Command \`$@\` failed: ${SENDRESULT}."; exit 1; fi;
+    if ! isSuccess "${SENDRESULT}"; then logWarn "Command 'receive-volume-snapshot --volume \"${1}\" --snapshot \"${2}\"' failed: ${SENDRESULT}"; return 1; fi;
+    
+    return 0;
+}
+
+function runReceiver {
+    if ! runCmd ${SSH_CALL} $@; then
+        logError "SSH-Command \`$@\` failed: ${RUNCMD_CONTENT}.";
+        exit 1;
+    fi;
+    
+    # Filter Output just for a line of true | false
+    if isSuccess "${RUNCMD_CONTENT}"; then return 0; fi;
+    return 1;
+}
+
 function sendSnapshot {
     # Scan Arguments
     local SNAPSHOTVOLUME="";
     local SNAPSHOT="";
     local SERVER="";
+    local AUTOREMOVE="false";
     #local TEST="false";
     #local TESTFLAG="";
     local VOLUMES="";
     while [[ "$#" -gt 0 ]]; do
         case $1 in
             --snapshotvolume) SNAPSHOTVOLUME="$2"; shift;;
+            --autoremove) AUTOREMOVE="true";;
             --server) SERVER="$2"; shift;;
             --volume)
                 # Todo, make useable multiple times
@@ -63,6 +98,12 @@ function sendSnapshot {
     # Validate
     if [[ -z "${VOLUMES}" ]]; then logError "<volume> cannot be empty"; printSendSnapshotHelp; exit 1; fi;
     
+    # Create Lockfile (Only one simultan instance per SNAPSHOTSPATH is allowed)
+    if ! createLockFile --lockfile "${SNAPSHOTVOLUME}/.$(basename $ENTRY_SCRIPT).lock"; then
+        logError "Failed to lock lockfile \"${LOCKFILE}\". Maybe another action is running already?";
+        exit 1;
+    fi;
+    
     # Scan Volumes
     for VOLUME in ${VOLUMES}; do
         # Skip @volumes
@@ -87,38 +128,27 @@ function sendSnapshot {
         
         # Create Directory for this volume on the backup server
         logDebug "Ensuring volume directory at server for \"${VOLUME}\"...";
-        if ! runCmd ${SSH_CALL} "create-volume" "${VOLUME}"; then
-            logError "Command 'create-volume \"${VOLUME}\"' failed: ${CREATERESULT}.";
-            exit 1;
-        fi;
-        #CREATERESULT="${RUNCMD_CONTENT}";
-        #if [[ $? -ne 0 ]]; then fi;
+        if ! runReceiver create-volume --volume "${VOLUME}"; then exit 1; fi;
         
         # Send FIRSTSNAPSHOT
-        CHECKVOLUMERESULT=$(${SSH_CALL} check-volume "${VOLUME}" "${FIRSTSNAPSHOT}");
-        if [[ $? -ne 0 ]]; then logError "Command 'check-volume \"${VOLUME}\" \"${FIRSTSNAPSHOT}\"' failed: ${CHECKVOLUMERESULT}."; exit 1; fi;
-        if isFalse ${CHECKVOLUMERESULT}; then
-            logLine "Sending snapshot \"${FIRSTSNAPSHOT}\" for volume \"${VOLUME}\"... (Full)";
-            SENDRESULT=$(btrfs send -q ${SNAPSHOTVOLUME}/${VOLUME}/${FIRSTSNAPSHOT} | ${SSH_CALL} upload-snapshot "${VOLUME}" "${FIRSTSNAPSHOT}");
-            if [[ $? -ne 0 ]] || [[ "${SENDRESULT}" != "success" ]]; then logError "Command 'upload-snapshot \"${VOLUME}\" \"${FIRSTSNAPSHOT}\"' failed: ${SENDRESULT}"; exit 1; fi;
+        if ! runReceiver check-volume-snapshot --volume "${VOLUME}" --snapshot "${FIRSTSNAPSHOT}"; then
+            if ! sendSnapshotData "${VOLUME}" "${FIRSTSNAPSHOT}"; then exit 1; fi;
         fi;
         
         # Now loop over incremental snapshots
         PREVIOUSSNAPSHOT=${FIRSTSNAPSHOT}
         for SNAPSHOT in ${OTHERSNAPSHOTS}
         do
-            CHECKVOLUMERESULT=$(${SSH_CALL} check-volume "${VOLUME}" "${SNAPSHOT}");
-            if [[ $? -ne 0 ]]; then logError "Command 'check-volume \"${VOLUME}\" \"${SNAPSHOT}\"' failed: ${CHECKVOLUMERESULT}."; exit 1; fi;
-            if isFalse ${CHECKVOLUMERESULT}; then
-                logLine "Sending snapshot \"${SNAPSHOT}\" for volume \"${VOLUME}\"... (Incremental)";
-                SENDRESULT=$(btrfs send -q -p ${SNAPSHOTVOLUME}/${VOLUME}/${PREVIOUSSNAPSHOT} ${SNAPSHOTVOLUME}/${VOLUME}/${SNAPSHOT} | ${SSH_CALL} upload-snapshot "${VOLUME}" "${SNAPSHOT}");
-                if [[ $? -ne 0 ]] || [[ "${SENDRESULT}" != "success" ]]; then logError "Command 'upload-snapshot \"${VOLUME}\" \"${SNAPSHOT}\"' failed: ${SENDRESULT}"; exit 1; fi;
+            if ! runReceiver check-volume-snapshot --volume "${VOLUME}" --snapshot "${SNAPSHOT}"; then
+                if ! sendSnapshotData "${VOLUME}" "${SNAPSHOT}"; then exit 1; fi;
             fi;
             
             # Remove previous subvolume as it is not needed here anymore!
-            logDebug "Removing SNAPSHOT \"${PREVIOUSSNAPSHOT}\"...";
-            REMOVERESULT=$(btrfs subvolume delete ${SNAPSHOTVOLUME}/${VOLUME}/${PREVIOUSSNAPSHOT})
-            if [[ $? -ne 0 ]]; then logError "Failed to remove snapshot \"${SNAPSHOT}\" for volume \"${VOLUME}\": ${REMOVERESULT}."; exit 1; fi;
+            if isTrue ${AUTOREMOVE}; then
+                logDebug "Removing SNAPSHOT \"${PREVIOUSSNAPSHOT}\"...";
+                REMOVERESULT=$(btrfs subvolume delete ${SNAPSHOTVOLUME}/${VOLUME}/${PREVIOUSSNAPSHOT})
+                if [[ $? -ne 0 ]]; then logError "Failed to remove snapshot \"${SNAPSHOT}\" for volume \"${VOLUME}\": ${REMOVERESULT}."; exit 1; fi;
+            fi;
             
             # Remember this snapshot as previos so we can send the next following backup as incremental
             PREVIOUSSNAPSHOT="${SNAPSHOT}";

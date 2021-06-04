@@ -5,7 +5,7 @@ function printReceiverSubCommandHelp() {
 }
 
 # Command manager
-# /manager.sh receiver --target <backupvolume> create-volume <volume>
+# /manager.sh receiver --target <backupvolume> create-volume --volume <volume>
 # Command create-volume
 # <volume>
 function receiverSubCommand() {
@@ -14,13 +14,8 @@ function receiverSubCommand() {
     while [[ "$#" -gt 0 ]]; do
         case $1 in
             -h|--help) printReceiverSubCommandHelp; exit 0;;
-            *) if [[ -z "${VOLUME}" ]]; then
-                    VOLUME="${1}";
-                    if [[ -z "${VOLUME}" ]]; then
-                        logError "<volume> cannot be empty"; printReceiverSubCommandHelp;
-                        exit 1;
-                    fi;
-                fi;
+            -v|--volume) VOLUME="$2"; shift;;
+            *) logError "Unknown Argument: $1"; printReceiverSubCommandHelp; exit 1;;
         esac;
         shift;
     done;
