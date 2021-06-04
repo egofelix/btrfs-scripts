@@ -14,7 +14,7 @@
                 "--remote",
                 "ssh://btest@127.0.0.1:22222",
                 "send-snapshot",
-                "test"
+                "--help"
             ],
             "terminalKind": "integrated"
         },
@@ -90,14 +90,17 @@
         {
             "type": "bashdb",
             "request": "launch",
-            "name": "send-snapshot --server ssh://btest@127.0.0.1:22222/ --autoremove",
+            "name": "system-manager --remote ssh://btest@127.0.0.1:22222/ send-snapshot --autoremove",
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/_router.sh",
             "args": [
                 "--debug",
+                "--host-script",
+                "${workspaceFolder}/sbin/system-manager",
+                "system-manager",
+                "--remote",
+                "ssh://btest@127.0.0.1:22222",
                 "send-snapshot",
-                "--server",
-                "ssh://btest@127.0.0.1:22222/",
                 "--autoremove"
             ],
             "terminalKind": "integrated"

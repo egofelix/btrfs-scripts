@@ -133,8 +133,8 @@ function sendSnapshot {
         logDebug OTHERSNAPSHOTS: $(removeTrailingChar $(echo "${OTHERSNAPSHOTS}" | tr '\n' ',') ',');
         
         # Create Directory for this volume on the backup server
-        logDebug "Ensuring volume directory at server for \"${VOLUME}\"...";
-        if ! runReceiver create-volume --volume "${VOLUME}"; then exit 1; fi;
+        #logDebug "Ensuring volume directory at server for \"${VOLUME}\"...";
+        #if ! runReceiver create-volume --volume "${VOLUME}"; then exit 1; fi;
         
         # Detect which snapshots we have for this volume
         logLine "Validating volume \"${VOLUME}\".";

@@ -22,8 +22,10 @@ function receiverSubCommand() {
     
     # Test and return
     if [[ ! -d "${BACKUPVOLUME}/${VOLUME}" ]]; then
-        logError "<volume> \"${VOLUME}\" does not exist";
-        exit 1;
+        if ! runCmd mkdir -p ${BACKUPVOLUME}/${VOLUME}; then
+            logError "<volume> \"${VOLUME}\" could not be created";
+            exit 1;
+        fi;
     fi;
     
     if ! runCmd ls ${BACKUPVOLUME}/${VOLUME}; then

@@ -55,50 +55,6 @@ function receiver() {
     
     # Proxy
     if ! commandLineProxy --command-name "client-command" --command-value "${RECEIVER_COMMAND:-}" --command-path "${BASH_SOURCE}" $@; then printReceiverHelp; exit 1; fi;
-    exit 0;
-    
-    # Command list-volumes
-    if [[ "${COMMAND_NAME,,}" = "list-volumes" ]]; then
-        # list directory
-        RESULT=$(LC_ALL=C ls ${SNAPSHOTSPATH})
-        if [[ $? -ne 0 ]]; then logError "listing volumes failed: ${RESULT}."; exit 1; fi;
-        echo "${RESULT}"; exit 0;
-    fi;
-    
-    # Command list-volume
-    if [[ "${COMMAND_NAME,,}" = "list-snapshots" ]]; then
-        # Test <volume> parameter
-        VOLUME=$(LC_ALL=C echo "${COMMAND}" | awk '{print $2}')
-        if [[ -z "${VOLUME}" ]]; then logError "Usage: list-snapshots <volume>"; exit 1; fi;
-        
-        # Create directory
-        RESULT=$(LC_ALL=C ls ${SNAPSHOTSPATH}/${VOLUME});
-        if [[ $? -ne 0 ]]; then logError "listing snapshots of volume \"${VOLUME}\" failed: ${RESULT}."; exit 1; fi;
-        echo "${RESULT}"; exit 0;
-    fi;
-    
-    # Command download-volume
-    if [[ "${COMMAND_NAME,,}" = "download-snapshot" ]]; then
-        # Test <volume> and <name> parameter
-        VOLUME=$(echo "${COMMAND}" | awk '{print $2}');
-        NAME=$(echo "${COMMAND}" | awk '{print $3}');
-        if [[ -z "${VOLUME}" ]] || [[ -z "${NAME}" ]]; then logError "Usage: download-snapshot <volume> <name>"; exit 1; fi;
-        
-        # Check if snapshot exists
-        if [[ ! -d "${SNAPSHOTSPATH}/${VOLUME}/${NAME}" ]]; then logError "snapshot does not exists"; exit 1; fi;
-        
-        # Aquire lock
-        source "${BASH_SOURCE%/*}/includes/lockfile.sh";
-        
-        # Send Snapshot
-        btrfs send -q ${SNAPSHOTSPATH}/${VOLUME}/${NAME};
-        if [[ $? -ne 0 ]]; then logError "Error sending snapshot."; exit 1; fi;
-        exit 0;
-    fi;
-    
-    # Unknown command
-    logError "Unknown Command: ${COMMAND_NAME}.";
-    exit 1;
 }
 
 receiver $@;
