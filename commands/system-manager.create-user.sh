@@ -1,13 +1,11 @@
 #!/bin/bash
-# Command create-user [-b|--backupvolume <backupvolume>] [-u|--username] <username>
+# Command create-user [-u|--username] <username>
 function printCreateUserHelp {
-    local MYARGS="[-b|--backupvolume <backupvolume>] [-u|--username] <username>";
-    local ARGS=${ENTRY_ARGS};
-    ARGS="${ARGS/\<command\>/${ENTRY_COMMAND}}";
-    ARGS="${ARGS/\[\<commandargs\>\]/${MYARGS}}";
-    echo "Usage: ${ENTRY_SCRIPT} ${ARGS}";
+    local MYARGS="";
+    
+    echo "Usage: ${HOST_NAME} ${COMMAND_VALUE} [-u|--username] <username>";
     echo "";
-    echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND} test";
+    echo "    ${HOST_NAME} ${COMMAND_VALUE} test";
     echo "      Create a local user test for backup usage.";
     echo "";
     echo "If you omit the <backupvolume> then the script will try to locate it with the subvolume name @backups.";

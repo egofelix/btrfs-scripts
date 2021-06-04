@@ -3,6 +3,37 @@
         {
             "type": "bashdb",
             "request": "launch",
+            "name": "system-manager create-user --help",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/manager.sh",
+            "args": [
+                "--debug",
+                "--host-script",
+                "${workspaceFolder}/sbin/system-manager",
+                "system-manager",
+                "create-user",
+                "--help"
+            ],
+            "terminalKind": "integrated"
+        },
+        {
+            "type": "bashdb",
+            "request": "launch",
+            "name": "system-manager --help",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/manager.sh",
+            "args": [
+                "--debug",
+                "--host-script",
+                "${workspaceFolder}/sbin/system-manager",
+                "system-manager",
+                "--help"
+            ],
+            "terminalKind": "integrated"
+        },
+        {
+            "type": "bashdb",
+            "request": "launch",
             "name": "--help",
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/manager.sh",

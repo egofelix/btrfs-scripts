@@ -1,19 +1,9 @@
 #!/bin/bash
 function printCreateSnapshotHelp {
-    local MYARGS="[-t|--target <snapshotvolume>] [-v|--volume] <volume> [... <volume>]";
-    local ARGS=${ENTRY_ARGS};
-    ARGS="${ARGS/\<command\>/${ENTRY_COMMAND}}";
-    ARGS="${ARGS/\[\<commandargs\>\]/${MYARGS}}";
-    echo "Usage: ${ENTRY_SCRIPT} ${ARGS}";
+    echo "Usage: ${HOST_NAME}${HOST_ARGS} ${COMMAND_VALUE} [-v|--volume] <volume> [... <volume>]";
     echo "";
-    echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND}";
+    echo "    ${HOST_NAME} ${COMMAND_VALUE}";
     echo "      Create snapshots of every mounted volume.";
-    echo "";
-    echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND} --target /.snapshots";
-    echo "      Create snapshots of every mounted volume in \"/.snapshorts\".";
-    echo "";
-    echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND} --target /.snapshots root-data usr-data";
-    echo "      Create a snapshot of volumes root-data and usr-data in \"/.snapshorts\".";
     echo "";
     echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND} root-data usr-data";
     echo "      Create a snapshot of volumes root-data and usr-data.";
@@ -28,11 +18,9 @@ function printCreateSnapshotHelp {
 # create-snapshot [-t|--target <snapshotvolume>] [-v|--volume] <volume> [... <volume>]
 function createSnapshot {
     # Scan Arguments
-    local SNAPSHOTVOLUME="";
     local VOLUMES="";
     while [[ "$#" -gt 0 ]]; do
         case $1 in
-            -t|--target) SNAPSHOTVOLUME="$2"; shift;;
             -v|--volume) if [[ -z ${VOLUMES} ]]; then VOLUMES="$2"; else VOLUMES="${VOLUMES} $2"; fi; shift ;;
             -h|--help) printCreateSnapshotHelp; exit 0;;
             *)
@@ -50,18 +38,11 @@ function createSnapshot {
     logFunction "createSnapshot#arguments --target \`${SNAPSHOTVOLUME}\` --volume \`${VOLUMES}\`";
     
     # Validate
-    autodetect-snapshotvolume;
-    autodetect-volumes;
+    if ! autodetect-snapshotvolume --backupvolume "${SNAPSHOTVOLUME}"; then logError "Could not detect <snapshotvolume>"; exit 1; fi;
+    if ! autodetect-volumes --volumes "${VOLUMES}"; then logError "Could not autodetect <volume>"; exit 1; fi;
     
     # Debug
     logFunction "createSnapshot#expandedArguments --target \`${SNAPSHOTVOLUME}\` --volume \`$(echo ${VOLUMES})\`";
-    
-    # Create Lockfile (Only one simultan instance per SNAPSHOTSPATH is allowed)
-    #if ! createLockFile --lockfile "${SNAPSHOTVOLUME}/.$(basename $ENTRY_SCRIPT).lock"; then
-    #    logError "Failed to lock lockfile \"${SNAPSHOTVOLUME}/.$(basename $ENTRY_SCRIPT).lock\". Maybe another action is running already?";
-    #    exit 1;
-    #fi;
-    #logDebug "Lock-File created";
     
     # Test if VOLUMES are btrfs subvol's
     local VOLUME;
