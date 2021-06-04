@@ -4,7 +4,7 @@
 # Command create-snapshot
 # [-v|--volume <volume>] [-t|--target <snapshotvolume>]
 function printCreateSnapshotHelp {
-    echo "Usage: ${ENTRY_SCRIPT} [-q|--quiet] ${ENTRY_COMMAND} [-t|--target <snapshotvolume>] [-v|--volume <volume>]";
+    echo "Usage: ${ENTRY_SCRIPT} [-q|--quiet] ${ENTRY_COMMAND} [--snapshotvolume <snapshotvolume>] [-v|--volume <volume>]";
     echo "";
     echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND}";
     echo "      Create snapshots of every mounted volume.";

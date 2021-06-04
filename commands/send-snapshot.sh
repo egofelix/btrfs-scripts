@@ -3,7 +3,7 @@
 # /manager [-q|--quiet] [-n|--name <clienthostname>] [-s|--server ssh://user@host:port] send-snapshot [--target <targetvolume>] [-s|--snapshot <snapshot>] [--test] <volume>
 
 function printSendSnapshotHelp {
-    echo "Usage: ${ENTRY_SCRIPT} [-q|--quiet] ${ENTRY_COMMAND} [-t|--target <snapshotvolume>] [-v|--volume <volume>]";
+    echo "Usage: ${ENTRY_SCRIPT} [-q|--quiet] ${ENTRY_COMMAND} [--snapshotvolume <snapshotvolume>] [--server ssh://user@host:port] [--volume <volume>]";
     echo "";
     echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND}";
     echo "      Create snapshots of every mounted volume.";
@@ -22,16 +22,19 @@ function sendSnapshot {
     # Scan Arguments
     local SNAPSHOTVOLUME="";
     local SNAPSHOT="";
-    local TEST="false";
-    local TESTFLAG="";
-    local VOLUME="";
+    local SERVER="";
+    #local TEST="false";
+    #local TESTFLAG="";
+    local VOLUMES="";
     while [[ "$#" -gt 0 ]]; do
         case $1 in
-            --target) SNAPSHOTVOLUME="$2"; shift;;
-            -s|--snapshot) SNAPSHOT="$2"; shift;;
-            --test) TEST="true"; TESTFLAG=" --test";;
-            -h|--help) echo "Print snapshot help"; exit 0;;
-            -*) echo "Unknown Argument: $1"; echo "PRint help here"; exit 1;;
+            --snapshotvolume) SNAPSHOTVOLUME="$2"; shift;;
+            --server) SERVER="$2"; shift;;
+            --volume)
+                # Todo, make useable multiple times
+            VOLUMES="$2"; shift;;
+            -h|--help) printSendSnapshotHelp; exit 0;;
+            -*) logError "Unknown Argument: $1"; printSendSnapshotHelp; exit 1;;
             *)
                 if [[ -z "${VOLUME}" ]]; then
                     VOLUME="${1}";
@@ -42,23 +45,23 @@ function sendSnapshot {
     done;
     
     # Debug Variables
-    logFunction "snapshotCommand --target \`${SNAPSHOTVOLUME}\` --snapshot \`${SNAPSHOT}\`${TESTFLAG} ${VOLUME}";
+    logFunction "snapshotCommand --snapshotvolume \`${SNAPSHOTVOLUME}\` --server \`${SERVER}\` --volume \`${VOLUMES}\`";
     
     # Auto Detect SNAPSHOTVOLUME and VOLUMES
     if ! autodetect-volumes; then logError "Could not autodetect volumes"; exit 1; fi;
     if ! autodetect-snapshotvolume; then logError "Could not autodetect snapshotvolume"; exit 1; fi;
     
-    # Validate
-    if [[ -z "${VOLUMES}" ]]; then logError "<volume> cannot be empty"; printSendSnapshotHelp; exit 1; fi;
+    # Detect Server
+    if ! autodetect-server --uri "${SERVER}" --hostname ""; then
+        logError "snapshotCommand#Failed to detect server, please specify one with --source <uri>";
+        exit 1;
+    fi;
     
     # Debug
     logFunction "createSnapshot#expandedArguments --target \`${SNAPSHOTVOLUME}\` --volume \`$(echo ${VOLUMES})\`";
     
-    # Detect Server
-    if ! autodetect-server --uri "${SSH_URI:-}" --hostname ""; then
-        logError "snapshotCommand#Failed to detect server, please specify one with --source <uri>";
-        exit 1;
-    fi;
+    # Validate
+    if [[ -z "${VOLUMES}" ]]; then logError "<volume> cannot be empty"; printSendSnapshotHelp; exit 1; fi;
     
     # Scan Volumes
     for VOLUME in ${VOLUMES}; do

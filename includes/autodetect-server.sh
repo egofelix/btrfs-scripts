@@ -31,7 +31,6 @@ function autodetect-server {
     
     # Try autodetect URI
     if isEmpty "${URI:-}"; then
-        
         # Get hostname, if none is specified
         if [[ -z "${HOSTNAME:-}" ]]; then
             HOSTNAME=$(cat /proc/sys/kernel/hostname)
@@ -84,23 +83,23 @@ function autodetect-server {
         
         export SSH_HOSTNAME="${DNS_HOSTNAME}"
         logLine "Autodetected Backup Server: ${SSH_USERNAME}@${DNS_HOSTNAME}:${DNS_PORT}";
-        export SSH_URI="ssh://${SSH_USERNAME}@${DNS_HOSTNAME}:${DNS_PORT}";
+        #export SSH_URI="ssh://${SSH_USERNAME}@${DNS_HOSTNAME}:${DNS_PORT}";
     fi;
     
     # Split SSH-URI
-    if [[ ${SSH_URI} != ssh://* ]]; then
+    if [[ ${URI} != ssh://* ]]; then
         logError "Only ssh:// protocol is supported";
         exit 1;
     fi;
     
-    if [[ ${SSH_URI} = *@* ]]; then
-        export SSH_USERNAME=$(echo ${SSH_URI} | cut -d'/' -f3 | cut -d'@' -f1)
-        export SSH_HOSTNAME=$(echo ${SSH_URI} | cut -d'/' -f3 | cut -d'@' -f2)
+    if [[ ${URI} = *@* ]]; then
+        export SSH_USERNAME=$(echo ${URI} | cut -d'/' -f3 | cut -d'@' -f1)
+        export SSH_HOSTNAME=$(echo ${URI} | cut -d'/' -f3 | cut -d'@' -f2)
     else
         if [[ -z "${HOSTNAME:-}" ]]; then HOSTNAME=$(cat /proc/sys/kernel/hostname); fi;
         MY_HOSTNAME=$(echo "${HOSTNAME}" | awk -F'.' '{print $1}')
         export SSH_USERNAME="${MY_HOSTNAME}"
-        export SSH_HOSTNAME=$(echo ${SSH_URI} | cut -d'/' -f3)
+        export SSH_HOSTNAME=$(echo ${URI} | cut -d'/' -f3)
     fi;
     
     if [[ ${SSH_HOSTNAME} = *:* ]]; then

@@ -74,8 +74,21 @@
             "program": "${workspaceFolder}/manager.sh",
             "args": [
                 "--debug",
+                "send-snapshot"
+            ],
+            "terminalKind": "integrated"
+        },
+        {
+            "type": "bashdb",
+            "request": "launch",
+            "name": "send-snapshot --server ssh://backup-tester@127.0.0.1:22222/",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/manager.sh",
+            "args": [
+                "--debug",
                 "send-snapshot",
-                "ssh://pluto@jupiter.egofelix.de:22222/"
+                "--server",
+                "ssh://backup-tester@127.0.0.1:22222/"
             ],
             "terminalKind": "integrated"
         },
