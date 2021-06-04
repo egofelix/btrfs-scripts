@@ -1,8 +1,6 @@
 #!/bin/bash
-
-
 function printReceiverHelp() {
-    local MYARGS="-t|--target <backupvolume> <client-command>";
+    local MYARGS="-t|--target <backupvolume> <client-command> <client-command-args...>";
     local ARGS=${ENTRY_ARGS};
     ARGS="${ARGS/\<command\>/${ENTRY_COMMAND}}";
     ARGS="${ARGS/\[\<commandargs\>\]/${MYARGS}}";
@@ -20,6 +18,8 @@ function printReceiverHelp() {
 # ssh-client -t|--target <backupvolume> <client-command> <client-command-args...>
 function receiver() {
     #local LOGFILE="/tmp/receiver.log";
+    logWarn "\`${ENTRY_SCRIPT} ssh-client\` should not be called by user direct, instead reference it in authorized_keys.";
+    
     # Scan Arguments
     local BACKUPVOLUME="";
     local RECEIVER_COMMAND="";

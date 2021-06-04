@@ -3,20 +3,6 @@
         {
             "type": "bashdb",
             "request": "launch",
-            "name": "create-user --username btest",
-            "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/manager.sh",
-            "args": [
-                "--debug",
-                "create-user",
-                "--username",
-                "btest"
-            ],
-            "terminalKind": "integrated"
-        },
-        {
-            "type": "bashdb",
-            "request": "launch",
             "name": "--help",
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/manager.sh",
@@ -29,44 +15,14 @@
         {
             "type": "bashdb",
             "request": "launch",
-            "name": "ssh-client --help",
+            "name": "create-user --username btest",
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/manager.sh",
             "args": [
                 "--debug",
-                "ssh-client",
-                "--help"
-            ],
-            "terminalKind": "integrated"
-        },
-        {
-            "type": "bashdb",
-            "request": "launch",
-            "name": "ssh-client --target /.backups/test/ create-volume haha-data",
-            "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/manager.sh",
-            "args": [
-                "--debug",
-                "ssh-client",
-                "--target",
-                "/.backups/test/",
-                "create-volume",
-                "testVolume"
-            ],
-            "terminalKind": "integrated"
-        },
-        {
-            "type": "bashdb",
-            "request": "launch",
-            "name": "ssh-client --target /.backups/btest btest",
-            "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/manager.sh",
-            "args": [
-                "--debug",
-                "ssh-client",
-                "--target",
-                "/.backups/test",
-                "test"
+                "create-user",
+                "--username",
+                "btest"
             ],
             "terminalKind": "integrated"
         },
@@ -94,22 +50,6 @@
                 "--server",
                 "ssh://btest@127.0.0.1:22222/",
                 "--autoremove"
-            ],
-            "terminalKind": "integrated"
-        },
-        {
-            "type": "bashdb",
-            "request": "launch",
-            "name": "create-snapshot --volume home-data",
-            "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/manager.sh",
-            "args": [
-                "--debug",
-                "--server",
-                "ssh://btest@127.0.0.1:22222/",
-                "create-snapshot",
-                "--volume",
-                "home-data"
             ],
             "terminalKind": "integrated"
         }

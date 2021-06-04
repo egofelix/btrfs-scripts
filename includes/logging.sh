@@ -19,6 +19,7 @@ function logSuccess {
 
 function logWarn {
     if [[ ! -z "${LOGFILE:-}" ]]; then echo "[WARN] $@" >> ${LOGFILE}; fi;
+    if isTrue "${QUIET:-}"; then return; fi;
     echo -en "\033[01;93m" && echo -n "[WARN] $@" && echo -e "\e[0m";
 }
 

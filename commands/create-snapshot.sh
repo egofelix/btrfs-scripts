@@ -1,6 +1,6 @@
 #!/bin/bash
 function printCreateSnapshotHelp {
-    local MYARGS="[-t|--target <snapshotvolume>] [-v|--volume] <volume>";
+    local MYARGS="[-t|--target <snapshotvolume>] [-v|--volume] <volume> [... <volume>]";
     local ARGS=${ENTRY_ARGS};
     ARGS="${ARGS/\<command\>/${ENTRY_COMMAND}}";
     ARGS="${ARGS/\[\<commandargs\>\]/${MYARGS}}";
@@ -25,7 +25,7 @@ function printCreateSnapshotHelp {
     echo "";
 }
 
-# create-snapshot [-t|--target <snapshotvolume>] [-v|--volume] <volume> (... <volume>)
+# create-snapshot [-t|--target <snapshotvolume>] [-v|--volume] <volume> [... <volume>]
 function createSnapshot {
     # Scan Arguments
     local SNAPSHOTVOLUME="";
