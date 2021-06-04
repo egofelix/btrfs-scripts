@@ -29,13 +29,18 @@ function isSuccess {
 }
 
 function sendSnapshotData {
-    logLine "Sending --volume "${1}" --snapshot "${2}""
+    logDebug "[FUNC] Sending --volume \"${1}\" --snapshot \"${2}\" --parent \"${3:-}\"";
+    logLine "Sending \"${1}/${2}\";"
     local SENDRESULT="";
     
-    SENDRESULT=$(btrfs send -q ${SNAPSHOTVOLUME}/${1}/${2} | ${SSH_CALL} receive-volume-snapshot --volume "${1}" --snapshot "${2}");
+    if [[ -z "${3:-}" ]]; then
+        SENDRESULT=$(btrfs send -q ${SNAPSHOTVOLUME}/${1}/${2} | ${SSH_CALL} receive-snapshot --volume "${1}" --snapshot "${2}");
+    else
+        SENDRESULT=$(btrfs send -q -p  ${SNAPSHOTVOLUME}/${1}/${3} ${SNAPSHOTVOLUME}/${1}/${2} | ${SSH_CALL} receive-snapshot --volume "${1}" --snapshot "${2}");
+    fi;
     
     if [[ $? -ne 0 ]]; then logError "SSH-Command \`$@\` failed: ${SENDRESULT}."; exit 1; fi;
-    if ! isSuccess "${SENDRESULT}"; then logWarn "Command 'receive-volume-snapshot --volume \"${1}\" --snapshot \"${2}\"' failed: ${SENDRESULT}"; return 1; fi;
+    if ! isSuccess "${SENDRESULT}"; then logWarn "Command 'receive-snapshot --volume \"${1}\" --snapshot \"${2}\"' failed: ${SENDRESULT}"; return 1; fi;
     
     return 0;
 }
@@ -100,9 +105,11 @@ function sendSnapshot {
     
     # Create Lockfile (Only one simultan instance per SNAPSHOTSPATH is allowed)
     if ! createLockFile --lockfile "${SNAPSHOTVOLUME}/.$(basename $ENTRY_SCRIPT).lock"; then
-        logError "Failed to lock lockfile \"${LOCKFILE}\". Maybe another action is running already?";
+        logError "Failed to lock lockfile \"${SNAPSHOTVOLUME}/.$(basename $ENTRY_SCRIPT).lock\". Maybe another action is running already?";
         exit 1;
     fi;
+    
+    logLine "Sending snapshots to ${SSH_HOSTNAME}";
     
     # Scan Volumes
     for VOLUME in ${VOLUMES}; do
@@ -130,8 +137,20 @@ function sendSnapshot {
         logDebug "Ensuring volume directory at server for \"${VOLUME}\"...";
         if ! runReceiver create-volume --volume "${VOLUME}"; then exit 1; fi;
         
+        # Detect which snapshots we have for this volume
+        logLine "Validating volume \"${VOLUME}\".";
+        if ! runCmd ${SSH_CALL} list-snapshots --volume "${VOLUME}"; then
+            logError "Failed to list snapshots for volume \"${VOLUME}\".";
+            exit 1;
+        fi;
+        local REMOTE_SNAPSHOTS="${RUNCMD_CONTENT}";
+        #exit 1;
+        #if ! runReceiver list-snapshots --volume "${VOLUME}"; then exit 1; fi;
+        
+        
         # Send FIRSTSNAPSHOT
-        if ! runReceiver check-volume-snapshot --volume "${VOLUME}" --snapshot "${FIRSTSNAPSHOT}"; then
+        #if ! runReceiver check-volume-snapshot --volume "${VOLUME}" --snapshot "${FIRSTSNAPSHOT}"; then
+        if [[ "${REMOTE_SNAPSHOTS}" != *"${FIRSTSNAPSHOT}"* ]]; then
             if ! sendSnapshotData "${VOLUME}" "${FIRSTSNAPSHOT}"; then exit 1; fi;
         fi;
         
@@ -139,8 +158,9 @@ function sendSnapshot {
         PREVIOUSSNAPSHOT=${FIRSTSNAPSHOT}
         for SNAPSHOT in ${OTHERSNAPSHOTS}
         do
-            if ! runReceiver check-volume-snapshot --volume "${VOLUME}" --snapshot "${SNAPSHOT}"; then
-                if ! sendSnapshotData "${VOLUME}" "${SNAPSHOT}"; then exit 1; fi;
+            #if ! runReceiver check-volume-snapshot --volume "${VOLUME}" --snapshot "${SNAPSHOT}"; then
+            if [[ "${REMOTE_SNAPSHOTS}" != *"${SNAPSHOT}"* ]]; then
+                if ! sendSnapshotData "${VOLUME}" "${SNAPSHOT}" "${PREVIOUSSNAPSHOT}"; then exit 1; fi;
             fi;
             
             # Remove previous subvolume as it is not needed here anymore!

@@ -1,3 +1,3 @@
 #!/bin/bash
 SCRIPT_SOURCE=$(readlink -f ${BASH_SOURCE});
-"${SCRIPT_SOURCE%/*}/manager.sh" --debug receiver $@;
+"${SCRIPT_SOURCE%/*}/manager.sh" ssh-client $@;

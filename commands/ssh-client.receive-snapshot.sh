@@ -5,7 +5,7 @@ function printReceiverSubCommandHelp() {
 
 #!/bin/bash
 # Command receiver check-volume
-# /manager receiver check-volume -v|--volume <volume> -s|--snapshot <snapshot>
+# /manager receiver receive-volume -v|--volume <volume> -s|--snapshot <snapshot>
 function receiverSubCommand() {
     # Scan Arguments
     local VOLUME="";

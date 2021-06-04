@@ -21,7 +21,7 @@ function dnsResolveSrv {
     # Try With nslookup
     if ! which nslookup &> /dev/null; then
         if ! runCmd nslookup -type=srv ${HOSTNAME}; then
-            logWarn "Failed to lookup ${HOSTNAME}, type \"SRV\", cmd \"nslookup\"";
+            logDebug "Failed to lookup ${HOSTNAME}, type \"SRV\", cmd \"nslookup\"";
             return 1;
         fi;
         

@@ -8,7 +8,7 @@ function runCmd {
     RUNCMD_RETURNCODE=$?
     
     if [ ${RUNCMD_RETURNCODE} -ne 0 ]; then
-        logError "Failed Command: \`$@\` Result: ${RUNCMD_CONTENT}";
+        logDebug "Failed Command: \`$@\` Result: ${RUNCMD_CONTENT}";
         return 1;
     else
         if [ ! -z "${RUNCMD_CONTENT}" ]; then

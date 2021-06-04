@@ -36,19 +36,19 @@ function createSnapshot {
     # Debug Variables
     logFunction "createSnapshot#arguments --target \`${SNAPSHOTVOLUME}\` --volume \`${VOLUMES}\`";
     
-    # Lockfile (Only one simultan instance is allowed)
-    stopIfNotElevated;
-    loadFunction "createLockFile"
-    if ! createLockFile; then logError "Failed to lock lockfile. Maybe another action is running already?"; exit 1; fi;
-    logDebug "Lock-File created";
-    
-    # Auto Detect SNAPSHOTVOLUME and VOLUMES
-    loadFunction autodetect-snapshotvolume autodetect-volumes;
+    # Validate
     autodetect-snapshotvolume;
     autodetect-volumes;
     
     # Debug
     logFunction "createSnapshot#expandedArguments --target \`${SNAPSHOTVOLUME}\` --volume \`$(echo ${VOLUMES})\`";
+    
+    # Create Lockfile (Only one simultan instance per SNAPSHOTSPATH is allowed)
+    #if ! createLockFile --lockfile "${SNAPSHOTVOLUME}/.$(basename $ENTRY_SCRIPT).lock"; then
+    #    logError "Failed to lock lockfile \"${SNAPSHOTVOLUME}/.$(basename $ENTRY_SCRIPT).lock\". Maybe another action is running already?";
+    #    exit 1;
+    #fi;
+    #logDebug "Lock-File created";
     
     # Test if VOLUMES are btrfs subvol's
     local VOLUME;
