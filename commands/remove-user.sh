@@ -1,7 +1,12 @@
 #!/bin/bash
-# Command create-user [-u|--username] <username>
+# Command remove-user [-b|--backupvolume <backupvolume>] [-u|--username] <username>
 function printRemoveUserHelp {
-    echo "Usage: ${ENTRY_SCRIPT} [-q|--quiet] ${ENTRY_COMMAND} [-u|--username] <username>";
+    echo "Usage: ${ENTRY_SCRIPT} ${ENTRY_COMMAND} [-b|--backupvolume <backupvolume>] [-u|--username] <username>";
+    echo "";
+    echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND} test";
+    echo "      Remove a local user backup user test.";
+    echo "";
+    echo "If you omit the <backupvolume> then the script will try to locate it with the subvolume name @backups.";
     echo "";
 }
 function removeUser {

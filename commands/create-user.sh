@@ -1,5 +1,5 @@
 #!/bin/bash
-# Command create-user [-u|--username] <username>
+# Command create-user [-b|--backupvolume <backupvolume>] [-u|--username] <username>
 function printCreateUserHelp {
     echo "Usage: ${ENTRY_SCRIPT} ${ENTRY_COMMAND} [-b|--backupvolume <backupvolume>] [-u|--username] <username>";
     echo "";
