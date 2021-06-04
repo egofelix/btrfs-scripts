@@ -1,6 +1,5 @@
 #!/bin/bash
-# Command send-snapshot
-# /manager [-q|--quiet] [-n|--name <clienthostname>] [-s|--server ssh://user@host:port] send-snapshot [--target <targetvolume>] [-s|--snapshot <snapshot>] [--test] <volume>
+# send-snapshot [--server <server>] [-s|--snapshot <snapshot>] [--test] [--volume] <volume>
 
 function printSendSnapshotHelp {
     echo "Usage: ${ENTRY_SCRIPT} [-q|--quiet] ${ENTRY_COMMAND} [--snapshotvolume <snapshotvolume>] [--server ssh://user@host:port] [--volume <volume>]";

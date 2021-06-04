@@ -1,10 +1,7 @@
 #!/bin/bash
-# Command manager
-# /manager.sh [-q|--quiet] [-n|--name <clienthostname>] [-s|--server ssh://user@host:port] create-snapshot
-# Command create-snapshot
-# [-v|--volume <volume>] [-t|--target <snapshotvolume>]
+# create-snapshot [-t|--target <snapshotvolume>] [-v|--volume] <volume> (... <volume>)
 function printCreateSnapshotHelp {
-    echo "Usage: ${ENTRY_SCRIPT} [-q|--quiet] ${ENTRY_COMMAND} [--snapshotvolume <snapshotvolume>] [-v|--volume <volume>]";
+    echo "Usage: ${ENTRY_SCRIPT} ${ENTRY_COMMAND} [-t|--target <snapshotvolume>] [-v|--volume] <volume>";
     echo "";
     echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND}";
     echo "      Create snapshots of every mounted volume.";
@@ -12,10 +9,16 @@ function printCreateSnapshotHelp {
     echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND} --target /.snapshots";
     echo "      Create snapshots of every mounted volume in \"/.snapshorts\".";
     echo "";
-    echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND} --volume root-data --volume usr-data";
+    echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND} --target /.snapshots root-data usr-data";
+    echo "      Create a snapshot of volumes root-data and usr-data in \"/.snapshorts\".";
+    echo "";
+    echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND} root-data usr-data";
     echo "      Create a snapshot of volumes root-data and usr-data.";
     echo "";
-    echo "If you ommit the <targetdirectory> then the script will try to locate it with the subvolume name @snapshots.";
+    echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND} -v root-data --volume usr-data";
+    echo "      Create a snapshot of volumes root-data and usr-data.";
+    echo "";
+    echo "If you omit the <snapshotvolume> then the script will try to locate it with the subvolume name @snapshots.";
     echo "";
 }
 function createSnapshot {
@@ -26,9 +29,14 @@ function createSnapshot {
         case $1 in
             -t|--target) SNAPSHOTVOLUME="$2"; shift;;
             -v|--volume) if [[ -z ${VOLUMES} ]]; then VOLUMES="$2"; else VOLUMES="${VOLUMES} $2"; fi; shift ;;
-            #-v|--volume) VOLUMES="$2"; shift;;
             -h|--help) printCreateSnapshotHelp; exit 0;;
-            *) logError "Unknown Argument: $1"; exit 1;;
+            *)
+                if [[ -z ${VOLUMES} ]]; then
+                    VOLUMES="$1";
+                else
+                    VOLUMES="${VOLUMES} $1";
+                fi;
+            ;;
         esac;
         shift;
     done;
