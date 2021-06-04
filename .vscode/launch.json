@@ -3,6 +3,24 @@
         {
             "type": "bashdb",
             "request": "launch",
+            "name": "system-manager send-snapshot --help",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/manager.sh",
+            "args": [
+                "--debug",
+                "--host-script",
+                "${workspaceFolder}/sbin/system-manager",
+                "system-manager",
+                "--remote",
+                "ssh://btest@127.0.0.1:22222",
+                "send-snapshot",
+                "test"
+            ],
+            "terminalKind": "integrated"
+        },
+        {
+            "type": "bashdb",
+            "request": "launch",
             "name": "system-manager create-user --help",
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/manager.sh",

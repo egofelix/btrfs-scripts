@@ -1,15 +1,16 @@
 #!/bin/bash
 function printReceiverHelp() {
-    echo "Usage: ${HOST_NAME} [-s|--snapshot <snapshotvolume>] [-b|--backup <backupvolume>] <client-command> <client-command-args...>";
+    echo "Usage: ${HOST_NAME} [-r|--remote <ssh-uri>] [-s|--snapshots <snapshotvolume>] <command> <command-args...>";
     echo "";
-    echo "If you omit the <backupvolume> then the script will try to locate it with the subvolume name @backups.";
+    #echo "If you omit the <backupvolume> then the script will try to locate it with the subvolume name @backups.";
+    echo "If you omit the <ssh-uri> then the script will try to locate it via dns records.";
     echo "If you omit the <snapshotvolume> then the script will try to locate it with the subvolume name @snapshots.";
     echo "";
-    echo "Possible client-commands are:";
+    echo "Possible commands are:";
     printCommandLineProxyHelp --command-path "${BASH_SOURCE}";
 }
 
-# system-manager [-s|--snapshot <snapshotvolume>] [-b|--backup <backupvolume>] <client-command> <client-command-args...>
+# system-manager [-s|--snapshot <snapshotvolume>] [-b|--backup <backupvolume>] <command> <command-args...>
 function receiver() {
     #local LOGFILE="/tmp/receiver.log";
     
@@ -47,7 +48,7 @@ function receiver() {
     logFunction "receiver#expandedArguments --snapshotvolume \`${SNAPSHOTVOLUME}\` --remote\`${SSH_URI}\` \`${RECEIVER_COMMAND}\`";
     
     # Proxy
-    if ! commandLineProxy --command-name "client-command" --command-value "${RECEIVER_COMMAND:-}" --command-path "${BASH_SOURCE}" $@; then printReceiverHelp; exit 1; fi;
+    if ! commandLineProxy --command-name "command" --command-value "${RECEIVER_COMMAND:-}" --command-path "${BASH_SOURCE}" $@; then printReceiverHelp; exit 1; fi;
     exit 0;
 }
 

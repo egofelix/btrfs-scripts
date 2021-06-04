@@ -1,97 +1,45 @@
 #!/bin/bash
-function printSendSnapshotHelp {
-    echo "Usage: ${HOST_NAME} ${RECEIVER_COMMAND} [--autoremove] [--volume] [<volume>] [... <volume>]";
-    echo "";
-    echo "    ${HOST_NAME} ${RECEIVER_COMMAND}";
-    echo "      Create snapshots of every mounted volume.";
-    echo "";
-    echo "    ${HOST_NAME} ${RECEIVER_COMMAND} --target /.snapshots";
-    echo "      Create snapshots of every mounted volume in \"/.snapshorts\".";
-    echo "";
-    echo "    ${HOST_NAME} ${RECEIVER_COMMAND} --volume root-data --volume usr-data";
-    echo "      Create a snapshot of volumes root-data and usr-data.";
-    echo "";
-    echo "If you ommit the <targetdirectory> then the script will try to locate it with the subvolume name @snapshots.";
-    echo "";
-}
-
-function isSuccess {
-    # Filter Output just for a line of true | false
-    local CHECKRESULT=$(echo "$1" | grep -P '^true$|^false$|^yes$|^no$|^success$|^failed$|^error$')
-    if [[ "${CHECKRESULT,,}" == "true" ]]; then return 0; fi;
-    if [[ "${CHECKRESULT,,}" == "yes" ]]; then return 0; fi;
-    if [[ "${CHECKRESULT,,}" == "success" ]]; then return 0; fi;
-    
-    return 1;
-}
-
-function sendSnapshotData {
-    logDebug "[FUNC] Sending --volume \"${1}\" --snapshot \"${2}\" --parent \"${3:-}\"";
-    logLine "Sending \"${1}/${2}\";"
-    local SENDRESULT="";
-    
-    if [[ -z "${3:-}" ]]; then
-        local CMD="btrfs send -q ${SNAPSHOTVOLUME}/${1}/${2} | ${SSH_CALL} receive-snapshot --volume "${1}" --snapshot "${2}"";
-        logDebug "[MSG] Executing ${CMD}";
-        SENDRESULT=$(btrfs send -q ${SNAPSHOTVOLUME}/${1}/${2} | ${SSH_CALL} receive-snapshot --volume "${1}" --snapshot "${2}");
-    else
-        local CMD="btrfs send -p ${SNAPSHOTVOLUME}/${1}/${3} -q ${SNAPSHOTVOLUME}/${1}/${2} | ${SSH_CALL} receive-snapshot --volume "${1}" --snapshot "${2}"";
-        logDebug "[MSG] Executing ${CMD}";
-        SENDRESULT=$(btrfs send -q -p ${SNAPSHOTVOLUME}/${1}/${3} ${SNAPSHOTVOLUME}/${1}/${2} | ${SSH_CALL} receive-snapshot --volume "${1}" --snapshot "${2}");
-    fi;
-    
-    
-    if [[ $? -ne 0 ]]; then
-        logError "Unexpected Failed Command: \`${CMD}\` Result: ${SENDRESULT}";
-        exit 1;
-    fi;
-    
-    logSuccess "Executed \`${CMD}\` Output: \`${SENDRESULT:-}\`";
-    if ! isSuccess "${SENDRESULT}"; then logWarn "Command \`${CMD}\` did not return success: \`${SENDRESULT}\`"; return 1; fi;
-    
-    return 0;
-}
-
-function runReceiver {
-    if ! runCmd ${SSH_CALL} $@; then
-        logError "SSH-Command \`$@\` failed: ${RUNCMD_CONTENT}.";
-        exit 1;
-    fi;
-    
-    # Filter Output just for a line of true | false
-    if isSuccess "${RUNCMD_CONTENT}"; then return 0; fi;
-    return 1;
+function printHelp {
+    echo "Usage: ${ENTRY_SCRIPT} [-q|--quiet] ${ENTRY_COMMAND} [--snapshotvolume <snapshotvolume>] [--server ssh://user@host:port] [--volume <volume>]";
 }
 
 function sendSnapshot {
     # Scan Arguments
+    local SNAPSHOTVOLUME="";
+    local SNAPSHOT="";
+    local SERVER="";
     local AUTOREMOVE="false";
+    #local TEST="false";
+    #local TESTFLAG="";
     local VOLUMES="";
     while [[ "$#" -gt 0 ]]; do
         case $1 in
+            --snapshotvolume) SNAPSHOTVOLUME="$2"; shift;;
             --autoremove) AUTOREMOVE="true";;
-            -v|--volume) if [[ -z ${VOLUMES} ]]; then VOLUMES="$2"; else VOLUMES="${VOLUMES} $2"; fi; shift ;;
+            --server) SERVER="$2"; shift;;
+            --volume)
+                # Todo, make useable multiple times
+            VOLUMES="$2"; shift;;
             -h|--help) printSendSnapshotHelp; exit 0;;
+            -*) logError "Unknown Argument: $1"; printSendSnapshotHelp; exit 1;;
             *)
-                if [[ -z ${VOLUMES} ]]; then
-                    VOLUMES="$1";
-                else
-                    VOLUMES="${VOLUMES} $1";
+                if [[ -z "${VOLUME}" ]]; then
+                    VOLUME="${1}";
+                    if [[ -z "${VOLUME}" ]]; then logError "<volume> cannot be empty"; printSendSnapshotHelp; exit 1; fi;
                 fi;
-            ;;
         esac;
         shift;
     done;
     
     # Debug Variables
-    logFunction "snapshotCommand --snapshotvolume \`${SNAPSHOTVOLUME}\` --volume \`${VOLUMES}\`";
+    logFunction "snapshotCommand --snapshotvolume \`${SNAPSHOTVOLUME}\` --server \`${SERVER}\` --volume \`${VOLUMES}\`";
     
     # Auto Detect SNAPSHOTVOLUME and VOLUMES
     if ! autodetect-volumes; then logError "Could not autodetect volumes"; exit 1; fi;
     if ! autodetect-snapshotvolume; then logError "Could not autodetect snapshotvolume"; exit 1; fi;
     
     # Detect Server
-    if ! autodetect-server; then
+    if ! autodetect-server --uri "${SERVER}" --hostname ""; then
         logError "snapshotCommand#Failed to detect server, please specify one with --source <uri>";
         exit 1;
     fi;

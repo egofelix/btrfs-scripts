@@ -124,10 +124,15 @@ function autodetect-server {
         #    export SSH_CALL="ssh -o PasswordAuthentication=no -o VerifyHostKeyDNS=yes -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
         #fi;
         if ! runCmd ${SSH_CALL} "test"; then
-            logError "Cannot connect to ${URI}";
-            exit 1;
+            if [[ -z "${RUNCMD_CONTENT}" ]]; then
+                logWarn "Cannot connect to ${URI}";
+            else
+                logWarn "Cannot connect to ${URI}: ${RUNCMD_CONTENT}";
+            fi;
+            return 1;
         fi;
     fi;
     
     logSuccess "Discovered Server: ${SSH_USERNAME}@${SSH_HOSTNAME}:${SSH_PORT}";
+    return 0;
 }
