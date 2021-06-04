@@ -5,7 +5,7 @@
             "request": "launch",
             "name": "system-manager send-snapshot --help",
             "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/manager.sh",
+            "program": "${workspaceFolder}/_router.sh",
             "args": [
                 "--debug",
                 "--host-script",
@@ -23,7 +23,7 @@
             "request": "launch",
             "name": "system-manager create-user --help",
             "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/manager.sh",
+            "program": "${workspaceFolder}/_router.sh",
             "args": [
                 "--debug",
                 "--host-script",
@@ -39,7 +39,7 @@
             "request": "launch",
             "name": "system-manager --help",
             "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/manager.sh",
+            "program": "${workspaceFolder}/_router.sh",
             "args": [
                 "--debug",
                 "--host-script",
@@ -54,7 +54,7 @@
             "request": "launch",
             "name": "--help",
             "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/manager.sh",
+            "program": "${workspaceFolder}/_router.sh",
             "args": [
                 "--debug",
                 "--help"
@@ -66,7 +66,7 @@
             "request": "launch",
             "name": "create-user --username btest",
             "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/manager.sh",
+            "program": "${workspaceFolder}/_router.sh",
             "args": [
                 "--debug",
                 "create-user",
@@ -80,7 +80,7 @@
             "request": "launch",
             "name": "create-snapshot",
             "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/manager.sh",
+            "program": "${workspaceFolder}/_router.sh",
             "args": [
                 "--debug",
                 "create-snapshot"
@@ -92,7 +92,7 @@
             "request": "launch",
             "name": "send-snapshot --server ssh://btest@127.0.0.1:22222/ --autoremove",
             "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/manager.sh",
+            "program": "${workspaceFolder}/_router.sh",
             "args": [
                 "--debug",
                 "send-snapshot",

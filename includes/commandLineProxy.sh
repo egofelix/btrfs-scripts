@@ -35,9 +35,9 @@ function commandLineProxy {
     
     # Check if subcommand exists
     if [ -f "${COMMAND_PATH}" ]; then
-        local COMMAND_SCRIPT="${COMMAND_PATH%.*}.${COMMAND_VALUE,,}.sh";
+        local COMMAND_SCRIPT="${COMMAND_PATH%/*}/${COMMAND_VALUE,,}.sh";
     else
-        local COMMAND_SCRIPT="${COMMAND_PATH}${COMMAND_VALUE,,}.sh";
+        local COMMAND_SCRIPT="${COMMAND_PATH}${COMMAND_VALUE,,}/_router.sh";
     fi;
     
     if [[ ! -f "${COMMAND_SCRIPT}" ]]; then
