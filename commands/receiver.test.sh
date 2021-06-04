@@ -18,7 +18,7 @@ function receiverSubCommand() {
     done;
     
     # Create Lockfile (Only one simultan instance per SNAPSHOTSPATH is allowed)
-    if ! createLockFile --lockfile "${SNAPSHOTVOLUME}/.$(basename $ENTRY_SCRIPT).lock"; then
+    if ! createLockFile --lockfile "${BACKUPVOLUME}/.$(basename $ENTRY_SCRIPT).lock"; then
         logError "Failed to lock lockfile \"${LOCKFILE}\". Maybe another action is running already?";
         exit 1;
     fi;

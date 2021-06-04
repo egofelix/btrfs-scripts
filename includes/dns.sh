@@ -21,7 +21,8 @@ function dnsResolveSrv {
     # Try With nslookup
     if ! which nslookup &> /dev/null; then
         if ! runCmd nslookup -type=srv ${HOSTNAME}; then
-            logError "Failed to lookup ${HOSTNAME}, type \"SRV\", cmd \"nslookup\"";
+            logWarn "Failed to lookup ${HOSTNAME}, type \"SRV\", cmd \"nslookup\"";
+            return 1;
         fi;
         
         if [[ "${RUNCMD_CONTENT}" = *"NXDOMAIN"* ]]; then

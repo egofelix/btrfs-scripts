@@ -14,7 +14,6 @@ function printReceiverHelp() {
     echo "";
     echo "Possible commands are:";
     printCommandLineProxyHelp --command-path "${BASH_SOURCE}";
-    exit 0;
 }
 
 function receiver() {

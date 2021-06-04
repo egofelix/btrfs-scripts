@@ -87,8 +87,12 @@ function sendSnapshot {
         
         # Create Directory for this volume on the backup server
         logDebug "Ensuring volume directory at server for \"${VOLUME}\"...";
-        CREATERESULT=$(${SSH_CALL} "create-volume" "${VOLUME}");
-        if [[ $? -ne 0 ]]; then logError "Command 'create-volume \"${VOLUME}\"' failed: ${CREATERESULT}."; exit 1; fi;
+        if ! runCmd ${SSH_CALL} "create-volume" "${VOLUME}"; then
+            logError "Command 'create-volume \"${VOLUME}\"' failed: ${CREATERESULT}.";
+            exit 1;
+        fi;
+        #CREATERESULT="${RUNCMD_CONTENT}";
+        #if [[ $? -ne 0 ]]; then fi;
         
         # Send FIRSTSNAPSHOT
         CHECKVOLUMERESULT=$(${SSH_CALL} check-volume "${VOLUME}" "${FIRSTSNAPSHOT}");

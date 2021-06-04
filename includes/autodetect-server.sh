@@ -83,7 +83,7 @@ function autodetect-server {
         
         export SSH_HOSTNAME="${DNS_HOSTNAME}"
         logLine "Autodetected Backup Server: ${SSH_USERNAME}@${DNS_HOSTNAME}:${DNS_PORT}";
-        #export SSH_URI="ssh://${SSH_USERNAME}@${DNS_HOSTNAME}:${DNS_PORT}";
+        URI="ssh://${SSH_USERNAME}@${DNS_HOSTNAME}:${DNS_PORT}";
     fi;
     
     # Split SSH-URI
@@ -114,22 +114,17 @@ function autodetect-server {
     logDebug "Testing ssh access: ${SSH_USERNAME}@${SSH_HOSTNAME}:${SSH_PORT}...";
     
     # Try with local key
-    if isTrue ${SSH_ACCEPT_NEW_HOSTKEY:-}; then
-        export SSH_CALL="ssh -o IdentityFile=/etc/ssh/ssh_host_ed25519_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
-    else
-        export SSH_CALL="ssh -o IdentityFile=/etc/ssh/ssh_host_ed25519_key -o IdentitiesOnly=yes -o VerifyHostKeyDNS=yes -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
-    fi;
-    local TESTRESULT=$(${SSH_CALL} "testReceiver")
-    if [[ $? -ne 0 ]]; then
+    export SSH_CALL="ssh -o IdentityFile=/etc/ssh/ssh_host_ed25519_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}";
+    if ! runCmd ${SSH_CALL} "test"; then
         # Test ssh without key (User auth)
-        if isTrue ${SSH_INSECURE}; then
-            export SSH_CALL="ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
-        else
-            export SSH_CALL="ssh -o PasswordAuthentication=no -o VerifyHostKeyDNS=yes -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
-        fi;
-        TESTRESULT=$(${SSH_CALL} "testReceiver")
-        if [[ $? -ne 0 ]]; then
-            logError "Cannot connect to ${SSH_URI}";
+        #if isTrue ${SSH_INSECURE}; then
+        #export SSH_CALL="ssh -o IdentityFile=/etc/ssh/ssh_host_ed25519_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+        export SSH_CALL="ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+        #else
+        #    export SSH_CALL="ssh -o PasswordAuthentication=no -o VerifyHostKeyDNS=yes -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+        #fi;
+        if ! runCmd ${SSH_CALL} "test"; then
+            logError "Cannot connect to ${URI}";
             exit 1;
         fi;
     fi;
