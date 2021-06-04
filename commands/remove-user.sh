@@ -66,12 +66,12 @@ function removeUser {
     fi;
     
     # Remove volumes under the user
-    if ! runCmd find "${BACKUPVOLUME}/${USERNAME}" -maxdepth 1 -type d ! -iname \".*\" -iwholename \""${BACKUPVOLUME}/${USERNAME}/*"\"; then
+    if ! runCmd find "${BACKUPVOLUME}/${USERNAME}" -maxdepth 2 -type d ! -iname ".*" -iwholename "${BACKUPVOLUME}/${USERNAME}/*/*"; then
         logError "Failed to list contents of user";
         exit 1;
     fi;
     if [[ ! -z "${RUNCMD_CONTENT}" ]]; then
-        if ! runCmd btrfs subvol del "${BACKUPVOLUME}/${USERNAME}/*/*"; then
+        if ! runCmd btrfs subvol del ${BACKUPVOLUME}/${USERNAME}/*/*; then
             logError "Could not clean user";
             exit 1;
         fi;
