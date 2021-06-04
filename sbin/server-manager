@@ -1,0 +1,18 @@
+#!/bin/bash
+MY_COMMAND="server-manager";
+SCRIPT_SOURCE=$(readlink -f ${BASH_SOURCE});
+if [[ "${1:-}" == "--quiet" ]];
+then
+    shift;
+    . "${SCRIPT_SOURCE%/*/*}/manager.sh" --quiet --host-script "${BASH_SOURCE}" "${MY_COMMAND}" $@;
+elif [[ "${1:-}" == "--debug" ]];
+then
+    shift;
+    . "${SCRIPT_SOURCE%/*/*}/manager.sh" --debug --host-script "${BASH_SOURCE}" "${MY_COMMAND}" $@;
+elif [[ "${1:-}" == "--verbose" ]];
+then
+    shift;
+    . "${SCRIPT_SOURCE%/*/*}/manager.sh" --verbose --host-script "${BASH_SOURCE}" "${MY_COMMAND}" $@;
+else
+    . "${SCRIPT_SOURCE%/*/*}/manager.sh" --host-script "${BASH_SOURCE}" "${MY_COMMAND}" $@;
+fi;

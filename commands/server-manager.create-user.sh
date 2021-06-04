@@ -73,7 +73,7 @@ function createUser {
         exit 1;
     fi;
     # check if sudoers allows receiver
-    local CHECKLINE="%ssh-backup-users ALL=(ALL) NOPASSWD: ${ENTRY_PATH}/ssh-client";
+    local CHECKLINE="%ssh-backup-users ALL=(ALL) NOPASSWD: ${ENTRY_PATH}/sbin/ssh-client";
     if ! runCmd grep "${CHECKLINE}" /etc/sudoers; then
         logDebug "adding \"${CHECKLINE}\" to /etc/sudoers";
         echo "${CHECKLINE}" >> /etc/sudoers;
@@ -97,7 +97,7 @@ function createUser {
     
     # Create template authorized_keys
     mkdir -p "${BACKUPVOLUME}/${USERNAME}/.ssh";
-    echo "command=\"/usr/bin/sudo -n ${ENTRY_PATH}/ssh-client --target \\\"${BACKUPVOLUME}/${USERNAME}\\\" \\\"\${SSH_ORIGINAL_COMMAND}\\\"\" SSHKEYHERE" > "${BACKUPVOLUME}/${USERNAME}/.ssh/authorized_keys";
+    echo "command=\"/usr/bin/sudo -n ${ENTRY_PATH}/sbin/ssh-client --target \\\"${BACKUPVOLUME}/${USERNAME}\\\" \\\"\${SSH_ORIGINAL_COMMAND}\\\"\" SSHKEYHERE" > "${BACKUPVOLUME}/${USERNAME}/.ssh/authorized_keys";
     chown -R "${USERNAME}:" "${BACKUPVOLUME}/${USERNAME}/.ssh";
     
     # Done

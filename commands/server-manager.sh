@@ -14,14 +14,14 @@ function receiver() {
     #local LOGFILE="/tmp/receiver.log";
     
     # Scan Arguments
-    local HOST_ARGS=" [-r|--remote <ssh-uri>] [-s|--snapshots <snapshotvolume>]";
+    local BACKUPVOLUME="";
     local SNAPSHOTVOLUME="";
-    local SSH_URI="";
     local RECEIVER_COMMAND="";
+    local HOST_ARGS=" [-b|--backup <backupvolume>]";
     while [[ "$#" -gt 0 ]]; do
         case $1 in
-            -r|--remote) SSH_URI="$2"; shift;;
-            -s|--snapshots) SNAPSHOTVOLUME="$2"; shift;;
+            -b|--backup) BACKUPVOLUME="$2"; shift;;
+            -s|--snapshot) SNAPSHOTVOLUME="$2"; shift;;
             -h|--help) printReceiverHelp; exit 0;;
             -*) logError "Unknown Argument: $1"; printReceiverHelp; exit 1;;
             *) RECEIVER_COMMAND="${1}"; shift; break;;
@@ -30,7 +30,7 @@ function receiver() {
     done;
     
     # Debug Variables
-    logFunction "receiver#arguments --snapshotvolume \`${SNAPSHOTVOLUME}\` --remote\`${SSH_URI}\` \`${RECEIVER_COMMAND}\`";
+    logFunction "receiver#arguments --snapshotvolume \`${SNAPSHOTVOLUME}\` --backupvolume\`${BACKUPVOLUME}\` \`${RECEIVER_COMMAND}\`";
     
     # Validate
     if [[ -z "${RECEIVER_COMMAND}" ]]; then
@@ -40,11 +40,11 @@ function receiver() {
     fi;
     
     # Detect / check variables
-    autodetect-server --uri "${SSH_URI}";
-    autodetect-snapshotvolume --snapshotvolume "${SNAPSHOTVOLUME}";
+    #autodetect-snapshotvolume --snapshotvolume "${SNAPSHOTVOLUME}";
+    autodetect-backupvolume --backupvolume "${BACKUPVOLUME}";
     
     # Debug
-    logFunction "receiver#expandedArguments --snapshotvolume \`${SNAPSHOTVOLUME}\` --remote\`${SSH_URI}\` \`${RECEIVER_COMMAND}\`";
+    logFunction "receiver#expandedArguments --snapshotvolume \`${SNAPSHOTVOLUME}\` --backupvolume\`${BACKUPVOLUME}\` \`${RECEIVER_COMMAND}\`";
     
     # Proxy
     if ! commandLineProxy --command-name "client-command" --command-value "${RECEIVER_COMMAND:-}" --command-path "${BASH_SOURCE}" $@; then printReceiverHelp; exit 1; fi;
