@@ -45,6 +45,8 @@ function manager() {
         shift;
     done;
     
+    # Check Root
+    if [[ "$EUID" -ne 0 ]]; then logError "Please run as root"; exit 1; fi;
     
     # Proxy
     if ! commandLineProxy --command-name "command" --command-value "${ENTRY_COMMAND:-}" --command-path "${SCRIPT_SOURCE%/*}/commands/" $@; then printManagerHelp; exit 1; fi;

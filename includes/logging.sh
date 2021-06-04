@@ -2,7 +2,7 @@
 function logDebug {
     if ! isTrue "${DEBUG:-}"; then return; fi;
     if [[ ! -z "${LOGFILE:-}" ]]; then echo "[DEBUG] [MSG] $@" >> ${LOGFILE}; fi;
-    echo -en "\033[02;98m" && echo -n "[DEBUG] [MSG] $@" && echo -e "\e[0m";
+    echo -en "\033[02;98m" && echo -n "[DEBUG] [MSG] " $@ && echo -e "\e[0m";
 }
 
 function logFunction {

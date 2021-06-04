@@ -58,7 +58,7 @@
         {
             "type": "bashdb",
             "request": "launch",
-            "name": "ssh-client --target /.backups/test test",
+            "name": "ssh-client --target /.backups/btest btest",
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/manager.sh",
             "args": [
@@ -85,26 +85,15 @@
         {
             "type": "bashdb",
             "request": "launch",
-            "name": "send-snapshot",
-            "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/manager.sh",
-            "args": [
-                "--debug",
-                "send-snapshot"
-            ],
-            "terminalKind": "integrated"
-        },
-        {
-            "type": "bashdb",
-            "request": "launch",
-            "name": "send-snapshot --server ssh://backup-tester@127.0.0.1:22222/",
+            "name": "send-snapshot --server ssh://btest@127.0.0.1:22222/ --autoremove",
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/manager.sh",
             "args": [
                 "--debug",
                 "send-snapshot",
                 "--server",
-                "ssh://backup-tester@127.0.0.1:22222/"
+                "ssh://btest@127.0.0.1:22222/",
+                "--autoremove"
             ],
             "terminalKind": "integrated"
         },
@@ -117,7 +106,7 @@
             "args": [
                 "--debug",
                 "--server",
-                "ssh://pluto@jupiter.egofelix.de:22222/",
+                "ssh://btest@127.0.0.1:22222/",
                 "create-snapshot",
                 "--volume",
                 "home-data"

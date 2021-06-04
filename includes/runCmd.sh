@@ -1,10 +1,10 @@
 #!/bin/bash
 function runCmd {
-    logDebug "Executing \`$@\`";
+    logDebug "Executing" $@;
     
     export RUNCMD_CONTENT=""
     export RUNCMD_RETURNCODE=1
-    RUNCMD_CONTENT=$(LC_ALL=C $@ 2>&1)
+    RUNCMD_CONTENT=$(LC_ALL=C "$@" 2>&1)
     RUNCMD_RETURNCODE=$?
     
     if [ ${RUNCMD_RETURNCODE} -ne 0 ]; then
