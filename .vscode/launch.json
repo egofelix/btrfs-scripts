@@ -3,6 +3,20 @@
         {
             "type": "bashdb",
             "request": "launch",
+            "name": "create-user --username btest",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/manager.sh",
+            "args": [
+                "--debug",
+                "create-user",
+                "--username",
+                "btest"
+            ],
+            "terminalKind": "integrated"
+        },
+        {
+            "type": "bashdb",
+            "request": "launch",
             "name": "--help",
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/manager.sh",
@@ -15,12 +29,12 @@
         {
             "type": "bashdb",
             "request": "launch",
-            "name": "receiver --help",
+            "name": "ssh-client --help",
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/manager.sh",
             "args": [
                 "--debug",
-                "receiver",
+                "ssh-client",
                 "--help"
             ],
             "terminalKind": "integrated"
@@ -28,12 +42,12 @@
         {
             "type": "bashdb",
             "request": "launch",
-            "name": "receiver --target /.backups/test/ create-volume haha-data",
+            "name": "ssh-client --target /.backups/test/ create-volume haha-data",
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/manager.sh",
             "args": [
                 "--debug",
-                "receiver",
+                "ssh-client",
                 "--target",
                 "/.backups/test/",
                 "create-volume",
@@ -44,12 +58,14 @@
         {
             "type": "bashdb",
             "request": "launch",
-            "name": "receiver test",
+            "name": "ssh-client --target /.backups/test test",
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/manager.sh",
             "args": [
                 "--debug",
-                "receiver",
+                "ssh-client",
+                "--target",
+                "/.backups/test",
                 "test"
             ],
             "terminalKind": "integrated"

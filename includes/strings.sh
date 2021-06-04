@@ -1,6 +1,6 @@
 #!/bin/bash
 function containsIllegalCharacter {
-  local ILLEGALCHARACTERS=("." "$" "&" "(" ")" "{" "}" "[" "]" ";" "<" ">" "\`" "|" "*" "?" "\"" "'" "*" "\\" "/")
+  local ILLEGALCHARACTERS=("." "$" "&" "(" ")" "{" "}" "[" "]" ";" "<" ">" "\`" "|" "*" "?" "\"" "'" "*" "\\" "/" "+")
   for CHAR in "${ILLEGALCHARACTERS[@]}"
   do
     if [[ "$1" == *"${CHAR}"* ]]; then return 0; fi;

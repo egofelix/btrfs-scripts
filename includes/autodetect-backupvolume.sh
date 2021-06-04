@@ -1,17 +1,22 @@
 function autodetect-backupvolume() {
-    if [[ ! -z "${BACKUPVOLUME:-}" ]]; then
-        logDebug "Skipping autodetect-backupvolume, using Cache...";
-        return 0;
-    fi;
-}
-
-function validate-backupvolume() {
+    # Scan Arguments
+    logFunction "autodetect-backupvolume#Scanning Arguments";
+    local ARG_BACKUPVOLUME="";
+    while [[ "$#" -gt 0 ]]; do
+        case $1 in
+            --backupvolume) ARG_BACKUPVOLUME="$2"; shift;;
+            *) logError "autodetect-backupvolume#Unknown Argument: $1"; return 1;;
+        esac;
+        shift;
+    done;
+    
     # Search BACKUPVOLUME via Environment or AutoDetect
-    #if isEmpty "${BACKUPVOLUME:-}"; then export BACKUPVOLUME=$(LC_ALL=C mount | grep '@backups' | grep -o 'on /\..* type btrfs' | awk '{print $2}'); fi;
-    export BACKUPVOLUME=$(removeTrailingChar "${BACKUPVOLUME}" "/");
-    if isEmpty "${BACKUPVOLUME}"; then return 1; fi;
+    if isEmpty "${ARG_BACKUPVOLUME:-}"; then ARG_BACKUPVOLUME=$(LC_ALL=C mount | grep '@backups' | grep -o 'on /\..* type btrfs' | awk '{print $2}'); fi;
+    if isEmpty "${ARG_BACKUPVOLUME}"; then return 1; fi;
     
     # Test if SNAPSHOTSPATH is a btrfs subvol
+    ARG_BACKUPVOLUME=$(removeTrailingChar "${ARG_BACKUPVOLUME}" "/");
+    export BACKUPVOLUME="${ARG_BACKUPVOLUME}";
     logDebug "Validating BACKUPVOLUME: ${BACKUPVOLUME}";
     #if isEmpty $(LC_ALL=C mount | grep "${BACKUPVOLUME}" | grep 'type btrfs'); then logError "<backupvolume> \"${BACKUPVOLUME}\" must be a btrfs volume"; exit 1; fi;
     

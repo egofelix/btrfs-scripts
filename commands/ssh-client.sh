@@ -45,7 +45,8 @@ function receiver() {
     fi;
     
     # Validate
-    if ! validate-backupvolume; then logError "<backupvolume> cannot be empty"; exit 1; fi;
+    if isEmpty ${BACKUPVOLUME}; then logError "<backupvolume> cannot be empty"; exit 1; fi;
+    if ! autodetect-backupvolume --backupvolume "${BACKUPVOLUME}"; then logError "<backupvolume> cannot be empty"; exit 1; fi;
     #if [[ -z "${USERNAME}" ]]; then logError "<username> cannot be empty"; exit 1; fi;
     #if containsIllegalCharacter "${USERNAME}"; then logError "Illegal character detected in <username> \"${USERNAME}\"."; return 1; fi;
     
