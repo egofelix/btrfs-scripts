@@ -76,7 +76,10 @@ function createUser {
     fi;
     
     # Check if backup-volume has folder
-    if [[ -d "${BACKUPVOLUME}/${USERNAME}" ]]; then logError "<username> \"${USERNAME}\" seems to already exist. Found directory \"${BACKUPVOLUME}/${USERNAME}\""; return 1; fi;
+    if [[ -d "${BACKUPVOLUME}/${USERNAME}" ]]; then
+        logError "<username> \"${USERNAME}\" seems to already exist. Found directory \"${BACKUPVOLUME}/${USERNAME}\"";
+        return 1;
+    fi;
     
     # Create user
     if ! runCmd useradd --home-dir "${BACKUPVOLUME}/${USERNAME}" --create-home --groups "${GID}" "${USERNAME}"; then
@@ -85,9 +88,9 @@ function createUser {
     fi;
     
     # Create template authorized_keys
-    mkdir -p "${BACKUPVOLUME}/${USERNAME}/.ssh"
-    echo "command=\"/usr/bin/sudo -n ${ENTRY_PATH}/ssh-client --target \\\"${BACKUPVOLUME}/${USERNAME}\\\" \\\"\${SSH_ORIGINAL_COMMAND}\\\"\" SSHKEYHERE" > "${BACKUPVOLUME}/${USERNAME}/.ssh/authorized_keys"
-    chown -R "${USERNAME}:" "${BACKUPVOLUME}/${USERNAME}/.ssh"
+    mkdir -p "${BACKUPVOLUME}/${USERNAME}/.ssh";
+    echo "command=\"/usr/bin/sudo -n ${ENTRY_PATH}/ssh-client --target \\\"${BACKUPVOLUME}/${USERNAME}\\\" \\\"\${SSH_ORIGINAL_COMMAND}\\\"\" SSHKEYHERE" > "${BACKUPVOLUME}/${USERNAME}/.ssh/authorized_keys";
+    chown -R "${USERNAME}:" "${BACKUPVOLUME}/${USERNAME}/.ssh";
     
     # Done
     logLine "User \"${USERNAME}\" created";

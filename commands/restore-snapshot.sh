@@ -22,6 +22,7 @@ function restoreSnapshot {
                     VOLUME="${1}";
                     if [[ -z "${VOLUME}" ]]; then logError "<volume> cannot be empty"; exit 1; fi;
                 fi;
+            ;;
         esac;
         shift;
     done;
@@ -40,6 +41,8 @@ function restoreSnapshot {
         logError "snapshotCommand#Failed to detect server, please specify one with --source <uri>";
         exit 1;
     fi;
+    
+    logError "Not implemented yet";
 }
 
 
