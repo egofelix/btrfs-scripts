@@ -20,7 +20,7 @@ function dnsResolveSrv {
     
     # Try With nslookup
     if ! which nslookup &> /dev/null; then
-        if ! runCmd LC_ALL=C nslookup -type=srv ${HOSTNAME}; then
+        if ! runCmd nslookup -type=srv ${HOSTNAME}; then
             logError "Failed to lookup ${HOSTNAME}, type \"SRV\", cmd \"nslookup\"";
         fi;
         

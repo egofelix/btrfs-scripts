@@ -74,7 +74,8 @@
             "program": "${workspaceFolder}/manager.sh",
             "args": [
                 "--debug",
-                "send-snapshot"
+                "send-snapshot",
+                "ssh://pluto@jupiter.egofelix.de:22222/"
             ],
             "terminalKind": "integrated"
         },

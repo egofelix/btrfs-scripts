@@ -2,7 +2,7 @@
 function runCmd {
     logDebug "Executing \`$@\`";
     
-    export RUNCMD_CONTENT=$($@ 2>&1);
+    export RUNCMD_CONTENT=$(LC_ALL=C $@ 2>&1);
     
     export RUNCMD_RETURNCODE=$?;
     

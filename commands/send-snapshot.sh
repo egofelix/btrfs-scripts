@@ -45,7 +45,6 @@ function sendSnapshot {
     logFunction "snapshotCommand --target \`${SNAPSHOTVOLUME}\` --snapshot \`${SNAPSHOT}\`${TESTFLAG} ${VOLUME}";
     
     # Auto Detect SNAPSHOTVOLUME and VOLUMES
-    loadFunction autodetect-snapshotvolume autodetect-volumes;
     if ! autodetect-volumes; then logError "Could not autodetect volumes"; exit 1; fi;
     if ! autodetect-snapshotvolume; then logError "Could not autodetect snapshotvolume"; exit 1; fi;
     
@@ -56,8 +55,7 @@ function sendSnapshot {
     logFunction "createSnapshot#expandedArguments --target \`${SNAPSHOTVOLUME}\` --volume \`$(echo ${VOLUMES})\`";
     
     # Detect Server
-    loadFunction serverDetect;
-    if ! serverDetect --uri "${SSH_URI}" --hostname ""; then
+    if ! autodetect-server --uri "${SSH_URI:-}" --hostname ""; then
         logError "snapshotCommand#Failed to detect server, please specify one with --source <uri>";
         exit 1;
     fi;

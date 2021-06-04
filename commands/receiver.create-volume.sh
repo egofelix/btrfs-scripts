@@ -13,6 +13,7 @@ function receiverSubCommand() {
     local VOLUME="";
     while [[ "$#" -gt 0 ]]; do
         case $1 in
+            -h|--help) printReceiverSubCommandHelp; exit 0;;
             *) if [[ -z "${VOLUME}" ]]; then
                     VOLUME="${1}";
                     if [[ -z "${VOLUME}" ]]; then
