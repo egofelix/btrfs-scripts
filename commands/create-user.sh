@@ -1,7 +1,12 @@
 #!/bin/bash
 # Command create-user [-u|--username] <username>
 function printCreateUserHelp {
-    echo "Usage: ${ENTRY_SCRIPT} [-q|--quiet] ${ENTRY_COMMAND} [-u|--username] <username>";
+    echo "Usage: ${ENTRY_SCRIPT} ${ENTRY_COMMAND} [-b|--backupvolume <backupvolume>] [-u|--username] <username>";
+    echo "";
+    echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND} test";
+    echo "      Create a local user test for backup usage.";
+    echo "";
+    echo "If you omit the <backupvolume> then the script will try to locate it with the subvolume name @backups.";
     echo "";
 }
 function createUser {
@@ -13,7 +18,8 @@ function createUser {
             -u|--username) USERNAME="$2"; shift;;
             -b|--backupvolume) BACKUPVOLUME="$2"; shift;;
             -h|--help) printCreateUserHelp; exit 0;;
-            *) if [[ -z "${USERNAME}" ]]; then
+            *)
+                if [[ -z "${USERNAME}" ]]; then
                     USERNAME="${1}";
                     if [[ -z "${USERNAME}" ]]; then
                         logError "<username> cannot be empty";
