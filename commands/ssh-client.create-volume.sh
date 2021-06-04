@@ -37,7 +37,7 @@ function receiverSubCommand() {
     if ! runCmd mkdir -p ${BACKUPVOLUME}/${VOLUME}; then logError "Failed to create volume directory."; exit 1; fi;
     
     # Done
-    logLine "success";
+    echo "success";
     exit 0;
 }
 

@@ -33,13 +33,29 @@ function sendSnapshotData {
     local SENDRESULT="";
     
     if [[ -z "${3:-}" ]]; then
+        local CMD="btrfs send -q ${SNAPSHOTVOLUME}/${1}/${2} | ${SSH_CALL} receive-snapshot --volume "${1}" --snapshot "${2}"";
+        logDebug "[MSG] Executing ${CMD}";
         SENDRESULT=$(btrfs send -q ${SNAPSHOTVOLUME}/${1}/${2} | ${SSH_CALL} receive-snapshot --volume "${1}" --snapshot "${2}");
     else
-        SENDRESULT=$(btrfs send -q -p  ${SNAPSHOTVOLUME}/${1}/${3} ${SNAPSHOTVOLUME}/${1}/${2} | ${SSH_CALL} receive-snapshot --volume "${1}" --snapshot "${2}");
+        local CMD="btrfs send -p ${SNAPSHOTVOLUME}/${1}/${3} -q ${SNAPSHOTVOLUME}/${1}/${2} | ${SSH_CALL} receive-snapshot --volume "${1}" --snapshot "${2}"";
+        logDebug "[MSG] Executing ${CMD}";
+        SENDRESULT=$(btrfs send -q -p ${SNAPSHOTVOLUME}/${1}/${3} ${SNAPSHOTVOLUME}/${1}/${2} | ${SSH_CALL} receive-snapshot --volume "${1}" --snapshot "${2}");
     fi;
     
-    if [[ $? -ne 0 ]]; then logError "SSH-Command \`$@\` failed: ${SENDRESULT}."; exit 1; fi;
-    if ! isSuccess "${SENDRESULT}"; then logWarn "Command 'receive-snapshot --volume \"${1}\" --snapshot \"${2}\"' failed: ${SENDRESULT}"; return 1; fi;
+    
+    if [[ $? -ne 0 ]]; then
+        logError "Unexpected Failed Command: \`${CMD}\` Result: ${SENDRESULT}";
+        exit 1;
+    fi;
+    
+    logSuccess "Executed \`${CMD}\` Output: \`${SENDRESULT:-}\`";
+    #if [ ! -z "${SENDRESULT}" ]; then
+    #    logSuccess "Executed \`${CMD}\` Output: \`${SENDRESULT}\`";
+    #else
+    #    logSuccess "Executed \`${CMD}\`";
+    #fi;
+    
+    if ! isSuccess "${SENDRESULT}"; then logWarn "Command \`${CMD}\` did not return success: \`${SENDRESULT}\`"; return 1; fi;
     
     return 0;
 }
@@ -165,8 +181,10 @@ function sendSnapshot {
             # Remove previous subvolume as it is not needed here anymore!
             if isTrue ${AUTOREMOVE}; then
                 logDebug "Removing SNAPSHOT \"${PREVIOUSSNAPSHOT}\"...";
-                REMOVERESULT=$(btrfs subvolume delete ${SNAPSHOTVOLUME}/${VOLUME}/${PREVIOUSSNAPSHOT})
-                if [[ $? -ne 0 ]]; then logError "Failed to remove snapshot \"${SNAPSHOT}\" for volume \"${VOLUME}\": ${REMOVERESULT}."; exit 1; fi;
+                if ! runCmd btrfs subvolume delete "${SNAPSHOTVOLUME}/${VOLUME}/${PREVIOUSSNAPSHOT}"; then
+                    logError "Failed to remove snapshot \"${SNAPSHOT}\" for volume \"${VOLUME}\": ${RUNCMD_CONTENT}.";
+                    exit 1;
+                fi;
             fi;
             
             # Remember this snapshot as previos so we can send the next following backup as incremental

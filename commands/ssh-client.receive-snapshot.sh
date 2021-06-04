@@ -61,11 +61,9 @@ function receiverSubCommand() {
     logLine "Starting Receive..";
     if ! runCmd btrfs receive ${BACKUPVOLUME}/${VOLUME} < /dev/stdin; then
         RECEIVERESULT=${RUNCMD_CONTENT};
-        logError "ARG";
         exit 1;
     fi;
     export RECEIVERESULT=${RUNCMD_CONTENT};
-    logError "ARG2: ${RECEIVERESULT}";
     # Get name of received subvolume
     SUBVOLCHECK=$(echo "${RUNCMD_CONTENT}" | grep -P 'At (subvol|snapshot) ' | awk '{print $3}');
     if [[ -z "${SUBVOLCHECK}" ]]; then
