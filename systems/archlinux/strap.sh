@@ -4,7 +4,7 @@ if [[ ! -f "/etc/pacman.d/mirrorlist.bak" ]]; then
     cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
 fi;
 
-echo "https://cached.egofelix.de/archlinux/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist
+echo "Server = https://cached.egofelix.de/archlinux/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist
 
 if ! runCmd pacstrap /tmp/mnt/root base; then
     if ! runCmd /tmp/arch-bootstrap.sh /tmp/mnt/root; then
