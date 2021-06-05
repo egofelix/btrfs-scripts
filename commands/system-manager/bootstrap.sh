@@ -63,6 +63,10 @@ function run {
     # Detect current system & Check Dependencies and Install them if live system, otherwise error out
     # TODO
     
+    # Unmount old
+    $(umount -R /tmp/mnt/root || true);
+    $(umount -R /tmp/mnt/disks/system || true);
+    
     # Format the harddisk
     logDebug "Checking if we need to format";
     if isTrue "${FORCE}" || ! harddisk-format-check --crypt "${CRYPT}" --crypt-mapper "cryptsystem" --harddisk "${HARDDISK}"; then
