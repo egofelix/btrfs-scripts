@@ -110,7 +110,7 @@ function run {
     if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@${DISTRO,,}-swap && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@${DISTRO,,}-swap; then logError "Failed to create btrfs @${DISTRO,,}-swap-Volume"; exit 1; fi;
     if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@${DISTRO,,}-var-logs-data && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@${DISTRO,,}-var-logs-data; then logError "Failed to create btrfs @${DISTRO,,}-var-logs-data-Volume"; exit 1; fi;
     if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@${DISTRO,,}-var-tmp-data && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@${DISTRO,,}-var-tmp-data; then logError "Failed to create btrfs @${DISTRO,,}-var-tmp-data-Volume"; exit 1; fi;
-    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/${DISTRO,,}-root-data && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/${DISTRO,,}-root-data; then logError "Failed to create btrfs ROOT-DATA-Volume"; exit 1; fi;
+    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/${DISTRO,,}-root-data && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/${DISTRO,,}-root-data; then logError "Failed to create btrfs ${DISTRO^^}-ROOT-DATA-Volume"; exit 1; fi;
     for subvolName in ${SUBVOLUMES}
     do
         if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/${DISTRO,,}-${subvolName,,}-data && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/${DISTRO,,}-${subvolName,,}-data; then logError "Failed to create btrfs ${subvolName^^}-DATA-Volume"; exit 1; fi;
