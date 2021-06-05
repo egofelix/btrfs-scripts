@@ -135,4 +135,65 @@ if ! runCmd mount -o subvol=/@tmp ${PART_SYSTEM} /tmp/mnt/root/var/tmp; then log
 logLine "Installing Base-System (${DISTRO^^})...";
 source "${BASH_SOURCE%/*}/scripts/strap.sh";
 
+# Generate fstab
+genfstab -pL /tmp/mnt/root >> /tmp/mnt/root/etc/fstab;
+if [ $? -ne 0 ]; then
+    logError "Failed to generate fstab";
+    exit 1;
+fi;
 
+if isTrue "${CRYPTED}"; then
+    if ! runCmd sed -i 's#^LABEL=system#/dev/mapper/cryptsystem#g' /tmp/mnt/root/etc/fstab; then logError "Failed to modify fstab"; exit 1; fi;
+fi;
+
+if ! runCmd sed -i 's/,subvolid=[0-9]*//g' /tmp/mnt/root/etc/fstab; then logError "Failed to modify fstab"; exit 1; fi;
+
+# Check if there are more subvol defined and remove ones starting with / if so
+if runCmd grep -E '\,subvol=[^\/][A-Za-z]+' /etc/fstab; then
+    if ! runCmd sed -i 's/,subvol=\/[^,]*//g' /tmp/mnt/root/etc/fstab; then logError "Failed to modify fstab"; exit 1; fi;
+fi;
+
+# Add Swapfile to fstab
+echo '# Swapfile' >> /tmp/mnt/root/etc/fstab;
+echo '/.swap/swapfile                 none                            swap    sw                                                      0 0' >> /tmp/mnt/root/etc/fstab;
+
+# Install CryptoKey
+if isTrue "${CRYPTED}"; then
+    if ! runCmd cp /tmp/crypto.key /tmp/mnt/root/etc/; then logError "Failed to copy crypto.key"; exit 1; fi;
+    if ! runCmd cp /tmp/crypto.header /tmp/mnt/root/etc/; then logError "Failed to copy crypto.header"; exit 1; fi;
+fi;
+
+# Prepare ChRoot
+source "${BASH_SOURCE%/*}/scripts/chroot_prepare.sh";
+
+# Run installer
+logLine "Setting up system...";
+source "${BASH_SOURCE%/*}/scripts/chroot.sh";
+
+# Question for CHROOT
+sync;
+read -p "Your system has been installed. Do you want to chroot into the system now and make changes? [yN]: " -n 1 -r;
+echo    # (optional) move to a new line
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    logLine "Entering chroot...";
+    chroot /tmp/mnt/root /bin/bash;
+    sync;
+fi
+
+# Restore resolve
+logDebug "Restoring resolv.conf...";
+source "${BASH_SOURCE%/*}/scripts/restoreresolv.sh";
+
+# Question for reboot
+read -p "Do you want to reboot into the system now? [Yn]: " -n 1 -r;
+if [[ $REPLY =~ ^[Yy]$ ]] || [[ $REPLY =~ ^$ ]]; then
+    sync;
+    source "${BASH_SOURCE%/*}/scripts/unmount.sh";
+    logLine "Rebooting...";
+    reboot now;
+    exit 0;
+fi
+
+# Finish
+sync;
+logLine "Your system is ready! Type reboot to boot it.";
