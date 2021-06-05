@@ -52,9 +52,11 @@ function harddisk-format-check {
     if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "PARTLABEL=\"system\"") ]]; then NEEDS_PARTITIONING="true"; fi;
 
     if isTrue ${NEEDS_PARTITIONING}; then
+        logDebug "Harddisk needs formatting";
         return 1;
     fi;
 
+    logDebug "Harddisk needs NO formatting";
     return 0;
 }
 
