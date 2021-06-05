@@ -130,7 +130,6 @@ function run {
         then
             logError "Failed to Mount Subvolume ${3} at ${1}";
             return 1;
-        fi;
         elif isEmpty "${3:-}" && ! runCmd mount ${2} ${1};
         then
             logError "Failed to Mount ${2} at ${1}";
