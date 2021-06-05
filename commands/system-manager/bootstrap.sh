@@ -6,7 +6,7 @@ function printHelp {
 function run {
     # Scan Arguments
     local CRYPT="true"; local NOCRYPT_FLAG="";
-    local FORCE="false"; local FORCE_FLAG="";
+    local CLEAN_DISK="false"; local CLEAN_DISK_FLAG="";
     local HARDDISK="";
     local DISTRO="archlinux";
     local CRYPT_PASSWORD="test1234";
@@ -15,7 +15,7 @@ function run {
         case $1 in
             -t|--target) HARDDISK="$2"; shift ;;
             -d|--distro) DISTRO="$2"; shift ;;
-            -c|--clean-disk) FORCE="true"; FORCE_FLAG=" --clean-disk";;
+            -c|--clean-disk) CLEAN_DISK="true"; CLEAN_DISK_FLAG=" --clean-disk";;
             --use-subvolume) SUBVOLUMES="${SUBVOLUMES} ${2}"; shift ;;
             -nc|--nocrypt) CRYPT="false"; NOCRYPT_FLAG=" --nocrypt";;
             -h|--help) printHelp; exit 0;;
@@ -25,7 +25,7 @@ function run {
     done;
     
     # Debug Variables
-    logFunction "bootstrap#arguments${FORCE_FLAG}${NOCRYPT_FLAG} --target \`${HARDDISK}\` --distro \`${DISTRO}\`";
+    logFunction "bootstrap#arguments${CLEAN_DISK_FLAG}${NOCRYPT_FLAG} --target \`${HARDDISK}\` --distro \`${DISTRO}\`";
     
     # Include bootstrap includes
     local SCRIPT_SOURCE=$(readlink -f ${BASH_SOURCE});
@@ -69,7 +69,7 @@ function run {
     
     # Format the harddisk
     logDebug "Checking if we need to format";
-    if isTrue "${FORCE}" || ! harddisk-format-check --crypt "${CRYPT}" --crypt-mapper "cryptsystem" --harddisk "${HARDDISK}"; then
+    if isTrue "${CLEAN_DISK}" || ! harddisk-format-check --crypt "${CRYPT}" --crypt-mapper "cryptsystem" --harddisk "${HARDDISK}"; then
         # Get user confirmation
         read -p "You are now deleting all contents of \"${HARDDISK}\", continue? [yN]: " -n 1 -r
         echo    # (optional) move to a new line
