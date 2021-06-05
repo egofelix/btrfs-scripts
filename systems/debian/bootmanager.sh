@@ -74,7 +74,7 @@ EOF
     chroot /tmp/mnt/root /chroot.sh;
     
     
-    mkdir -p /tmp/mnt/root/etc/initramfs-tools/hooks/ /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/ /tmp/mnt/root/etc/tinyssh-initramfs/;
+    mkdir -p /tmp/mnt/root/etc/initramfs-tools/hooks/ /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/ /tmp/mnt/root/etc/tinyssh-initramfs/ /tmp/mnt/root/etc/initramfs-tools/scripts/init-bottom/;
     
     cp "${BASH_SOURCE%/*}/tinyssh.hook.sh" /tmp/mnt/root/etc/initramfs-tools/hooks/tinyssh;
     chmod +x /tmp/mnt/root/etc/initramfs-tools/hooks/tinyssh;
