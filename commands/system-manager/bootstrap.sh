@@ -115,15 +115,25 @@ function run {
         if runCmd findmnt -r -n ${1};
         then
             logDebug "Checking mount on ${1}";
-            local MOUNTTEST=$(echo "${RUNCMD_CONTENT}" | cut -d' ' -f 2 | grep "${2}\[/${3}\]");
+            
+            if [[ -z "${3:-} "]]; then
+                local MOUNTTEST=$(echo "${RUNCMD_CONTENT}" | cut -d' ' -f 2 | grep "${2}");
+            else
+                local MOUNTTEST=$(echo "${RUNCMD_CONTENT}" | cut -d' ' -f 2 | grep "${2}\[/${3}\]");
+            fi;
             
             if [[ -z "${MOUNTTEST}" ]]; then
                 logError "There seems to be another mount at ${1}";
                 return 1;
             fi;
-        elif ! runCmd mount -o subvol=/${3} ${2} ${1};
+        elif ! isEmpty "${3:-}" && ! runCmd mount -o subvol=/${3} ${2} ${1};
         then
             logError "Failed to Mount Subvolume ${3} at ${1}";
+            return 1;
+        fi;
+        elif isEmpty "${3:-}" && ! runCmd mount ${2} ${1};
+        then
+            logError "Failed to Mount ${2} at ${1}";
             return 1;
         fi;
         
@@ -131,12 +141,11 @@ function run {
     }
     
     if ! mountItem "/tmp/mnt/root" "${PART_SYSTEM}" "${DISTRO,,}-root-data"; then logError "Failed to mount ROOT-Volume"; exit 1; fi;
-    #if ! mountItem "/tmp/mnt/root" "${DISTRO,,}-root-data"; then logError "Failed to mount ROOT-Volume"; exit 1; fi;
+    if ! mountItem "/tmp/mnt/root/boot" "${PART_BOOT}"; then logError "Failed to mount BOOT-Partition"; exit 1; fi;
     
-    mkdir -p /tmp/mnt/root/boot;
-    if ! runCmd mount ${PART_BOOT} /tmp/mnt/root/boot; then logError "Failed to mount BOOT-Partition"; exit 1; fi;
-    if ! runCmd mkdir -p /tmp/mnt/root/boot/efi; then logError "Failed to create efi directory at /tmp/mnt/root/boot/efi"; exit 1; fi;
-    if ! runCmd mount ${PART_EFI} /tmp/mnt/root/boot/efi; then logError "Failed to mount EFI-Partition"; exit 1; fi;
+    #if ! runCmd mount ${PART_BOOT} /tmp/mnt/root/boot; then logError "Failed to mount BOOT-Partition"; exit 1; fi;
+    #if ! runCmd mkdir -p /tmp/mnt/root/boot/efi; then logError "Failed to create efi directory at /tmp/mnt/root/boot/efi"; exit 1; fi;
+    #if ! runCmd mount ${PART_EFI} /tmp/mnt/root/boot/efi; then logError "Failed to mount EFI-Partition"; exit 1; fi;
     
     
     echo "Todo";
