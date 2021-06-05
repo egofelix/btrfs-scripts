@@ -24,7 +24,7 @@ function autodetect-harddisk {
     
     # Test if this drive is mounted under /*
     if ! runCmd findmnt -r; then logError "Could not detect rootfs mounts"; exit 1; fi;
-    local DRIVEMOUNTS=$(echo "${RUNCMD_CONTENT,,}" | cut -d' ' -f 2 | grep "${HARDDISK}");
+    local DRIVEMOUNTS=$(echo "${RUNCMD_CONTENT,,}" | grep -v '/tmp/mnt/root' | grep -v '/tmp/mnt/disks/system' | cut -d' ' -f 2 | grep "${HARDDISK}");
     if ! isEmpty ${DRIVEMOUNTS}; then
         logWarn "<harddisk> ${HARDDISK} is currently mounted and cannot be used as target. This value will be ignored.";
         return 1;
