@@ -1,16 +1,16 @@
 #!/bin/bash
 function printHelp {
-    echo "Usage: ${HOST_NAME} ${COMMAND_VALUE} [-nc|--nocrypt] [-t|-target <targetdrive>] [-d|--distro <volume>]";
+    echo "Usage: ${HOST_NAME} ${COMMAND_VALUE} [-nc|--nocrypt] [-t|--target <harddisk>] [-d|--distro <volume>]";
 }
 
 function run {
     # Scan Arguments
     local NOCRYPT="false"; local NOCRYPT_FLAG="";
-    local TARGET_DRIVE="";
+    local HARDDISK="";
     local DISTRO="archlinux";
     while [[ "$#" -gt 0 ]]; do
         case $1 in
-            -t|--target) TARGET_DRIVE="$2"; shift ;;
+            -t|--target) HARDDISK="$2"; shift ;;
             -d|--distro) DISTRO="$2"; shift ;;
             -nc|--nocrypt) NOCRYPT="true"; NOCRYPT_FLAG=" --nocrypt";;
             -h|--help) printHelp; exit 0;;
@@ -20,7 +20,13 @@ function run {
     done;
     
     # Debug Variables
-    logFunction "bootstrap#arguments${NOCRYPT_FLAG} --target \`${TARGET_DRIVE}\` --distro \`${DISTRO}\`";
+    logFunction "bootstrap#arguments${NOCRYPT_FLAG} --target \`${HARDDISK}\` --distro \`${DISTRO}\`";
+    
+    # Validate HARDDISK
+    if ! autodetect-harddisk --harddisk "${HARDDISK}"; then logError "Could not detect <harddisk>"; exit 1; fi;
+    
+    #Debug
+    logFunction "bootstrap#expandedArguments${NOCRYPT_FLAG} --target \`${HARDDISK}\` --distro \`${DISTRO}\`";
     
     # Test if we are running a live iso
     local IS_LIVE="false";
@@ -31,8 +37,20 @@ function run {
         *) IS_LIVE="false";;
     esac;
     
+    # Warn user if we didnt detected a live system
+    if ! isTrue ${IS_LIVE}; then
+        # Get user confirmation
+        read -p "You are not running a live system, bootstrap to a running system will fail, continue? [yN]: " -n 1 -r
+        echo    # (optional) move to a new line
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            logError "Script canceled by user";
+            exit 1;
+        fi
+    fi;
     
-    echo "Todo: ${IS_LIVE} ${ROOTFS_TYPE}";
+    # Check if Target exists
+    
+    echo "Todo";
     printHelp;
     exit 1;
 }

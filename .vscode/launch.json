@@ -117,9 +117,6 @@
                 "${workspaceFolder}/sbin/system-manager",
                 "system-manager",
                 "bootstrap",
-                "--nocrypt",
-                "--target",
-                "/dev/sda",
                 "--distro",
                 "debian"
             ],
