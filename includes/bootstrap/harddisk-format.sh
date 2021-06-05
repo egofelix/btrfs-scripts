@@ -74,7 +74,7 @@ function harddisk-format-check {
         else
             # Otherwise try open it
             if ! isTrue ${NEEDS_PARTITIONING}; then
-                if ! runCmd cryptsetup --batch-mode open ${PART_SYSTEM} cryptsystem -d /tmp/crypto.key; then NEEDS_PARTITIONING="true"; fi;
+                if ! runCmd cryptsetup --batch-mode open ${PART_SYSTEM} "${ARG_CRYPT_MAPPER}" -d /tmp/crypto.key; then NEEDS_PARTITIONING="true"; fi;
             fi;
         fi;
 
