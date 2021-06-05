@@ -144,16 +144,18 @@ function run {
     if ! mountItem /tmp/mnt/root/boot/efi "${PART_EFI}"; then logError "Failed to mount EFI-Partition"; exit 1; fi;
     if ! mountItem /tmp/mnt/root/.snapshots "${PART_SYSTEM}" "@snapshots"; then logError "Failed to Mount Snapshot-Volume at /tmp/mnt/root/.snapshots"; exit 1; fi;
     
-    # Create Swap-Volume and Swap-File
+    # Mount Swap-Volume
     if ! mountItem /tmp/mnt/root/.swap "${PART_SYSTEM}" "@swap"; then logError "Failed to Mount SWAP-Volume at /tmp/mnt/root/.swap"; exit 1; fi;
-    if [[ -f /tmp/mnt/root/.swap/swapfile ]]; then rm -f /tmp/mnt/root/.swap/swapfile; fi;
-    if ! runCmd truncate -s 0 /tmp/mnt/root/.swap/swapfile; then logError "Failed to truncate Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
-    if ! runCmd chattr +C /tmp/mnt/root/.swap/swapfile; then logError "Failed to chattr Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
-    if ! runCmd chmod 600 /tmp/mnt/root/.swap/swapfile; then logError "Failed to chmod Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
-    if ! runCmd btrfs property set /tmp/mnt/root/.swap/swapfile compression none; then logError "Failed to disable compression for Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
-    if ! runCmd fallocate /tmp/mnt/root/.swap/swapfile -l2g; then logError "Failed to fallocate 2G Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
-    if ! runCmd mkswap /tmp/mnt/root/.swap/swapfile; then logError "Failed to mkswap for Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
     
+    # Create SwapFile
+    if [[ ! -f /tmp/mnt/root/.swap/swapfile ]]; then
+        if ! runCmd truncate -s 0 /tmp/mnt/root/.swap/swapfile; then logError "Failed to truncate Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
+        if ! runCmd chattr +C /tmp/mnt/root/.swap/swapfile; then logError "Failed to chattr Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
+        if ! runCmd chmod 600 /tmp/mnt/root/.swap/swapfile; then logError "Failed to chmod Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
+        if ! runCmd btrfs property set /tmp/mnt/root/.swap/swapfile compression none; then logError "Failed to disable compression for Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
+        if ! runCmd fallocate /tmp/mnt/root/.swap/swapfile -l2g; then logError "Failed to fallocate 2G Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
+        if ! runCmd mkswap /tmp/mnt/root/.swap/swapfile; then logError "Failed to mkswap for Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
+    fi;
     
     echo "Todo";
     printHelp;
