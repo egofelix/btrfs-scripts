@@ -70,7 +70,13 @@ function run {
         fi;
     fi;
     
-    # Mount Partition
+    # Setup variables
+    local PART_EFI="${HARDDISK}2"
+    local PART_BOOT="${HARDDISK}3"
+    local PART_SYSTEM="${HARDDISK}4"
+    if isTrue "${CRYPT}"; then PART_SYSTEM="/dev/mapper/cryptsystem"; fi;
+    
+    # Mount system
     logLine "Mounting SYSTEM-Partition at /tmp/mnt/disks/system"
     mkdir -p /tmp/mnt/disks/system
     if ! runCmd mount ${PART_SYSTEM} /tmp/mnt/disks/system; then logError "Failed to mount SYSTEM-Partition"; exit 1; fi;
