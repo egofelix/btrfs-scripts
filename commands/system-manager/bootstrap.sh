@@ -9,6 +9,7 @@ function run {
     local HARDDISK="";
     local DISTRO="archlinux";
     local CRYPT_PASSWORD="test1234";
+    local SUBVOLUMES="";
     while [[ "$#" -gt 0 ]]; do
         case $1 in
             -t|--target) HARDDISK="$2"; shift ;;
@@ -28,11 +29,14 @@ function run {
     logDebug "Including ${SCRIPT_SOURCE%/*/*}/includes/bootstrap/*.sh";
     for f in ${SCRIPT_SOURCE%/*/*/*}/includes/bootstrap/*.sh; do source $f; done;
     
+    # Defaults
+    if [[ -z "${SUBVOLUMES}" ]]; then SUBVOLUMES="home var srv usr opt"; fi;
+    
     # Validate HARDDISK
     if ! autodetect-harddisk --harddisk "${HARDDISK}"; then logError "Could not detect <harddisk>"; exit 1; fi;
     
     #Debug
-    logFunction "bootstrap#expandedArguments${NOCRYPT_FLAG} --target \`${HARDDISK}\` --distro \`${DISTRO}\`";
+    logFunction "bootstrap#expandedArguments${NOCRYPT_FLAG} --target \`${HARDDISK}\` --distro \`${DISTRO}\` --subvolumes \`${SUBVOLUMES}\`";
     
     # Test if we are running a live iso
     local IS_LIVE="false";
@@ -96,10 +100,10 @@ function run {
     if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@logs && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@logs; then logError "Failed to create btrfs @LOGS-Volume"; exit 1; fi;
     if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@tmp && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@tmp; then logError "Failed to create btrfs @TMP-Volume"; exit 1; fi;
     if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/${DISTRO,,}-root-data && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/${DISTRO,,}-root-data; then logError "Failed to create btrfs ROOT-DATA-Volume"; exit 1; fi;
-    #for subvolName in ${SUBVOLUMES}
-    #do
-    #    if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/${subvolName,,}-data; then logError "Failed to create btrfs ${subvolName^^}-DATA-Volume"; exit 1; fi;
-    #done;
+    for subvolName in ${SUBVOLUMES}
+    do
+        if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/${subvolName,,}-data && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/${subvolName,,}-data; then logError "Failed to create btrfs ${subvolName^^}-DATA-Volume"; exit 1; fi;
+    done;
     
     
     echo "Todo";
