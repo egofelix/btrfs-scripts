@@ -24,13 +24,15 @@ function run {
     
     # Test if we are running a live iso
     local IS_LIVE="false";
-    if ! runCmd "findmnt -n / -r | cut -d' ' -f 2"; then logError "Could not detect rootfs type"; exit 1; fi;
-    case "${RUNCMD_CONTENT,,}" in
+    if ! runCmd "findmnt -n / -r"; then logError "Could not detect rootfs type"; exit 1; fi;
+    local ROOTFS_TYPE=$(echo "${RUNCMD_CONTENT,,}" | cut -d' ' -f 2);
+    case "${ROOTFS_TYPE,,}" in
         airootfs) IS_LIVE="true";;
         *) IS_LIVE="false";;
     esac;
     
-    echo "Todo: ${IS_LIVE}";
+    
+    echo "Todo: ${IS_LIVE} ${ROOTFS_TYPE}";
     printHelp;
     exit 1;
 }
