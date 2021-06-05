@@ -87,9 +87,7 @@ function run {
             logError "There seems to be another drive mounted at /tmp/mnt/disks/system";
             exit 1;
         fi;
-    fi;
-    
-    if ! runCmd mount ${PART_SYSTEM} /tmp/mnt/disks/system; then logError "Failed to mount SYSTEM-Partition"; exit 1; fi;
+    elif ! runCmd mount ${PART_SYSTEM} /tmp/mnt/disks/system; then logError "Failed to mount SYSTEM-Partition"; exit 1; fi;
     
     # Create Subvolumes
     logLine "Creating BTRFS-Subvolumes on SYSTEM-Partition...";
