@@ -1,6 +1,6 @@
 #!/bin/bash
 # Install kernel & bootmanager
-if [[ system-arch = "ARMHF" ]]; then
+if [[ system-arch "ARMHF" ]]; then
     logLine "Setting up Bootmanager (UBOOT)";
     # TODO
 else
@@ -29,7 +29,7 @@ EOF
     chroot /tmp/mnt/root /chroot.sh;
 fi;
 
-if isTrue "${CRYPTED}"; then
+if isTrue "${CRYPT}"; then
     # Install crypt tools
     # dropbear-initramfs
   cat > /tmp/mnt/root/chroot.sh <<- EOF
