@@ -70,6 +70,22 @@ function run {
         fi;
     fi;
     
+    # Mount Partition
+    logLine "Mounting SYSTEM-Partition at /tmp/mnt/disks/system"
+    mkdir -p /tmp/mnt/disks/system
+    if ! runCmd mount ${PART_SYSTEM} /tmp/mnt/disks/system; then logError "Failed to mount SYSTEM-Partition"; exit 1; fi;
+    
+    # Create Subvolumes
+    logLine "Creating BTRFS-Subvolumes on SYSTEM-Partition...";
+    if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@snapshots; then logError "Failed to create btrfs @SNAPSHOTS-Volume"; exit 1; fi;
+    if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@swap; then logError "Failed to create btrfs @SWAP-Volume"; exit 1; fi;
+    if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@logs; then logError "Failed to create btrfs @LOGS-Volume"; exit 1; fi;
+    if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@tmp; then logError "Failed to create btrfs @TMP-Volume"; exit 1; fi;
+    if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/root-data; then logError "Failed to create btrfs ROOT-DATA-Volume"; exit 1; fi;
+    #for subvolName in ${SUBVOLUMES}
+    #do
+    #    if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/${subvolName,,}-data; then logError "Failed to create btrfs ${subvolName^^}-DATA-Volume"; exit 1; fi;
+    #done;
     
     
     echo "Todo";
