@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# exprots PART_SYSTEM, PART_EFI, PART_BIOS
 function harddisk-format {
     # Scan Arguments
     local ARG_HARDDISK="";
@@ -14,8 +15,15 @@ function harddisk-format {
     # Autodetect ${HARDDISK}
     if ! autodetect-harddisk --harddisk "${ARG_HARDDISK}"; then logError "Could not format harddisk. No Harddisk specified"; return 1; fi;
     
+    # Check if we need partitioning?
+    local NEEDS_PARTITIONING="false";
+    if ! isTrue ${NEEDS_PARTITIONING} && runCmd blkid /dev/sda5; then NEEDS_PARTITIONING="true"; fi;
+    if ! isTrue ${NEEDS_PARTITIONING} && ! runCmd blkid /dev/sda; then NEEDS_PARTITIONING="true"; fi;
+    
+    echo "PT: ${NEEDS_PARTITIONING}";
+    
     # Format drives
-    logLine "Partitioning ${HARDDISK}...";
+    logLine "Partitioning ${HARDDISK} with default partition scheme (bios and efi support)...";
     sfdisk -q ${HARDDISK} &> /dev/null <<- EOM
 label: gpt
 unit: sectors
@@ -31,6 +39,19 @@ EOM
         logLine "Failed to partition ${HARDDISK}";
         return 1;
     fi;
+    
+    # Remember partitions
+    export PART_EFI="${HARDDISK}2"
+    export PART_BOOT="${HARDDISK}3"
+    export PART_SYSTEM="${HARDDISK}4"
+    export PART_SYSTEM_NUM="4"
+    
+    if ! runCmd parted -s ${DRIVE_ROOT} resizepart ${PART_SYSTEM_NUM} 100%; then logError "Failed to expand ROOT-Partition"; return 1; fi;
+    
+    # Sync drives
+    sleep 1
+    sync
+    sleep 1
     
     return 0;
 }
