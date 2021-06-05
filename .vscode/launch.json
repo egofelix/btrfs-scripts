@@ -117,6 +117,8 @@
                 "${workspaceFolder}/sbin/system-manager",
                 "system-manager",
                 "bootstrap",
+                "--target",
+                "/dev/sda",
                 "--distro",
                 "debian"
             ],

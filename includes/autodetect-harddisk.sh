@@ -26,7 +26,7 @@ function autodetect-harddisk {
     if ! runCmd findmnt -r; then logError "Could not detect rootfs mounts"; exit 1; fi;
     local DRIVEMOUNTS=$(echo "${RUNCMD_CONTENT,,}" | cut -d' ' -f 2 | grep "${HARDDISK}");
     if ! isEmpty ${DRIVEMOUNTS}; then
-        logWarn "<harddisk> ${HARDDISK} is currently mounted and cannot be used as target.";
+        logWarn "<harddisk> ${HARDDISK} is currently mounted and cannot be used as target. This value will be ignored.";
         return 1;
     fi;
     

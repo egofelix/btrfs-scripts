@@ -22,6 +22,11 @@ function run {
     # Debug Variables
     logFunction "bootstrap#arguments${NOCRYPT_FLAG} --target \`${HARDDISK}\` --distro \`${DISTRO}\`";
     
+    # Include bootstrap includes
+    local SCRIPT_SOURCE=$(readlink -f ${BASH_SOURCE});
+    logDebug "Including ${SCRIPT_SOURCE%/*/*}/includes/bootstrap/*.sh";
+    for f in ${SCRIPT_SOURCE%/*/*/*}/includes/bootstrap/*.sh; do source $f; done;
+    
     # Validate HARDDISK
     if ! autodetect-harddisk --harddisk "${HARDDISK}"; then logError "Could not detect <harddisk>"; exit 1; fi;
     
@@ -49,6 +54,13 @@ function run {
     fi;
     
     # Check if Target exists
+    # Get user confirmation
+    read -p "You are now deleting all contents of \"${HARDDISK}\", continue? [yN]: " -n 1 -r
+    echo    # (optional) move to a new line
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        logError "Script canceled by user";
+        exit 1;
+    fi;
     
     echo "Todo";
     printHelp;
