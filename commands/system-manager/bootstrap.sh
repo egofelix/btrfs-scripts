@@ -55,7 +55,7 @@ function run {
     
     # Get user confirmation
     logDebug "Checking if we need to format";
-    if ! harddisk-format-check --crypt "${CRYPT}" --crypt-mapper "/dev/mapper/cryptsystem" --harddisk "${HARDDISK}"; then
+    if ! harddisk-format-check --crypt "${CRYPT}" --crypt-mapper "cryptsystem" --harddisk "${HARDDISK}"; then
         read -p "You are now deleting all contents of \"${HARDDISK}\", continue? [yN]: " -n 1 -r
         echo    # (optional) move to a new line
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -64,7 +64,7 @@ function run {
         fi;
         
         # Format Drive
-        if ! harddisk-format --crypt "${CRYPT}" --crypt-mapper "/dev/mapper/cryptsystem" --crypt-password "${CRYPT_PASSWORD}" --harddisk "${HARDDISK}"; then
+        if ! harddisk-format --crypt "${CRYPT}" --crypt-mapper "cryptsystem" --crypt-password "${CRYPT_PASSWORD}" --harddisk "${HARDDISK}"; then
             logError "Failed to format ${HARDDISK}";
             exit 1;
         fi;

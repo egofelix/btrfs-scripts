@@ -80,7 +80,7 @@ function harddisk-format-check {
 
         # Check if /dev/mapper/cryptsystem
         if ! isTrue ${NEEDS_PARTITIONING}; then
-            if ! runCmd blkid "${ARG_CRYPT_MAPPER}"; then NEEDS_PARTITIONING="true"; fi;
+            if ! runCmd blkid "/dev/mapper/${ARG_CRYPT_MAPPER}"; then NEEDS_PARTITIONING="true"; fi;
             if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "TYPE=\"btrfs\"") ]]; then NEEDS_PARTITIONING="true"; fi;
             if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "LABEL=\"system\"") ]]; then NEEDS_PARTITIONING="true"; fi; 
         fi;
@@ -133,7 +133,7 @@ function harddisk-format {
     # Check if drive is formatted already
     if harddisk-format-check --crypt "${ARG_CRYPT}" --crypt-mapper "${ARG_CRYPT_MAPPER}" --harddisk "${HARDDISK}"; then
         if isTrue "${ARG_CRYPT}"; then
-            export PART_SYSTEM="${ARG_CRYPT_MAPPER}";
+            export PART_SYSTEM="/dev/mapper/${ARG_CRYPT_MAPPER}";
         fi;
         return 0;
     fi;
@@ -198,7 +198,7 @@ EOM
         if [ $? -ne 0 ]; then logError "Failed to add password to SYSTEM-Partition"; return 1; fi;
         
         # Remap partition to crypted one
-        export PART_SYSTEM="${ARG_CRYPT_MAPPER}"
+        export PART_SYSTEM="/dev/mapper/${ARG_CRYPT_MAPPER}"
     fi;
 
     # Format Partition
