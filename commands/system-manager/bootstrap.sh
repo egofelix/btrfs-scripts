@@ -116,7 +116,7 @@ function run {
         then
             logDebug "Checking mount on ${1}";
             
-            if [[ -z "${3:-} "]]; then
+            if [[ -z "${3:-}" ]]; then
                 local MOUNTTEST=$(echo "${RUNCMD_CONTENT}" | cut -d' ' -f 2 | grep "${2}");
             else
                 local MOUNTTEST=$(echo "${RUNCMD_CONTENT}" | cut -d' ' -f 2 | grep "${2}\[/${3}\]");
