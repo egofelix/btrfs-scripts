@@ -104,6 +104,26 @@
                 "--autoremove"
             ],
             "terminalKind": "integrated"
+        },
+        {
+            "type": "bashdb",
+            "request": "launch",
+            "name": "system-manager bootstrap",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/_router.sh",
+            "args": [
+                "--debug",
+                "--host-script",
+                "${workspaceFolder}/sbin/system-manager",
+                "system-manager",
+                "bootstrap",
+                "--nocrypt",
+                "--target",
+                "/dev/sda",
+                "--distro",
+                "debian"
+            ],
+            "terminalKind": "integrated"
         }
     ]
 }
