@@ -8,6 +8,7 @@ function run {
     local CRYPT="true"; local NOCRYPT_FLAG="";
     local HARDDISK="";
     local DISTRO="archlinux";
+    local CRYPT_PASSWORD="test1234";
     while [[ "$#" -gt 0 ]]; do
         case $1 in
             -t|--target) HARDDISK="$2"; shift ;;
@@ -61,7 +62,7 @@ function run {
     fi;
     
     # Format Drive
-    if ! harddisk-format --crypt "${CRYPT}" --harddisk "${HARDDISK}"; then
+    if ! harddisk-format --crypt "${CRYPT}" --crypt-password "${CRYPT_PASSWORD}" --harddisk "${HARDDISK}"; then
         logError "Failed to format ${HARDDISK}";
         exit 1;
     fi;
