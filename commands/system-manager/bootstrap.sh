@@ -164,12 +164,8 @@ function run {
     done;
     
     # Mount /var/logs
-    #if ! runCmd mkdir -p /tmp/mnt/root/var/log; then logError "Failed to create /tmp/mnt/root/var/log"; exit 1; fi;
-    #if ! runCmd mount -o subvol=/@logs ${PART_SYSTEM} /tmp/mnt/root/var/log; then logError "Failed to Mount Subvolume @LOGS-Volume at /tmp/mnt/root/var/log"; exit 1; fi;
-    
-    # Mount /var/tmp
-    #if ! runCmd mkdir -p /tmp/mnt/root/var/tmp; then logError "Failed to create /tmp/mnt/root/var/tmp"; exit 1; fi;
-    #if ! runCmd mount -o subvol=/@tmp ${PART_SYSTEM} /tmp/mnt/root/var/tmp; then logError "Failed to Mount Subvolume @TMP-Volume at /tmp/mnt/root/var/tmp"; exit 1; fi;
+    if ! mountItem /tmp/mnt/root/var/logs "${PART_SYSTEM}" "@${DISTRO,,}-var-logs-data"; then logError "Failed to Mount @${DISTRO,,}-var-logs-data-Volume at /tmp/mnt/root/var/logs"; exit 1; fi;
+    if ! mountItem /tmp/mnt/root/var/tmp "${PART_SYSTEM}" "@${DISTRO,,}-var-tmp-data"; then logError "Failed to Mount @${DISTRO,,}-var-tmp-data-Volume at /tmp/mnt/root/var/tmp"; exit 1; fi;
     
     
     echo "Todo";
