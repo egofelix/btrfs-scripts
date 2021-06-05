@@ -207,7 +207,7 @@ function run {
     echo '/.swap/swapfile                 none                            swap    sw                                                      0 0' >> /tmp/mnt/root/etc/fstab;
     
     # Install CryptoKey
-    if isTrue "${CRYPTED}"; then
+    if isTrue "${CRYPT}"; then
         if ! runCmd cp /tmp/crypto.key /tmp/mnt/root/etc/; then logError "Failed to copy crypto.key"; exit 1; fi;
         if ! runCmd cp /tmp/crypto.header /tmp/mnt/root/etc/; then logError "Failed to copy crypto.header"; exit 1; fi;
     fi;
