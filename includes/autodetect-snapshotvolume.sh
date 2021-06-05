@@ -6,7 +6,7 @@ function autodetect-snapshotvolume() {
     
     # Search SNAPSHOTSPATH via Environment or AutoDetect
     if isEmpty "${SNAPSHOTVOLUME:-}"; then export SNAPSHOTVOLUME=$(LC_ALL=C mount | grep '@snapshots' | grep -o 'on /\..* type btrfs' | awk '{print $2}'); fi;
-    if isEmpty "${SNAPSHOTVOLUME}"; then logError "Cannot find @snapshots directory"; return 1; fi;
+    if isEmpty "${SNAPSHOTVOLUME}"; then logWarn "Cannot autodetect @snapshots directory"; return 1; fi;
     
     # Test if SNAPSHOTSPATH is a btrfs subvol
     logDebug "SNAPSHOTVOLUME: ${SNAPSHOTVOLUME}";
