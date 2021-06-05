@@ -106,6 +106,7 @@ function run {
     
     # Create Subvolumes
     local VOLUME_PREFIX="${DISTRO,,}-";
+    VOLUME_PREFIX="";
     logLine "Checking BTRFS-Subvolumes on SYSTEM-Partition...";
     if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@snapshots && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@snapshots; then logError "Failed to create btrfs @SNAPSHOTS-Volume"; exit 1; fi;
     if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@${VOLUME_PREFIX}swap && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@${VOLUME_PREFIX}swap; then logError "Failed to create btrfs @${VOLUME_PREFIX}swap-Volume"; exit 1; fi;
