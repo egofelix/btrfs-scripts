@@ -42,7 +42,9 @@ function harddisk-format {
     
     # Check if /dev/sda4 is type crypto_LUKS and and has PARTLABEL=system
     if ! isTrue ${NEEDS_PARTITIONING} && ! runCmd blkid "${HARDDISK}4"; then NEEDS_PARTITIONING="true"; fi;
-    if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "TYPE=\"crypto_LUKS\"") ]]; then NEEDS_PARTITIONING="true"; fi;
+    if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "LABEL=\"system\"") ]]; then NEEDS_PARTITIONING="true"; fi;
+    if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "TYPE=\"btrfs\"") ]]; then NEEDS_PARTITIONING="true"; fi;
+    #if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "TYPE=\"crypto_LUKS\"") ]]; then NEEDS_PARTITIONING="true"; fi;
     if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "PARTLABEL=\"system\"") ]]; then NEEDS_PARTITIONING="true"; fi;
 
     if isTrue ${NEEDS_PARTITIONING}; then
