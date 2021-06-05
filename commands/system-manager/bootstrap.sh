@@ -54,17 +54,19 @@ function run {
     fi;
     
     # Get user confirmation
-    read -p "You are now deleting all contents of \"${HARDDISK}\", continue? [yN]: " -n 1 -r
-    echo    # (optional) move to a new line
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        logError "Script canceled by user";
-        exit 1;
-    fi;
-    
-    # Format Drive
-    if ! harddisk-format --crypt "${CRYPT}" --crypt-password "${CRYPT_PASSWORD}" --harddisk "${HARDDISK}"; then
-        logError "Failed to format ${HARDDISK}";
-        exit 1;
+    if ! harddisk-format-check --crypt "${CRYPT}" --harddisk "${HARDDISK}"; then
+        read -p "You are now deleting all contents of \"${HARDDISK}\", continue? [yN]: " -n 1 -r
+        echo    # (optional) move to a new line
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            logError "Script canceled by user";
+            exit 1;
+        fi;
+        
+        # Format Drive
+        if ! harddisk-format --crypt "${CRYPT}" --crypt-password "${CRYPT_PASSWORD}" --harddisk "${HARDDISK}"; then
+            logError "Failed to format ${HARDDISK}";
+            exit 1;
+        fi;
     fi;
     
     

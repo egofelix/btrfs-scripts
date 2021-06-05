@@ -1,32 +1,22 @@
 #!/bin/bash
 
-# exprots PART_SYSTEM, PART_EFI, PART_BIOS
-function harddisk-format {
+function harddisk-format-check {
     # Scan Arguments
     local ARG_HARDDISK="";
     local ARG_CRYPT="false";
-    local ARG_CRYPT_PASSWORD="";
     while [[ "$#" -gt 0 ]]; do
         case $1 in
             --crypt) ARG_CRYPT="$2"; shift;;
-            --crypt-password) ARG_CRYPT_PASSWORD="$2"; shift;;
             --harddisk) ARG_HARDDISK="$2"; shift;;
-            *) logError "harddisk-format#Unknown Argument: $1"; return 1;;
+            *) logError "harddisk-format-check#Unknown Argument: $1"; return 1;;
         esac;
         shift;
     done;
     
     # Autodetect ${HARDDISK}
     if ! autodetect-harddisk --harddisk "${ARG_HARDDISK}"; then logError "Could not format harddisk. No Harddisk specified"; return 1; fi;
-
-    if isTrue ${ARG_CRYPT}; then
-        if [[ -z "${ARG_CRYPT_PASSWORD}" ]]; then
-            logError "Must specify a password for crypto";
-            return 1;
-        fi;
-    fi;
     
-    # Check if we need partitioning?
+        # Check if we need partitioning?
     local NEEDS_PARTITIONING="false";
 
     # Check that we dont have /dev/sda5
@@ -62,6 +52,42 @@ function harddisk-format {
     if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "PARTLABEL=\"system\"") ]]; then NEEDS_PARTITIONING="true"; fi;
 
     if isTrue ${NEEDS_PARTITIONING}; then
+        return 1;
+    fi;
+
+    return 0;
+}
+
+# exprots PART_SYSTEM, PART_EFI, PART_BIOS
+function harddisk-format {
+    # Scan Arguments
+    local ARG_HARDDISK="";
+    local ARG_CRYPT="false";
+    local ARG_CRYPT_PASSWORD="";
+    while [[ "$#" -gt 0 ]]; do
+        case $1 in
+            --crypt) ARG_CRYPT="$2"; shift;;
+            --crypt-password) ARG_CRYPT_PASSWORD="$2"; shift;;
+            --harddisk) ARG_HARDDISK="$2"; shift;;
+            *) logError "harddisk-format#Unknown Argument: $1"; return 1;;
+        esac;
+        shift;
+    done;
+    
+    # Autodetect ${HARDDISK}
+    if ! autodetect-harddisk --harddisk "${ARG_HARDDISK}"; then logError "Could not format harddisk. No Harddisk specified"; return 1; fi;
+
+
+    if isTrue ${ARG_CRYPT}; then
+        if [[ -z "${ARG_CRYPT_PASSWORD}" ]]; then
+            logError "Must specify a password for crypto";
+            return 1;
+        fi;
+    fi;
+    
+
+
+    if harddisk-format-check --crypt "${ARG_CRYPT}" --harddisk "${HARDDISK}"; then
         # Format drives
         logLine "Partitioning ${HARDDISK} with default partition scheme (bios and efi support)...";
         sfdisk -q ${HARDDISK} &> /dev/null <<- EOM
