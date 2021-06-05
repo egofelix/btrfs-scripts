@@ -92,10 +92,10 @@ function run {
     # Create Subvolumes
     logLine "Creating BTRFS-Subvolumes on SYSTEM-Partition...";
     if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@snapshots && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@snapshots; then logError "Failed to create btrfs @SNAPSHOTS-Volume"; exit 1; fi;
-    if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@swap; then logError "Failed to create btrfs @SWAP-Volume"; exit 1; fi;
-    if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@logs; then logError "Failed to create btrfs @LOGS-Volume"; exit 1; fi;
-    if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@tmp; then logError "Failed to create btrfs @TMP-Volume"; exit 1; fi;
-    if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/root-data; then logError "Failed to create btrfs ROOT-DATA-Volume"; exit 1; fi;
+    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@swap && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@swap; then logError "Failed to create btrfs @SWAP-Volume"; exit 1; fi;
+    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@logs && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@logs; then logError "Failed to create btrfs @LOGS-Volume"; exit 1; fi;
+    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@tmp && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@tmp; then logError "Failed to create btrfs @TMP-Volume"; exit 1; fi;
+    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/root-data && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/root-data; then logError "Failed to create btrfs ROOT-DATA-Volume"; exit 1; fi;
     #for subvolName in ${SUBVOLUMES}
     #do
     #    if ! runCmd btrfs subvolume create /tmp/mnt/disks/system/${subvolName,,}-data; then logError "Failed to create btrfs ${subvolName^^}-DATA-Volume"; exit 1; fi;
