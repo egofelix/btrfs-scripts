@@ -20,6 +20,10 @@ function harddisk-format-check {
     
         # Check if we need partitioning?
     local NEEDS_PARTITIONING="false";
+    local PART_EFI="${HARDDISK}2"
+    local PART_BOOT="${HARDDISK}3"
+    local PART_SYSTEM="${HARDDISK}4"
+    local PART_SYSTEM_NUM="4"
 
     # Check that we dont have /dev/sda5
     if ! isTrue ${NEEDS_PARTITIONING} && runCmd blkid "${HARDDISK}5"; then NEEDS_PARTITIONING="true"; fi;
