@@ -60,7 +60,7 @@ function harddisk-format-check {
         # close cryptsystem if mounted
         runCmd cryptsetup --batch-mode close cryptsystem; # Ignore output
 
-        if [[ -f "/tmp/crypto.key" ]]; then NEEDS_PARTITIONING="true"; fi;
+        if [[ ! -f "/tmp/crypto.key" ]]; then NEEDS_PARTITIONING="true"; fi;
 
         if ! isTrue ${NEEDS_PARTITIONING}; then
             if ! runCmd cryptsetup --batch-mode open ${PART_SYSTEM} cryptsystem -d /tmp/crypto.key; then NEEDS_PARTITIONING="true"; fi;
