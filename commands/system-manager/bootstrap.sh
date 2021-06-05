@@ -1,11 +1,12 @@
 #!/bin/bash
 function printHelp {
-    echo "Usage: ${HOST_NAME} ${COMMAND_VALUE} [-nc|--nocrypt] [-t|--target <harddisk>] [-d|--distro <volume>]";
+    echo "Usage: ${HOST_NAME} ${COMMAND_VALUE} [-f|--force] [-nc|--nocrypt] [-t|--target <harddisk>] [-d|--distro <distroc>] [--use-subvolume <volume> ...]";
 }
 
 function run {
     # Scan Arguments
     local CRYPT="true"; local NOCRYPT_FLAG="";
+    local FORCE="false"; local FORCE_FLAG="";
     local HARDDISK="";
     local DISTRO="archlinux";
     local CRYPT_PASSWORD="test1234";
@@ -14,6 +15,8 @@ function run {
         case $1 in
             -t|--target) HARDDISK="$2"; shift ;;
             -d|--distro) DISTRO="$2"; shift ;;
+            -f|--force) FORCE="true"; FORCE_FLAG=" --force";;
+            --use-subvolume) SUBVOLUMES="${SUBVOLUMES} ${2}"; shift ;;
             -nc|--nocrypt) CRYPT="false"; NOCRYPT_FLAG=" --nocrypt";;
             -h|--help) printHelp; exit 0;;
             *) logError "Unknown argument $1"; printHelp; exit 1;;
@@ -62,7 +65,7 @@ function run {
     
     # Format the harddisk
     logDebug "Checking if we need to format";
-    if ! harddisk-format-check --crypt "${CRYPT}" --crypt-mapper "cryptsystem" --harddisk "${HARDDISK}"; then
+    if isTrue "${FORCE}" || ! harddisk-format-check --crypt "${CRYPT}" --crypt-mapper "cryptsystem" --harddisk "${HARDDISK}"; then
         # Get user confirmation
         read -p "You are now deleting all contents of \"${HARDDISK}\", continue? [yN]: " -n 1 -r
         echo    # (optional) move to a new line
