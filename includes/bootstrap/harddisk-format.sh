@@ -70,7 +70,8 @@ EOM
         export PART_SYSTEM="${HARDDISK}4"
         export PART_SYSTEM_NUM="4"
         
-        if ! runCmd parted -s ${DRIVE_ROOT} resizepart ${PART_SYSTEM_NUM} 100%; then logError "Failed to expand ROOT-Partition"; return 1; fi;
+        # Resize to maximum space
+        if ! runCmd parted -s ${HARDDISK} resizepart ${PART_SYSTEM_NUM} 100%; then logError "Failed to expand ROOT-Partition"; return 1; fi;
         
         # Sync drives
         sleep 1
