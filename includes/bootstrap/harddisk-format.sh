@@ -17,11 +17,35 @@ function harddisk-format {
     
     # Check if we need partitioning?
     local NEEDS_PARTITIONING="false";
-    if ! isTrue ${NEEDS_PARTITIONING} && runCmd blkid /dev/sda5; then NEEDS_PARTITIONING="true"; fi;
-    if ! isTrue ${NEEDS_PARTITIONING} && ! runCmd blkid /dev/sda; then NEEDS_PARTITIONING="true"; fi;
+
+    # Check that we dont have /dev/sda5
+    if ! isTrue ${NEEDS_PARTITIONING} && runCmd blkid "${HARDDISK}5"; then NEEDS_PARTITIONING="true"; fi;
     
-    echo "PT: ${NEEDS_PARTITIONING}";
+    # Check if /dev/sda is gpt type
+    if ! isTrue ${NEEDS_PARTITIONING} && ! runCmd blkid "${HARDDISK}"; then NEEDS_PARTITIONING="true"; fi;
+    if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "PTTYPE=\"gpt\"") ]]; then NEEDS_PARTITIONING="true"; fi;
+
+    # Check if /dev/sda1 is type ext2 and labeled BOOT
+    if ! isTrue ${NEEDS_PARTITIONING} && ! runCmd blkid "${HARDDISK}1"; then NEEDS_PARTITIONING="true"; fi;
+    if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "TYPE=\"ext2\"") ]]; then NEEDS_PARTITIONING="true"; fi;
+    if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "LABEL=\"boot\"") ]]; then NEEDS_PARTITIONING="true"; fi;
+
+    # Check if /dev/sda2 is type vfat
+    if ! isTrue ${NEEDS_PARTITIONING} && ! runCmd blkid "${HARDDISK}2"; then NEEDS_PARTITIONING="true"; fi;
+    if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "TYPE=\"vfat\"") ]]; then NEEDS_PARTITIONING="true"; fi;
+
+    # Check if /dev/sda3 is type ext2 and labeled BOOT and has PARTLABEL=boot
+    if ! isTrue ${NEEDS_PARTITIONING} && ! runCmd blkid "${HARDDISK}3"; then NEEDS_PARTITIONING="true"; fi;
+    if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "TYPE=\"ext2\"") ]]; then NEEDS_PARTITIONING="true"; fi;
+    if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "LABEL=\"boot\"") ]]; then NEEDS_PARTITIONING="true"; fi;
+    if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "PARTLABEL=\"boot\"") ]]; then NEEDS_PARTITIONING="true"; fi;
     
+    # Check if /dev/sda4 is type crypto_LUKS and and has PARTLABEL=system
+    if ! isTrue ${NEEDS_PARTITIONING} && ! runCmd blkid "${HARDDISK}4"; then NEEDS_PARTITIONING="true"; fi;
+    if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "TYPE=\"crypto_LUKS\"") ]]; then NEEDS_PARTITIONING="true"; fi;
+    if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "PARTLABEL=\"system\"") ]]; then NEEDS_PARTITIONING="true"; fi;
+
+    if isTrue ${NEEDS_PARTITIONING}; then
     # Format drives
     logLine "Partitioning ${HARDDISK} with default partition scheme (bios and efi support)...";
     sfdisk -q ${HARDDISK} &> /dev/null <<- EOM
@@ -52,6 +76,6 @@ EOM
     sleep 1
     sync
     sleep 1
-    
+    fi;
     return 0;
 }
