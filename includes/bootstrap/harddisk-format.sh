@@ -34,8 +34,8 @@ function harddisk-format-check {
 
     # Check if /dev/sda1 is type ext2 and labeled BOOT
     if ! isTrue ${NEEDS_PARTITIONING} && ! runCmd blkid "${HARDDISK}1"; then NEEDS_PARTITIONING="true"; fi;
-    if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "TYPE=\"ext2\"") ]]; then NEEDS_PARTITIONING="true"; fi;
-    if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "LABEL=\"boot\"") ]]; then NEEDS_PARTITIONING="true"; fi;
+    #if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "TYPE=\"ext2\"") ]]; then NEEDS_PARTITIONING="true"; fi;
+    #if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "LABEL=\"boot\"") ]]; then NEEDS_PARTITIONING="true"; fi;
 
     # Check if /dev/sda2 is type vfat
     if ! isTrue ${NEEDS_PARTITIONING} && ! runCmd blkid "${HARDDISK}2"; then NEEDS_PARTITIONING="true"; fi;
