@@ -139,13 +139,11 @@ function run {
         return 0;
     }
     
-    if ! mountItem "/tmp/mnt/root" "${PART_SYSTEM}" "${DISTRO,,}-root-data"; then logError "Failed to mount ROOT-Volume"; exit 1; fi;
-    if ! mountItem "/tmp/mnt/root/boot" "${PART_BOOT}"; then logError "Failed to mount BOOT-Partition"; exit 1; fi;
-    if ! mountItem "/tmp/mnt/root/boot/efi" "${PART_EFI}"; then logError "Failed to mount EFI-Partition"; exit 1; fi;
+    if ! mountItem /tmp/mnt/root "${PART_SYSTEM}" "${DISTRO,,}-root-data"; then logError "Failed to mount ROOT-Volume"; exit 1; fi;
+    if ! mountItem /tmp/mnt/root/boot "${PART_BOOT}"; then logError "Failed to mount BOOT-Partition"; exit 1; fi;
+    if ! mountItem /tmp/mnt/root/boot/efi "${PART_EFI}"; then logError "Failed to mount EFI-Partition"; exit 1; fi;
+    if ! mountItem /tmp/mnt/root/.snapshots "${PART_SYSTEM}" "@snapshots"; then logError "Failed to Mount Snapshot-Volume at /tmp/mnt/root/.snapshots"; exit 1; fi;
     
-    #if ! runCmd mount ${PART_BOOT} /tmp/mnt/root/boot; then logError "Failed to mount BOOT-Partition"; exit 1; fi;
-    #if ! runCmd mkdir -p /tmp/mnt/root/boot/efi; then logError "Failed to create efi directory at /tmp/mnt/root/boot/efi"; exit 1; fi;
-    #if ! runCmd mount ${PART_EFI} /tmp/mnt/root/boot/efi; then logError "Failed to mount EFI-Partition"; exit 1; fi;
     
     
     echo "Todo";
