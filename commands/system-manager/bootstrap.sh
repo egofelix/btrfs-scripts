@@ -170,8 +170,8 @@ function run {
     if ! mountItem /tmp/mnt/root/var/tmp "${PART_SYSTEM}" "@${DISTRO,,}-var-tmp-data"; then logError "Failed to Mount @${DISTRO,,}-var-tmp-data-Volume at /tmp/mnt/root/var/tmp"; exit 1; fi;
     
     # Install base system
-    if [[ ! -d /tmp/mnt/root/etc ]]; then
-        logLine "Skipping strap, there is a system already";
+    if [[ -d /tmp/mnt/root/etc ]]; then
+        logLine "Skipping strap, there seems to be a system already";
     else
         logLine "Installing Base-System (${DISTRO^^})...";
         source "${BASH_SOURCE%/*/*/*}/scripts/strap.sh";
