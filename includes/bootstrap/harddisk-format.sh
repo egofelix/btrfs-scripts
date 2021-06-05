@@ -67,11 +67,11 @@ function harddisk-format-check {
                 logWarn "Mapper ${ARG_CRYPT_MAPPER} seems to be in use already";
                 return 1;
             fi;
-        fi;
-       
-
-        if ! isTrue ${NEEDS_PARTITIONING}; then
-            if ! runCmd cryptsetup --batch-mode open ${PART_SYSTEM} cryptsystem -d /tmp/crypto.key; then NEEDS_PARTITIONING="true"; fi;
+        else
+            # Otherwise try open it
+            if ! isTrue ${NEEDS_PARTITIONING}; then
+                if ! runCmd cryptsetup --batch-mode open ${PART_SYSTEM} cryptsystem -d /tmp/crypto.key; then NEEDS_PARTITIONING="true"; fi;
+            fi;
         fi;
 
         # Check if /dev/mapper/cryptsystem
