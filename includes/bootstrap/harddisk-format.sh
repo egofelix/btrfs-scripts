@@ -68,9 +68,10 @@ function harddisk-format-check {
 
         # Check if /dev/mapper/cryptsystem
         if ! isTrue ${NEEDS_PARTITIONING}; then
-        if ! runCmd blkid "/dev/mapper/cryptsystem"; then NEEDS_PARTITIONING="true"; fi;
-        if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "TYPE=\"btrfs\"") ]]; then NEEDS_PARTITIONING="true"; fi;
-        if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "LABEL=\"system\"") ]]; then NEEDS_PARTITIONING="true"; fi; 
+            if ! runCmd blkid "/dev/mapper/cryptsystem"; then NEEDS_PARTITIONING="true"; fi;
+            if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "TYPE=\"btrfs\"") ]]; then NEEDS_PARTITIONING="true"; fi;
+            if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "LABEL=\"system\"") ]]; then NEEDS_PARTITIONING="true"; fi; 
+        fi;
     fi;
 
     if isTrue ${NEEDS_PARTITIONING}; then
