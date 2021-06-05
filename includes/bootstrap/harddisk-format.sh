@@ -56,7 +56,7 @@ function harddisk-format-check {
     # Try open cryptsystem
     if isTrue ${ARG_CRYPT}; then
         if [[ -z "${ARG_CRYPT_MAPPER}" ]]; then logError "CRYPT_MAPPER must be provided with crypted"; return 1; fi;
-        
+
         # close cryptsystem if mounted
         runCmd cryptsetup --batch-mode close cryptsystem; # Ignore output
 
@@ -69,10 +69,8 @@ function harddisk-format-check {
         # Check if /dev/mapper/cryptsystem
         if ! isTrue ${NEEDS_PARTITIONING}; then
         if ! runCmd blkid "/dev/mapper/cryptsystem"; then NEEDS_PARTITIONING="true"; fi;
-        if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "TYPE=\"ext2\"") ]]; then NEEDS_PARTITIONING="true"; fi;
-        if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "LABEL=\"boot\"") ]]; then NEEDS_PARTITIONING="true"; fi;
-        if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "PARTLABEL=\"boot\"") ]]; then NEEDS_PARTITIONING="true"; fi;
-        
+        if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "TYPE=\"btrfs\"") ]]; then NEEDS_PARTITIONING="true"; fi;
+        if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "LABEL=\"system\"") ]]; then NEEDS_PARTITIONING="true"; fi; 
     fi;
 
     if isTrue ${NEEDS_PARTITIONING}; then
