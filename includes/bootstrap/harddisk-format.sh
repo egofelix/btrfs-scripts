@@ -5,6 +5,7 @@ function harddisk-format {
     # Scan Arguments
     local ARG_HARDDISK="";
     local ARG_CRYPT="false";
+    local ARG_CRYPT_PASSWORD="test1234";
     while [[ "$#" -gt 0 ]]; do
         case $1 in
             --crypt) ARG_CRYPT="$2"; shift;;
@@ -97,7 +98,7 @@ EOM
         if ! runCmd mkfs.ext2 -F -L boot ${PART_BOOT}; then logError "Failed to format BOOT-Partition"; return 1; fi;
 
         # Encrypt SYSTEM-Partition
-        if isTrue ${ARG_CRYPTED}; then
+        if isTrue ${ARG_CRYPT}; then
             if [[ ! -f /tmp/crypto.key ]]; then
                 logLine "Generating Crypto-KEY...";
                 if ! runCmd dd if=/dev/urandom of=/tmp/crypto.key bs=1024 count=1; then logError "Failed to generate Crypto-KEY"; return 1; fi;
@@ -112,7 +113,7 @@ EOM
             if ! runCmd cryptsetup luksHeaderBackup ${PART_SYSTEM} --header-backup-file /tmp/crypto.header; then logError "Failed to Backup LUKS-Header"; return 1; fi;
             
             # Add Password
-            echo ${CRYPTEDPASSWORD} | cryptsetup --batch-mode luksAddKey ${PART_SYSTEM} -d /tmp/crypto.key; 
+            echo ${ARG_CRYPT_PASSWORD} | cryptsetup --batch-mode luksAddKey ${PART_SYSTEM} -d /tmp/crypto.key; 
             if [ $? -ne 0 ]; then logError "Failed to add password to SYSTEM-Partition"; return 1; fi;
             
             # Remap partition to crypted one
