@@ -108,7 +108,7 @@ function run {
     # Mount Subvolumes
     logLine "Mounting...";
     mkdir -p /tmp/mnt/root;
-    if ! runCmd mount -o subvol=/${DISTRO,,}root-data ${PART_SYSTEM} /tmp/mnt/root; then logError "Failed to Mount Subvolume ROOT-DATA at /tmp/mnt/root"; exit 1; fi;
+    if ! runCmd mount -o subvol=/${DISTRO,,}-root-data ${PART_SYSTEM} /tmp/mnt/root; then logError "Failed to Mount Subvolume ${DISTRO^^}-ROOT-DATA at /tmp/mnt/root"; exit 1; fi;
     mkdir -p /tmp/mnt/root/boot;
     if ! runCmd mount ${PART_BOOT} /tmp/mnt/root/boot; then logError "Failed to mount BOOT-Partition"; exit 1; fi;
     if ! runCmd mkdir -p /tmp/mnt/root/boot/efi; then logError "Failed to create efi directory at /tmp/mnt/root/boot/efi"; exit 1; fi;
