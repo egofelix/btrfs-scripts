@@ -110,7 +110,7 @@ fi;
 # Install Grub
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 mkinitcpio -P
-grub-install ${DRIVE_ROOT}
+grub-install ${HARDDISK}
 grub-mkconfig -o /boot/grub/grub.cfg
 EOF
 chroot /tmp/mnt/root /chroot.sh;
