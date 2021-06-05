@@ -96,9 +96,9 @@ function run {
     # Create Subvolumes
     logLine "Checking BTRFS-Subvolumes on SYSTEM-Partition...";
     if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@snapshots && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@snapshots; then logError "Failed to create btrfs @SNAPSHOTS-Volume"; exit 1; fi;
-    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@swap && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@swap; then logError "Failed to create btrfs @SWAP-Volume"; exit 1; fi;
-    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@logs && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@logs; then logError "Failed to create btrfs @LOGS-Volume"; exit 1; fi;
-    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@tmp && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@tmp; then logError "Failed to create btrfs @TMP-Volume"; exit 1; fi;
+    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@${DISTRO,,}-swap && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@${DISTRO,,}-swap; then logError "Failed to create btrfs @${DISTRO,,}-swap-Volume"; exit 1; fi;
+    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@${DISTRO,,}-var-logs-data && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@${DISTRO,,}-var-logs-data; then logError "Failed to create btrfs @${DISTRO,,}-var-logs-data-Volume"; exit 1; fi;
+    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@${DISTRO,,}-var-tmp-data && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@${DISTRO,,}-var-tmp-data; then logError "Failed to create btrfs @${DISTRO,,}-var-tmp-data-Volume"; exit 1; fi;
     if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/${DISTRO,,}-root-data && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/${DISTRO,,}-root-data; then logError "Failed to create btrfs ROOT-DATA-Volume"; exit 1; fi;
     for subvolName in ${SUBVOLUMES}
     do
@@ -145,7 +145,7 @@ function run {
     if ! mountItem /tmp/mnt/root/.snapshots "${PART_SYSTEM}" "@snapshots"; then logError "Failed to Mount Snapshot-Volume at /tmp/mnt/root/.snapshots"; exit 1; fi;
     
     # Mount Swap-Volume
-    if ! mountItem /tmp/mnt/root/.swap "${PART_SYSTEM}" "@swap"; then logError "Failed to Mount SWAP-Volume at /tmp/mnt/root/.swap"; exit 1; fi;
+    if ! mountItem /tmp/mnt/root/.swap "${PART_SYSTEM}" "@${DISTRO,,}-swap"; then logError "Failed to Mount ${DISTRO,,}-swap-Volume at /tmp/mnt/root/.swap"; exit 1; fi;
     
     # Create SwapFile
     if [[ ! -f /tmp/mnt/root/.swap/swapfile ]]; then
