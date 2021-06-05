@@ -64,7 +64,7 @@ function run {
         fi;
         
         # Format Drive
-        if ! harddisk-format --crypt "${CRYPT}" --crypt-password "${CRYPT_PASSWORD}" --harddisk "${HARDDISK}"; then
+        if ! harddisk-format --crypt "${CRYPT}" --crypt-mapper "/dev/mapper/cryptsystem" --crypt-password "${CRYPT_PASSWORD}" --harddisk "${HARDDISK}"; then
             logError "Failed to format ${HARDDISK}";
             exit 1;
         fi;
