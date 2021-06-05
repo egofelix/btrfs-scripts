@@ -114,6 +114,7 @@ function run {
         local MOUNTTEST=$(echo "${RUNCMD_CONTENT}" | grep "${PART_SYSTEM}\[/${DISTRO,,}-${subvolName,,}-data\]");
         echo "MOUNTTEST: ${MOUNTTEST}";
         echo "MOUNTTEST: ${RUNCMD_CONTENT}";
+        echo "${PART_SYSTEM}\[/${DISTRO,,}-${subvolName,,}-data\]";
         
         exit 1;
         elif ! runCmd mount -o subvol=/${DISTRO,,}-root-data ${PART_SYSTEM} /tmp/mnt/root; then
