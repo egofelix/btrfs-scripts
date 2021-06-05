@@ -1,14 +1,9 @@
 #!/bin/bash
 set -uo pipefail;
 
-############### Main Script ################
-function printManagerArgs() {
-    echo -n "[-q|--quiet] [-v|--verbose] [-d|--debug] <command> [<commandargs>]";
-}
-
-function printManagerHelp() {
+function printHelp() {
     echo -en "Usage: ";
-    printUsage ${ENTRY_HELP} $(printManagerArgs);
+    printUsage "${ENTRY_HELP} [-q|--quiet] [-v|--verbose] [-d|--debug] <command> [<commandargs>]";
     
     echo "";
     echo -en "To get more information about commands try: ";
@@ -21,7 +16,7 @@ function printManagerHelp() {
 }
 
 # Scan arguments & command
-function manager() {
+function _router() {
     ## Load Functions
     local SCRIPT_SOURCE=$(readlink -f ${BASH_SOURCE});
     for f in ${SCRIPT_SOURCE%/*}/includes/*.sh; do source $f; done;
@@ -41,9 +36,9 @@ function manager() {
             -d|--debug) if isTrue ${LOGDEFINED}; then logError "Cannot mix --debug with --verbose or --quiet"; exit 1; fi; LOGDEFINED="true"; DEBUG="true"; VERBOSE="true";;
             -v|-verbose) if isTrue ${LOGDEFINED}; then logError "Cannot mix --debug with --verbose or --quiet"; exit 1; fi; LOGDEFINED="true"; VERBOSE="true";;
             -q|--quiet) if isTrue ${LOGDEFINED}; then logError "Cannot mix --debug with --verbose or --quiet"; exit 1; fi; LOGDEFINED="true"; QUIET="true"; QUIETPS=" &>/dev/null";;
-            -h|--help) printManagerHelp; exit 0;;
+            -h|--help) printHelp; exit 0;;
             --host-script) HOST_SCRIPT="${2}"; shift;;
-            -*) logError "Unknown Argument: $1"; printManagerHelp; exit 1;;
+            -*) logError "Unknown Argument: $1"; printHelp; exit 1;;
             *)
                 HOST_COMMAND="$1";
                 shift;
@@ -59,8 +54,8 @@ function manager() {
     # Check Root
     if [[ "$EUID" -ne 0 ]]; then logError "Please run as root"; exit 1; fi;
     
-    if ! commandLineProxy --command-name "command" --command-value "${HOST_COMMAND}" --command-path "${SCRIPT_SOURCE%/*}/commands/" $@; then printManagerHelp; exit 1; fi;
+    if ! commandLineProxy --command-name "command" --command-value "${HOST_COMMAND}" --command-path "${SCRIPT_SOURCE%/*}/commands/" $@; then printHelp; exit 1; fi;
 }
 
-manager $@;
+_router $@;
 exit 0;
