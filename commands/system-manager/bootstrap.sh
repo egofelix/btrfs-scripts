@@ -105,6 +105,15 @@ function run {
         if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/${DISTRO,,}-${subvolName,,}-data && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/${DISTRO,,}-${subvolName,,}-data; then logError "Failed to create btrfs ${subvolName^^}-DATA-Volume"; exit 1; fi;
     done;
     
+    # Mount Subvolumes
+    logLine "Mounting...";
+    mkdir -p /tmp/mnt/root;
+    if ! runCmd mount -o subvol=/${DISTRO,,}root-data ${PART_SYSTEM} /tmp/mnt/root; then logError "Failed to Mount Subvolume ROOT-DATA at /tmp/mnt/root"; exit 1; fi;
+    mkdir -p /tmp/mnt/root/boot;
+    if ! runCmd mount ${PART_BOOT} /tmp/mnt/root/boot; then logError "Failed to mount BOOT-Partition"; exit 1; fi;
+    if ! runCmd mkdir -p /tmp/mnt/root/boot/efi; then logError "Failed to create efi directory at /tmp/mnt/root/boot/efi"; exit 1; fi;
+    if ! runCmd mount ${PART_EFI} /tmp/mnt/root/boot/efi; then logError "Failed to mount EFI-Partition"; exit 1; fi;
+    
     
     echo "Todo";
     printHelp;
