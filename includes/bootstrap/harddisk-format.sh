@@ -97,7 +97,7 @@ EOM
         if ! runCmd mkfs.ext2 -F -L boot ${PART_BOOT}; then logError "Failed to format BOOT-Partition"; return 1; fi;
 
         # Encrypt SYSTEM-Partition
-        if isTrue "${CRYPTED}"; then
+        if isTrue ${ARG_CRYPTED}; then
             if [[ ! -f /tmp/crypto.key ]]; then
                 logLine "Generating Crypto-KEY...";
                 if ! runCmd dd if=/dev/urandom of=/tmp/crypto.key bs=1024 count=1; then logError "Failed to generate Crypto-KEY"; return 1; fi;
