@@ -22,7 +22,7 @@ DEBIAN_FRONTEND=noninteractive apt-get -yq install linux-image-amd64 grub-pc
 EOF
         fi;
     else
-        logError "Unsupported System Type: $(getSystemType)";
+        logError "Unsupported System Type: $(system-arch)";
         exit 1;
     fi;
     chmod +x /tmp/mnt/root/chroot.sh;
