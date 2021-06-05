@@ -105,15 +105,16 @@ function run {
     elif ! runCmd mount ${PART_SYSTEM} /tmp/mnt/disks/system; then logError "Failed to mount SYSTEM-Partition"; exit 1; fi;
     
     # Create Subvolumes
+    local VOLUME_PREFIX="${DISTRO,,}-";
     logLine "Checking BTRFS-Subvolumes on SYSTEM-Partition...";
     if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@snapshots && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@snapshots; then logError "Failed to create btrfs @SNAPSHOTS-Volume"; exit 1; fi;
-    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@${DISTRO,,}-swap && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@${DISTRO,,}-swap; then logError "Failed to create btrfs @${DISTRO,,}-swap-Volume"; exit 1; fi;
-    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@${DISTRO,,}-var-logs-data && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@${DISTRO,,}-var-logs-data; then logError "Failed to create btrfs @${DISTRO,,}-var-logs-data-Volume"; exit 1; fi;
-    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@${DISTRO,,}-var-tmp-data && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@${DISTRO,,}-var-tmp-data; then logError "Failed to create btrfs @${DISTRO,,}-var-tmp-data-Volume"; exit 1; fi;
-    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/${DISTRO,,}-root-data && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/${DISTRO,,}-root-data; then logError "Failed to create btrfs ${DISTRO^^}-ROOT-DATA-Volume"; exit 1; fi;
+    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@${VOLUME_PREFIX}swap && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@${VOLUME_PREFIX}swap; then logError "Failed to create btrfs @${VOLUME_PREFIX}swap-Volume"; exit 1; fi;
+    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@${VOLUME_PREFIX}var-logs-data && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@${VOLUME_PREFIX}var-logs-data; then logError "Failed to create btrfs @${VOLUME_PREFIX}var-logs-data-Volume"; exit 1; fi;
+    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@${VOLUME_PREFIX}var-tmp-data && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@${VOLUME_PREFIX}var-tmp-data; then logError "Failed to create btrfs @${VOLUME_PREFIX}var-tmp-data-Volume"; exit 1; fi;
+    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/${VOLUME_PREFIX}root-data && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/${VOLUME_PREFIX}root-data; then logError "Failed to create btrfs ${VOLUME_PREFIX}ROOT-DATA-Volume"; exit 1; fi;
     for subvolName in ${SUBVOLUMES}
     do
-        if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/${DISTRO,,}-${subvolName,,}-data && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/${DISTRO,,}-${subvolName,,}-data; then logError "Failed to create btrfs ${subvolName^^}-DATA-Volume"; exit 1; fi;
+        if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/${VOLUME_PREFIX}${subvolName,,}-data && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/${VOLUME_PREFIX}${subvolName,,}-data; then logError "Failed to create btrfs ${VOLUME_PREFIX}${subvolName^^}-DATA-Volume"; exit 1; fi;
     done;
     
     # Mount Subvolumes
@@ -148,13 +149,13 @@ function run {
         return 0;
     }
     
-    if ! mountItem /tmp/mnt/root "${PART_SYSTEM}" "${DISTRO,,}-root-data"; then logError "Failed to mount ROOT-Volume"; exit 1; fi;
+    if ! mountItem /tmp/mnt/root "${PART_SYSTEM}" "${VOLUME_PREFIX}root-data"; then logError "Failed to mount ${VOLUME_PREFIX}ROOT-Volume"; exit 1; fi;
     if ! mountItem /tmp/mnt/root/boot "${PART_BOOT}"; then logError "Failed to mount BOOT-Partition"; exit 1; fi;
     if ! mountItem /tmp/mnt/root/boot/efi "${PART_EFI}"; then logError "Failed to mount EFI-Partition"; exit 1; fi;
     if ! mountItem /tmp/mnt/root/.snapshots "${PART_SYSTEM}" "@snapshots"; then logError "Failed to Mount Snapshot-Volume at /tmp/mnt/root/.snapshots"; exit 1; fi;
     
     # Mount Swap-Volume
-    if ! mountItem /tmp/mnt/root/.swap "${PART_SYSTEM}" "@${DISTRO,,}-swap"; then logError "Failed to Mount ${DISTRO,,}-swap-Volume at /tmp/mnt/root/.swap"; exit 1; fi;
+    if ! mountItem /tmp/mnt/root/.swap "${PART_SYSTEM}" "@${VOLUME_PREFIX}swap"; then logError "Failed to Mount ${VOLUME_PREFIX}swap-Volume at /tmp/mnt/root/.swap"; exit 1; fi;
     
     # Create SwapFile
     if [[ ! -f /tmp/mnt/root/.swap/swapfile ]]; then
@@ -169,12 +170,12 @@ function run {
     # Mount Subvolumes
     for subvolName in ${SUBVOLUMES}
     do
-        if ! mountItem /tmp/mnt/root/${subvolName,,} "${PART_SYSTEM}" "${DISTRO,,}-${subvolName,,}-data"; then logError "Failed to Mount ${DISTRO,,}-${subvolName,,}-data-Volume at /tmp/mnt/root/${subvolName,,}"; exit 1; fi;
+        if ! mountItem /tmp/mnt/root/${subvolName,,} "${PART_SYSTEM}" "${VOLUME_PREFIX}${subvolName,,}-data"; then logError "Failed to Mount ${VOLUME_PREFIX}${subvolName,,}-data-Volume at /tmp/mnt/root/${subvolName,,}"; exit 1; fi;
     done;
     
     # Mount /var/logs
-    if ! mountItem /tmp/mnt/root/var/logs "${PART_SYSTEM}" "@${DISTRO,,}-var-logs-data"; then logError "Failed to Mount @${DISTRO,,}-var-logs-data-Volume at /tmp/mnt/root/var/logs"; exit 1; fi;
-    if ! mountItem /tmp/mnt/root/var/tmp "${PART_SYSTEM}" "@${DISTRO,,}-var-tmp-data"; then logError "Failed to Mount @${DISTRO,,}-var-tmp-data-Volume at /tmp/mnt/root/var/tmp"; exit 1; fi;
+    if ! mountItem /tmp/mnt/root/var/logs "${PART_SYSTEM}" "@${VOLUME_PREFIX}var-logs-data"; then logError "Failed to Mount @${VOLUME_PREFIX}var-logs-data-Volume at /tmp/mnt/root/var/logs"; exit 1; fi;
+    if ! mountItem /tmp/mnt/root/var/tmp "${PART_SYSTEM}" "@${VOLUME_PREFIX}var-tmp-data"; then logError "Failed to Mount @${VOLUME_PREFIX}var-tmp-data-Volume at /tmp/mnt/root/var/tmp"; exit 1; fi;
     
     # Install base system
     if [[ -d /tmp/mnt/root/etc ]]; then
