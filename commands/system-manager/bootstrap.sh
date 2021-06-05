@@ -44,7 +44,6 @@ function run {
     
     # Warn user if we didnt detected a live system
     if ! isTrue ${IS_LIVE}; then
-        # Get user confirmation
         read -p "You are not running a live system, bootstrap to a running system will fail, continue? [yN]: " -n 1 -r
         echo    # (optional) move to a new line
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -53,7 +52,6 @@ function run {
         fi
     fi;
     
-    # Check if Target exists
     # Get user confirmation
     read -p "You are now deleting all contents of \"${HARDDISK}\", continue? [yN]: " -n 1 -r
     echo    # (optional) move to a new line
@@ -62,6 +60,11 @@ function run {
         exit 1;
     fi;
     
+    # Format Drive
+    if ! harddisk-format --harddisk "${HARDDISK}"; then
+        logError "Failed to format ${HARDDISK}";
+        exit 1;
+    fi;
     echo "Todo";
     printHelp;
     exit 1;

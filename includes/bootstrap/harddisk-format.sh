@@ -6,7 +6,7 @@ function harddisk-format {
     while [[ "$#" -gt 0 ]]; do
         case $1 in
             --harddisk) ARG_HARDDISK="$2"; shift;;
-            *) logError "autodetect-harddisk#Unknown Argument: $1"; return 1;;
+            *) logError "harddisk-format#Unknown Argument: $1"; return 1;;
         esac;
         shift;
     done;
