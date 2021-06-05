@@ -111,10 +111,10 @@ function run {
     
     if runCmd findmnt -r -n /tmp/mnt/root; then
         logDebug "Checking mount on /tmp/mnt/root";
-        local MOUNTTEST=$(echo "${RUNCMD_CONTENT}" | grep "${PART_SYSTEM}[/${DISTRO,,}-${subvolName,,}-data]");
+        local MOUNTTEST=$(echo "${RUNCMD_CONTENT}" | grep "${PART_SYSTEM}\[/${DISTRO,,}-root-data\]");
         echo "MOUNTTEST: ${MOUNTTEST}";
         echo "MOUNTTEST: ${RUNCMD_CONTENT}";
-        echo "${PART_SYSTEM}[/${DISTRO,,}-${subvolName,,}-data]";
+        echo "${PART_SYSTEM}[/${DISTRO,,}-root-data]";
         
         exit 1;
         elif ! runCmd mount -o subvol=/${DISTRO,,}-root-data ${PART_SYSTEM} /tmp/mnt/root; then
