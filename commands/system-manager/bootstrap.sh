@@ -112,11 +112,11 @@ function run {
     if runCmd findmnt -r -n /tmp/mnt/root; then
         logDebug "Checking mount on /tmp/mnt/root";
         local MOUNTTEST=$(echo "${RUNCMD_CONTENT}" | cut -d' ' -f 2 | grep "${PART_SYSTEM}\[/${DISTRO,,}-root-data\]");
-        echo "MOUNTTEST: ${MOUNTTEST}";
-        echo "MOUNTTEST: ${RUNCMD_CONTENT}";
-        echo "${PART_SYSTEM}[/${DISTRO,,}-root-data]";
         
-        exit 1;
+        if [[ -z "${MOUNTTEST}" ]]; then
+            logError "There seems to be another mount at /tmp/mnt/root";
+            exit 1;
+        fi;
         elif ! runCmd mount -o subvol=/${DISTRO,,}-root-data ${PART_SYSTEM} /tmp/mnt/root; then
         logError "Failed to Mount Subvolume ${DISTRO^^}-ROOT-DATA at /tmp/mnt/root";
         exit 1;
