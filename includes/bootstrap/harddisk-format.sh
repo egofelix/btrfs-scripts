@@ -57,10 +57,18 @@ function harddisk-format-check {
     if isTrue ${ARG_CRYPT}; then
         if [[ -z "${ARG_CRYPT_MAPPER}" ]]; then logError "CRYPT_MAPPER must be provided with crypted"; exit 1; fi;
 
-        # close cryptsystem if mounted
-        runCmd cryptsetup --batch-mode close cryptsystem; # Ignore output
-
         if [[ ! -f "/tmp/crypto.key" ]]; then NEEDS_PARTITIONING="true"; fi;
+
+        # check if ${ARG_CRYPT_MAPPER} is loaded
+        if runCmd cryptsetup --batch-mode status "${ARG_CRYPT_MAPPER}"; then
+            local CRYPTDEVICECHECK=$(echo ${RUNCMD_CONTENT} | grep "${ARG_HARDDISK}4");
+            if [[ -z "${CRYPTDEVICECHECK}" ]]; then
+                # Wrong partition mounted, close
+                logWarn "Mapper ${ARG_CRYPT_MAPPER} seems to be in use already";
+                return 1;
+            fi;
+        fi;
+       
 
         if ! isTrue ${NEEDS_PARTITIONING}; then
             if ! runCmd cryptsetup --batch-mode open ${PART_SYSTEM} cryptsystem -d /tmp/crypto.key; then NEEDS_PARTITIONING="true"; fi;
@@ -169,10 +177,13 @@ EOM
             logLine "Generating Crypto-KEY...";
             if ! runCmd dd if=/dev/urandom of=/tmp/crypto.key bs=1024 count=1; then logError "Failed to generate Crypto-KEY"; return 1; fi;
         fi;
+
+        # Close if mounted
+        runCmd cryptsetup --batch-mode close "${ARG_CRYPT_MAPPER}"; # Ignore output
         
         logLine "Encrypting SYSTEM-Partition (${PART_SYSTEM})...";
         if ! runCmd cryptsetup --batch-mode luksFormat --type luks2 --cipher aes-xts-plain64 --key-size 256 --hash sha256 --pbkdf argon2i -d /tmp/crypto.key ${PART_SYSTEM}; then logError "Failed to cryptformat SYSTEM-Partiton"; return 1; fi;
-        if ! runCmd cryptsetup --batch-mode open ${PART_SYSTEM} cryptsystem -d /tmp/crypto.key; then logError "Failed to open CRYPTSYSTEM-Partition"; return 1; fi;
+        if ! runCmd cryptsetup --batch-mode open ${PART_SYSTEM} "${ARG_CRYPT_MAPPER}" -d /tmp/crypto.key; then logError "Failed to open CRYPTSYSTEM-Partition"; return 1; fi;
         
         # Backup luks header
         rm -f /tmp/crypto.header &> /dev/null
@@ -183,7 +194,7 @@ EOM
         if [ $? -ne 0 ]; then logError "Failed to add password to SYSTEM-Partition"; return 1; fi;
         
         # Remap partition to crypted one
-        export PART_SYSTEM="/dev/mapper/cryptsystem"
+        export PART_SYSTEM="${ARG_CRYPT_MAPPER}"
     fi;
 
     # Format Partition
