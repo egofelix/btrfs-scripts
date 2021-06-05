@@ -12,7 +12,7 @@ function autodetect-backupvolume() {
     
     # Search BACKUPVOLUME via Environment or AutoDetect
     if isEmpty "${ARG_BACKUPVOLUME:-}"; then ARG_BACKUPVOLUME=$(LC_ALL=C mount | grep '@backups' | grep -o 'on /\..* type btrfs' | awk '{print $2}'); fi;
-    if isEmpty "${ARG_BACKUPVOLUME}"; then return 1; fi;
+    if isEmpty "${ARG_BACKUPVOLUME}"; then logWarn "Failed to autodetect @backups directory."; return 1; fi;
     
     # Test if SNAPSHOTSPATH is a btrfs subvol
     ARG_BACKUPVOLUME=$(removeTrailingChar "${ARG_BACKUPVOLUME}" "/");
