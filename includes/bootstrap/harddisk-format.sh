@@ -4,9 +4,11 @@ function harddisk-format-check {
     # Scan Arguments
     local ARG_HARDDISK="";
     local ARG_CRYPT="false";
+    local ARG_CRYPT_MAPPER="";
     while [[ "$#" -gt 0 ]]; do
         case $1 in
             --crypt) ARG_CRYPT="$2"; shift;;
+            --crypt-mapper) ARG_CRYPT_MAPPER="$2"; shift;;
             --harddisk) ARG_HARDDISK="$2"; shift;;
             *) logError "harddisk-format-check#Unknown Argument: $1"; return 1;;
         esac;
@@ -51,6 +53,28 @@ function harddisk-format-check {
     fi;    
     if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "PARTLABEL=\"system\"") ]]; then NEEDS_PARTITIONING="true"; fi;
 
+    # Try open cryptsystem
+    if isTrue ${ARG_CRYPT}; then
+        if [[ -z "${ARG_CRYPT_MAPPER}" ]]; then logError "CRYPT_MAPPER must be provided with crypted"; return 1; fi;
+        
+        # close cryptsystem if mounted
+        runCmd cryptsetup --batch-mode close cryptsystem; # Ignore output
+
+        if [[ -f "/tmp/crypto.key" ]]; then NEEDS_PARTITIONING="true"; fi;
+
+        if ! isTrue ${NEEDS_PARTITIONING}; then
+            if ! runCmd cryptsetup --batch-mode open ${PART_SYSTEM} cryptsystem -d /tmp/crypto.key; then NEEDS_PARTITIONING="true"; fi;
+        fi;
+
+        # Check if /dev/mapper/cryptsystem
+        if ! isTrue ${NEEDS_PARTITIONING}; then
+        if ! runCmd blkid "/dev/mapper/cryptsystem"; then NEEDS_PARTITIONING="true"; fi;
+        if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "TYPE=\"ext2\"") ]]; then NEEDS_PARTITIONING="true"; fi;
+        if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "LABEL=\"boot\"") ]]; then NEEDS_PARTITIONING="true"; fi;
+        if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "PARTLABEL=\"boot\"") ]]; then NEEDS_PARTITIONING="true"; fi;
+        
+    fi;
+
     if isTrue ${NEEDS_PARTITIONING}; then
         logDebug "Harddisk needs formatting";
         return 1;
@@ -94,7 +118,12 @@ function harddisk-format {
     export PART_SYSTEM_NUM="4"
     
     # Check if drive is formatted already
-    if harddisk-format-check --crypt "${ARG_CRYPT}" --harddisk "${HARDDISK}"; then return 0; fi;
+    if harddisk-format-check --crypt "${ARG_CRYPT}" --harddisk "${HARDDISK}"; then
+        if isTrue "${ARG_CRYPT}"; then
+            export PART_SYSTEM="/dev/mapper/cryptsystem";
+        fi;
+        return 0;
+    fi;
 
     # Format drives
     logLine "Partitioning ${HARDDISK} with default partition scheme (bios and efi support)...";
