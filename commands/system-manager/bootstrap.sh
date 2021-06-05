@@ -5,14 +5,14 @@ function printHelp {
 
 function run {
     # Scan Arguments
-    local NOCRYPT="false"; local NOCRYPT_FLAG="";
+    local CRYPT="true"; local NOCRYPT_FLAG="";
     local HARDDISK="";
     local DISTRO="archlinux";
     while [[ "$#" -gt 0 ]]; do
         case $1 in
             -t|--target) HARDDISK="$2"; shift ;;
             -d|--distro) DISTRO="$2"; shift ;;
-            -nc|--nocrypt) NOCRYPT="true"; NOCRYPT_FLAG=" --nocrypt";;
+            -nc|--nocrypt) CRYPT="false"; NOCRYPT_FLAG=" --nocrypt";;
             -h|--help) printHelp; exit 0;;
             *) logError "Unknown argument $1"; printHelp; exit 1;;
         esac;
@@ -61,10 +61,13 @@ function run {
     fi;
     
     # Format Drive
-    if ! harddisk-format --harddisk "${HARDDISK}"; then
+    if ! harddisk-format --crypt "${CRYPT}" --harddisk "${HARDDISK}"; then
         logError "Failed to format ${HARDDISK}";
         exit 1;
     fi;
+    
+    
+    
     echo "Todo";
     printHelp;
     exit 1;

@@ -4,8 +4,10 @@
 function harddisk-format {
     # Scan Arguments
     local ARG_HARDDISK="";
+    local ARG_CRYPT="false";
     while [[ "$#" -gt 0 ]]; do
         case $1 in
+            --crypt) ARG_CRYPT="$2"; shift;;
             --harddisk) ARG_HARDDISK="$2"; shift;;
             *) logError "harddisk-format#Unknown Argument: $1"; return 1;;
         esac;
@@ -43,8 +45,11 @@ function harddisk-format {
     # Check if /dev/sda4 is type crypto_LUKS and and has PARTLABEL=system
     if ! isTrue ${NEEDS_PARTITIONING} && ! runCmd blkid "${HARDDISK}4"; then NEEDS_PARTITIONING="true"; fi;
     if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "LABEL=\"system\"") ]]; then NEEDS_PARTITIONING="true"; fi;
-    if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "TYPE=\"btrfs\"") ]]; then NEEDS_PARTITIONING="true"; fi;
-    #if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "TYPE=\"crypto_LUKS\"") ]]; then NEEDS_PARTITIONING="true"; fi;
+    if isTrue ${ARG_CRYPT}; then
+        if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "TYPE=\"crypto_LUKS\"") ]]; then NEEDS_PARTITIONING="true"; fi;
+    else
+        if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "TYPE=\"btrfs\"") ]]; then NEEDS_PARTITIONING="true"; fi;
+    fi;    
     if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "PARTLABEL=\"system\"") ]]; then NEEDS_PARTITIONING="true"; fi;
 
     if isTrue ${NEEDS_PARTITIONING}; then
@@ -90,6 +95,29 @@ EOM
         # Format BOOT-Partition
         logLine "Formatting BOOT-Partition (${PART_BOOT})...";
         if ! runCmd mkfs.ext2 -F -L boot ${PART_BOOT}; then logError "Failed to format BOOT-Partition"; return 1; fi;
+
+        # Encrypt SYSTEM-Partition
+        if isTrue "${CRYPTED}"; then
+            if [[ ! -f /tmp/crypto.key ]]; then
+                logLine "Generating Crypto-KEY...";
+                if ! runCmd dd if=/dev/urandom of=/tmp/crypto.key bs=1024 count=1; then logError "Failed to generate Crypto-KEY"; return 1; fi;
+            fi;
+            
+            logLine "Encrypting SYSTEM-Partition (${PART_SYSTEM})...";
+            if ! runCmd cryptsetup --batch-mode luksFormat --type luks2 --cipher aes-xts-plain64 --key-size 256 --hash sha256 --pbkdf argon2i -d /tmp/crypto.key ${PART_SYSTEM}; then logError "Failed to cryptformat SYSTEM-Partiton"; return 1; fi;
+            if ! runCmd cryptsetup --batch-mode open ${PART_SYSTEM} cryptsystem -d /tmp/crypto.key; then logError "Failed to open CRYPTSYSTEM-Partition"; return 1; fi;
+            
+            # Backup luks header
+            rm -f /tmp/crypto.header &> /dev/null
+            if ! runCmd cryptsetup luksHeaderBackup ${PART_SYSTEM} --header-backup-file /tmp/crypto.header; then logError "Failed to Backup LUKS-Header"; return 1; fi;
+            
+            # Add Password
+            echo ${CRYPTEDPASSWORD} | cryptsetup --batch-mode luksAddKey ${PART_SYSTEM} -d /tmp/crypto.key; 
+            if [ $? -ne 0 ]; then logError "Failed to add password to SYSTEM-Partition"; return 1; fi;
+            
+            # Remap partition to crypted one
+            export PART_SYSTEM="/dev/mapper/cryptsystem"
+        fi;
 
         # Format Partition
         logLine "Formatting SYSTEM-Partition";
