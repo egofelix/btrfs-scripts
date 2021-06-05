@@ -79,6 +79,16 @@ function run {
     # Mount system
     logLine "Mounting SYSTEM-Partition at /tmp/mnt/disks/system"
     mkdir -p /tmp/mnt/disks/system
+    
+    if runCmd findmnt -n -r /tmp/mnt/disks/system; then
+        local CURRENTLYMOUNTED=$(echo "${RUNCMD_CONTENT}" | cut -d' ' -f 2);
+        
+        if [[ "${CURRENTLYMOUNTED}" != "${PART_SYSTEM}" ]];
+            logError "There seems to be another drive mounted at /tmp/mnt/disks/system";
+            exit 1;
+        fi;
+    fi;
+    
     if ! runCmd mount ${PART_SYSTEM} /tmp/mnt/disks/system; then logError "Failed to mount SYSTEM-Partition"; exit 1; fi;
     
     # Create Subvolumes
