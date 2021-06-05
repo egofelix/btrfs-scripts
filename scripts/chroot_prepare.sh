@@ -11,4 +11,5 @@ if system-is-efi; then
 fi;
 
 # Install current resolv.conf
+rm -f /tmp/mnt/root/etc/resolv.conf;
 if ! runCmd cp /etc/resolv.conf /tmp/mnt/root/etc/resolv.conf; then logLine "Error preparing chroot"; exit; fi;
