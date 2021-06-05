@@ -55,7 +55,7 @@ function run {
     
     # Get user confirmation
     logDebug "Checking if we need to format";
-    if ! harddisk-format-check --crypt "${CRYPT}" --harddisk "${HARDDISK}"; then
+    if ! harddisk-format-check --crypt "${CRYPT}" --crypt-mapper "/dev/mapper/cryptsystem" --harddisk "${HARDDISK}"; then
         read -p "You are now deleting all contents of \"${HARDDISK}\", continue? [yN]: " -n 1 -r
         echo    # (optional) move to a new line
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then

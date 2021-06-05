@@ -55,7 +55,7 @@ function harddisk-format-check {
 
     # Try open cryptsystem
     if isTrue ${ARG_CRYPT}; then
-        if [[ -z "${ARG_CRYPT_MAPPER}" ]]; then logError "CRYPT_MAPPER must be provided with crypted"; return 1; fi;
+        if [[ -z "${ARG_CRYPT_MAPPER}" ]]; then logError "CRYPT_MAPPER must be provided with crypted"; exit 1; fi;
 
         # close cryptsystem if mounted
         runCmd cryptsetup --batch-mode close cryptsystem; # Ignore output
@@ -68,7 +68,7 @@ function harddisk-format-check {
 
         # Check if /dev/mapper/cryptsystem
         if ! isTrue ${NEEDS_PARTITIONING}; then
-            if ! runCmd blkid "/dev/mapper/cryptsystem"; then NEEDS_PARTITIONING="true"; fi;
+            if ! runCmd blkid "${ARG_CRYPT_MAPPER}"; then NEEDS_PARTITIONING="true"; fi;
             if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "TYPE=\"btrfs\"") ]]; then NEEDS_PARTITIONING="true"; fi;
             if [[ -z $(echo "${RUNCMD_CONTENT}" | grep "LABEL=\"system\"") ]]; then NEEDS_PARTITIONING="true"; fi; 
         fi;
@@ -89,10 +89,12 @@ function harddisk-format {
     local ARG_HARDDISK="";
     local ARG_CRYPT="false";
     local ARG_CRYPT_PASSWORD="";
+    local ARG_CRYPT_MAPPER="";
     while [[ "$#" -gt 0 ]]; do
         case $1 in
             --crypt) ARG_CRYPT="$2"; shift;;
             --crypt-password) ARG_CRYPT_PASSWORD="$2"; shift;;
+            --crypt-mapper) ARG_CRYPT_MAPPER="$2"; shift;;
             --harddisk) ARG_HARDDISK="$2"; shift;;
             *) logError "harddisk-format#Unknown Argument: $1"; return 1;;
         esac;
@@ -117,9 +119,9 @@ function harddisk-format {
     export PART_SYSTEM_NUM="4"
     
     # Check if drive is formatted already
-    if harddisk-format-check --crypt "${ARG_CRYPT}" --harddisk "${HARDDISK}"; then
+    if harddisk-format-check --crypt "${ARG_CRYPT}" --crypt-mapper "${ARG_CRYPT_MAPPER}" --harddisk "${HARDDISK}"; then
         if isTrue "${ARG_CRYPT}"; then
-            export PART_SYSTEM="/dev/mapper/cryptsystem";
+            export PART_SYSTEM="${ARG_CRYPT_MAPPER}";
         fi;
         return 0;
     fi;
