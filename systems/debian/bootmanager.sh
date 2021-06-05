@@ -7,7 +7,7 @@ else
     logLine "Setting up Bootmanager (GRUB)";
     
     # TODO: Detect Platform and install right kernel
-    if [[ system-arch = "AMD64" ]]; then
+    if system-arch "AMD64"; then
         if system-is-efi; then
       cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash

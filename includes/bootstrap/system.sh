@@ -46,9 +46,22 @@ function system-name {
 
 function system-arch {
     local DISTIDENTIFIER=$(uname -m)
+    local ID=""
     if [[ "${DISTIDENTIFIER^^}" = "ARMV7L" ]]; then
-        echo -n "ARMHF";
+        ID="ARMHF";
     else
+        ID="AMD64"
         echo -n "AMD64";
+    fi;
+    
+    if [[ -z "${1:-}" ]]; then
+        echo -n "${ID}";
+        return 0;
+    fi;
+    
+    if [[ "${1^^}" == "${ID}" ]]; then
+        return 0;
+    else
+        return 1;
     fi;
 }
