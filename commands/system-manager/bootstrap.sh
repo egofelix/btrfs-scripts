@@ -1,6 +1,6 @@
 #!/bin/bash
 function printHelp {
-    echo "Usage: ${HOST_NAME} ${COMMAND_VALUE} [-f|--force] [-nc|--nocrypt] [-t|--target <harddisk>] [-d|--distro <distroc>] [--use-subvolume <volume> ...]";
+    echo "Usage: ${HOST_NAME} ${COMMAND_VALUE} [-c|--clean-disk] [-nc|--nocrypt] [-t|--target <harddisk>] [-d|--distro <distroc>] [--use-subvolume <volume> ...]";
 }
 
 function run {
@@ -15,7 +15,7 @@ function run {
         case $1 in
             -t|--target) HARDDISK="$2"; shift ;;
             -d|--distro) DISTRO="$2"; shift ;;
-            -f|--force) FORCE="true"; FORCE_FLAG=" --force";;
+            -c|--clean-disk) FORCE="true"; FORCE_FLAG=" --clean-disk";;
             --use-subvolume) SUBVOLUMES="${SUBVOLUMES} ${2}"; shift ;;
             -nc|--nocrypt) CRYPT="false"; NOCRYPT_FLAG=" --nocrypt";;
             -h|--help) printHelp; exit 0;;
@@ -25,7 +25,7 @@ function run {
     done;
     
     # Debug Variables
-    logFunction "bootstrap#arguments${NOCRYPT_FLAG} --target \`${HARDDISK}\` --distro \`${DISTRO}\`";
+    logFunction "bootstrap#arguments${FORCE_FLAG}${NOCRYPT_FLAG} --target \`${HARDDISK}\` --distro \`${DISTRO}\`";
     
     # Include bootstrap includes
     local SCRIPT_SOURCE=$(readlink -f ${BASH_SOURCE});
