@@ -72,7 +72,9 @@ DEBIAN_FRONTEND=noninteractive apt-get -yq install tinysshd ipsvd
 systemctl disable tinysshd.socket
 EOF
     chroot /tmp/mnt/root /chroot.sh;
-    #mkdir -p /tmp/mnt/root/etc/initramfs-tools/hooks/ /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/ /tmp/mnt/root/etc/tinyssh-initramfs/;
+    
+    
+    mkdir -p /tmp/mnt/root/etc/initramfs-tools/hooks/ /tmp/mnt/root/etc/initramfs-tools/scripts/init-premount/ /tmp/mnt/root/etc/tinyssh-initramfs/;
     
     cp "${BASH_SOURCE%/*}/tinyssh.hook.sh" /tmp/mnt/root/etc/initramfs-tools/hooks/tinyssh;
     chmod +x /tmp/mnt/root/etc/initramfs-tools/hooks/tinyssh;
@@ -94,7 +96,7 @@ fi;
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 source /etc/profile
-grub-install ${DRIVE_ROOT}
+grub-install ${HARDDISK}
 update-grub
 update-initramfs -u -k all
 EOF
