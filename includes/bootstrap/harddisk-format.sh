@@ -24,7 +24,7 @@ function harddisk-format {
             logError "Must specify a password for crypto";
             return 1;
         fi;
-    if;
+    fi;
     
     # Check if we need partitioning?
     local NEEDS_PARTITIONING="false";
