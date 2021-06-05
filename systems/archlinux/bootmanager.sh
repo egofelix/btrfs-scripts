@@ -1,106 +1,110 @@
-# Command manager
-# /manager.sh [-q|--quiet] [-n|--name <clienthostname>] [-s|--server ssh://user@host:port] create-snapshot
-# Command create-snapshot
-# [-v|--volume <volume>] [-t|--target <snapshotvolume>]
-function printCreateSnapshotHelp {
-    echo "Usage: ${ENTRY_SCRIPT} [-q|--quiet] ${ENTRY_COMMAND} [-t|--target <snapshotvolume>] [-v|--volume <volume>]";
-    echo "";
-    echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND}";
-    echo "      Create snapshots of every mounted volume.";
-    echo "";
-    echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND} --target /.snapshots";
-    echo "      Create snapshots of every mounted volume in \"/.snapshorts\".";
-    echo "";
-    echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND} --volume root-data --volume usr-data";
-    echo "      Create a snapshot of volumes root-data and usr-data.";
-    echo "";
-    echo "If you ommit the <targetdirectory> then the script will try to locate it with the subvolume name @snapshots.";
-    echo "";
-}
-function createSnapshot {
-    # Scan Arguments
-    local SNAPSHOTVOLUME="";
-    local VOLUMES="";
-    while [[ "$#" -gt 0 ]]; do
-        case $1 in
-            -t|--target) SNAPSHOTVOLUME="$2"; shift;;
-            -v|--volume) if [[ -z ${VOLUMES} ]]; then VOLUMES="$2"; else VOLUMES="${VOLUMES} $2"; fi; shift ;;
-            #-v|--volume) VOLUMES="$2"; shift;;
-            -h|--help) printCreateSnapshotHelp; exit 0;;
-            *) logError "Unknown Argument: $1"; exit 1;;
-        esac;
-        shift;
-    done;
+#!/bin/bash
+# Install kernel & bootmanager
+if system-arch "ARMHF"; then
+    logLine "Setting up Bootmanager (UBOOT)";
+  cat > /tmp/mnt/root/chroot.sh <<- EOF
+pacman -S --noconfirm linux-armv7 efibootmgr
+yes | pacman -S --noconfirm uboot-cubietruck uboot-tools
+EOF
+    chmod +x /tmp/mnt/root/chroot.sh;
+    chroot /tmp/mnt/root /chroot.sh;
     
-    # Debug Variables
-    logFunction "createSnapshot#arguments --target \`${SNAPSHOTVOLUME}\` --volume \`${VOLUMES}\`";
+  cat > /tmp/mnt/root/boot/boot.txt <<- EOF
+# After modifying, run ./mkscr
+setenv bootpart 3;
+EOF
+    if isTrue "${CRYPTED}"; then
+    cat >> /tmp/mnt/root/boot/boot.txt <<- EOF
+setenv bootargs console=\${console} cryptdevice=PARTLABEL=system:cryptsystem root=/dev/mapper/cryptsystem rw rootwait;
+EOF
+    else
+    cat >> /tmp/mnt/root/boot/boot.txt <<- EOF
+setenv bootargs console=\${console} root=PARTLABEL=system rw rootwait;
+EOF
+    fi;
     
-    # Lockfile (Only one simultan instance is allowed)
-    stopIfNotElevated;
-    loadFunction "createLockFile"
-    if ! createLockFile; then logError "Failed to lock lockfile. Maybe another action is running already?"; exit 1; fi;
-    logDebug "Lock-File created";
+  cat >> /tmp/mnt/root/boot/boot.txt <<- EOF
+if load \${devtype} \${devnum}:\${bootpart} \${kernel_addr_r} /zImage; then
+  if load \${devtype} \${devnum}:\${bootpart} \${fdt_addr_r} /dtbs/\${fdtfile}; then
+    if load \${devtype} \${devnum}:\${bootpart} \${ramdisk_addr_r} /initramfs-linux.img; then
+      bootz \${kernel_addr_r} \${ramdisk_addr_r}:\${filesize} \${fdt_addr_r};
+    else
+      bootz \${kernel_addr_r} - \${fdt_addr_r};
+    fi;
+  fi;
+fi
+EOF
     
-    # Auto Detect SNAPSHOTVOLUME and VOLUMES
-    loadFunction autodetect-snapshotvolume autodetect-volumes;
-    autodetect-snapshotvolume;
-    autodetect-volumes;
-    
-    # Debug
-    logFunction "createSnapshot#expandedArguments --target \`${SNAPSHOTVOLUME}\` --volume \`$(echo ${VOLUMES})\`";
-    
-    # Test if VOLUMES are btrfs subvol's
-    local VOLUME;
-    for VOLUME in ${VOLUMES}
-    do
-        VOLUME=$(removeLeadingChar "${VOLUME}" "/");
-        if [[ -z "${VOLUME}" ]]; then continue; fi;
-        if [[ "${VOLUME}" = "@"* ]]; then continue; fi;
-        
-        logDebug "Testing btrfs on VOLUME: ${VOLUME}";
-        if isEmpty $(LC_ALL=C mount | grep -P "[\(\,](subvol\=[/]{0,1}${VOLUME})[\)\,]" | grep 'type btrfs'); then logError "Source \"${VOLUME}\" could not be found."; exit 1; fi;
-    done;
-    
-    # Current time
-    local STAMP=$(date -u +"%Y-%m-%d_%H-%M-%S");
-    
-    # Backup
-    logLine "Target Directory: ${SNAPSHOTVOLUME}";
-    for VOLUME in ${VOLUMES}
-    do
-        VOLUME=$(removeLeadingChar "${VOLUME}" "/");
-        if [[ -z "${VOLUME}" ]]; then continue; fi;
-        if [[ "${VOLUME}" = "@"* ]]; then logDebug "Skipping Volume ${VOLUME}"; continue; fi;
-        
-        # Find the first mountpoint for the volume
-        VOLUMEMOUNTPOINT=$(LC_ALL=C mount | grep -P "[\(\,](subvol\=[/]{0,1}${VOLUME})[\)\,]" | grep -o -P 'on(\s)+[^\s]*' | awk '{print $2}' | head -1);
-        
-        # Create Directory for this volume
-        if [[ ! -d "${SNAPSHOTVOLUME}/${VOLUME}" ]]; then
-            if ! runCmd mkdir -p ${SNAPSHOTVOLUME}/${VOLUME}; then logError "Failed to create directory ${SNAPSHOTVOLUME}/${VOLUME}."; exit 1; fi;
-        fi;
-        
-        # Create Snapshot
-        if [[ -d "${SNAPSHOTVOLUME}/${VOLUME}/${STAMP}" ]]; then
-            logLine "Snapshot already exists. Aborting";
-        else
-            logLine "Creating Snapshot ${SNAPSHOTVOLUME}/${VOLUME}/${STAMP}";
-            if ! runCmd btrfs subvolume snapshot -r ${VOLUMEMOUNTPOINT} ${SNAPSHOTVOLUME}/${VOLUME}/${STAMP}; then
-                logError "Failed to create snapshot of ${SNAPSHOTVOLUME}/${VOLUME}/${STAMP}";
-                exit 1;
-            fi;
-            logVerbose "Created Snapshot ${SNAPSHOTVOLUME}/${VOLUME}/${STAMP}";
-        fi;
-    done;
-    
-    # Finish
-    sync;
-    logLine "Snapshots done.";
-}
+    # Recompile boot.txt -> boot.scr
+  cat > /tmp/mnt/root/chroot.sh <<- EOF
+cd /boot
+./mkscr
+EOF
+    chroot /tmp/mnt/root /chroot.sh
+else
+    logLine "Setting up Bootmanager (GRUB)";
+  cat > /tmp/mnt/root/chroot.sh <<- EOF
+pacman -S --noconfirm linux grub efibootmgr
+EOF
+    chmod +x /tmp/mnt/root/chroot.sh;
+    chroot /tmp/mnt/root /chroot.sh;
+fi;
 
-createSnapshot $@;
-exit 0;  HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && if [[ ${HOOKS[@]} != *"usr"* ]]; then HOOKS+=(usr); fi && echo ${HOOKS[@]} | xargs echo -n))"
-  sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
+if isTrue "${CRYPT}"; then
+    # Install crypt tools
+  cat > /tmp/mnt/root/chroot.sh <<- EOF
+pacman -S --noconfirm cryptsetup mkinitcpio-netconf mkinitcpio-tinyssh mkinitcpio-utils
+EOF
+    chroot /tmp/mnt/root /chroot.sh;
+    
+    # Append cryptsystem in crypttab
+    if [[ -z $(cat /tmp/mnt/root/etc/crypttab | grep 'cryptsystem ') ]]; then
+        echo cryptsystem PARTLABEL=system none luks > /tmp/mnt/root/etc/crypttab
+    fi;
+    
+    # Add the /usr/lib/libgcc_s.so.1 to BINARIES in /etc/mkinitcpio.conf
+    BINARIES="BINARIES=($(source /tmp/mnt/root/etc/mkinitcpio.conf && if [[ ${BINARIES[@]} != *"/usr/lib/libgcc_s.so.1"* ]]; then BINARIES+=(/usr/lib/libgcc_s.so.1); fi && echo ${BINARIES[@]} | xargs echo -n))"
+    sed -i "s#BINARIES=.*#${BINARIES}#g" /tmp/mnt/root/etc/mkinitcpio.conf
+    
+    # Get current hooks
+    HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && echo ${HOOKS[@]}))"
+    
+    # Remove these hooks
+    HOOKS=${HOOKS/keyboard/}
+    HOOKS=${HOOKS/keymap/}
+    HOOKS=${HOOKS/netconf/}
+    HOOKS=${HOOKS/tinyssh/}
+    HOOKS=${HOOKS/encryptssh/}
+    
+    # Insert hooks before filesystems
+    HOOKS=${HOOKS/filesystems/keyboard keymap netconf tinyssh encryptssh filesystems}
+    sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
+    
+    # Setup GRUB_ENABLE_CRYPTODISK=y in /etc/default/grub
+    if [[ -z $(cat /tmp/mnt/root/etc/default/grub | grep "^GRUB_ENABLE_CRYPTODISK") ]]; then
+        sed -i "s/#GRUB_ENABLE_CRYPTODISK=y/GRUB_ENABLE_CRYPTODISK=y/g" /tmp/mnt/root/etc/default/grub
+    fi;
+    if [[ -z $(cat /tmp/mnt/root/etc/default/grub | grep "^GRUB_ENABLE_CRYPTODISK") ]]; then
+        echo "GRUB_ENABLE_CRYPTODISK=y" >> /tmp/mnt/root/etc/default/grub
+    fi;
+    
+    # Setup CMDLINE
+    if [[ -z $(cat /tmp/mnt/root/etc/default/grub | grep 'GRUB_CMDLINE_LINUX=\"cryptdevice\=') ]]; then
+        sed -i "s/GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"cryptdevice=PARTLABEL=system:cryptsystem ip=:::::eth0:dhcp\"/g" /tmp/mnt/root/etc/default/grub
+    fi;
+else
+    # Remove HOOKS netconf tinyssh encryptssh
+    HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && echo ${HOOKS[@]}))"
+    HOOKS=${HOOKS/netconf/}
+    HOOKS=${HOOKS/tinyssh/}
+    HOOKS=${HOOKS/encryptssh/}
+    sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
+fi;
+
+# Add usr hook to mkinitcpio.conf if usr is on a subvolume
+if [[ ! -z $(LANG=C mount | grep ' /tmp/mnt/root/usr type ') ]]; then
+    HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && if [[ ${HOOKS[@]} != *"usr"* ]]; then HOOKS+=(usr); fi && echo ${HOOKS[@]} | xargs echo -n))"
+    sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
 fi;
 
 # Install Grub

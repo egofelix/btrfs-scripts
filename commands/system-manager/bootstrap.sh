@@ -1,6 +1,6 @@
 #!/bin/bash
 function printHelp {
-    echo "Usage: ${HOST_NAME} ${COMMAND_VALUE} [-c|--clean-disk] [-nc|--nocrypt] [-t|--target <harddisk>] [-d|--distro <distroc>] [--use-subvolume <volume> ...]";
+    echo "Usage: ${HOST_NAME} ${COMMAND_VALUE} [-c|--clean-disk] [-nc|--nocrypt] [-t|--target <harddisk>] [-d|--distro <distro>] [--use-subvolume <volume> ...]";
 }
 
 function run {
