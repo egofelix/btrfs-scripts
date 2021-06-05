@@ -131,12 +131,12 @@ function harddisk-format {
     export PART_SYSTEM_NUM="4"
     
     # Check if drive is formatted already
-    if harddisk-format-check --crypt "${ARG_CRYPT}" --crypt-mapper "${ARG_CRYPT_MAPPER}" --harddisk "${HARDDISK}"; then
-        if isTrue "${ARG_CRYPT}"; then
-            export PART_SYSTEM="/dev/mapper/${ARG_CRYPT_MAPPER}";
-        fi;
-        return 0;
-    fi;
+    #if harddisk-format-check --crypt "${ARG_CRYPT}" --crypt-mapper "${ARG_CRYPT_MAPPER}" --harddisk "${HARDDISK}"; then
+    #    if isTrue "${ARG_CRYPT}"; then
+    #        export PART_SYSTEM="/dev/mapper/${ARG_CRYPT_MAPPER}";
+    #    fi;
+    #    return 0;
+    #fi;
 
     # Format drives
     logLine "Partitioning ${HARDDISK} with default partition scheme (bios and efi support)...";
