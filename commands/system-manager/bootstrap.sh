@@ -107,22 +107,31 @@ function run {
     
     # Mount Subvolumes
     logLine "Mounting...";
-    mkdir -p /tmp/mnt/root;
     
-    if runCmd findmnt -r -n /tmp/mnt/root;
-    then
-        logDebug "Checking mount on /tmp/mnt/root";
-        local MOUNTTEST=$(echo "${RUNCMD_CONTENT}" | cut -d' ' -f 2 | grep "${PART_SYSTEM}\[/${DISTRO,,}-root-data\]");
+    
+    function mountItem() {
+        mkdir -p ${1};
         
-        if [[ -z "${MOUNTTEST}" ]]; then
-            logError "There seems to be another mount at /tmp/mnt/root";
-            exit 1;
+        if runCmd findmnt -r -n ${1};
+        then
+            logDebug "Checking mount on ${1}";
+            local MOUNTTEST=$(echo "${RUNCMD_CONTENT}" | cut -d' ' -f 2 | grep "${PART_SYSTEM}\[/${2}\]");
+            
+            if [[ -z "${MOUNTTEST}" ]]; then
+                logError "There seems to be another mount at /tmp/mnt/root";
+                return 1;
+            fi;
+        elif ! runCmd mount -o subvol=/${2} ${PART_SYSTEM} /tmp/mnt/root;
+        then
+            logError "Failed to Mount Subvolume ${DISTRO^^}-ROOT-DATA at /tmp/mnt/root";
+            return 1;
         fi;
-    elif ! runCmd mount -o subvol=/${DISTRO,,}-root-data ${PART_SYSTEM} /tmp/mnt/root;
-    then
-        logError "Failed to Mount Subvolume ${DISTRO^^}-ROOT-DATA at /tmp/mnt/root";
-        exit 1;
-    fi;
+        
+        return 0;
+    }
+    
+    if ! mountItem "/tmp/mnt/root" "${DISTRO,,}-root-data"; then logError "Failed to mount ROOT-Volume"; exit 1; fi;
+    if ! mountItem "/tmp/mnt/root" "${DISTRO,,}-root-data"; then logError "Failed to mount ROOT-Volume"; exit 1; fi;
     
     mkdir -p /tmp/mnt/root/boot;
     if ! runCmd mount ${PART_BOOT} /tmp/mnt/root/boot; then logError "Failed to mount BOOT-Partition"; exit 1; fi;
