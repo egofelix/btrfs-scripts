@@ -1,6 +1,6 @@
 #!/bin/bash
 # Install kernel & bootmanager
-if [[ system-arch "ARMHF" ]]; then
+if system-arch "ARMHF"; then
     logLine "Setting up Bootmanager (UBOOT)";
     # TODO
 else
