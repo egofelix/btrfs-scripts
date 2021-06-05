@@ -83,7 +83,7 @@ function run {
     if runCmd findmnt -n -r /tmp/mnt/disks/system; then
         local CURRENTLYMOUNTED=$(echo "${RUNCMD_CONTENT}" | cut -d' ' -f 2);
         
-        if [[ "${CURRENTLYMOUNTED}" != "${PART_SYSTEM}" ]];
+        if [[ "${CURRENTLYMOUNTED}" != "${PART_SYSTEM}" ]]; then
             logError "There seems to be another drive mounted at /tmp/mnt/disks/system";
             exit 1;
         fi;
