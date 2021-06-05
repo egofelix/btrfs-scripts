@@ -57,9 +57,13 @@ function run {
         fi
     fi;
     
-    # Get user confirmation
+    # Detect current system & Check Dependencies and Install them if live system, otherwise error out
+    # TODO
+    
+    # Format the harddisk
     logDebug "Checking if we need to format";
     if ! harddisk-format-check --crypt "${CRYPT}" --crypt-mapper "cryptsystem" --harddisk "${HARDDISK}"; then
+        # Get user confirmation
         read -p "You are now deleting all contents of \"${HARDDISK}\", continue? [yN]: " -n 1 -r
         echo    # (optional) move to a new line
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -165,10 +169,16 @@ function run {
     if ! mountItem /tmp/mnt/root/var/logs "${PART_SYSTEM}" "@${DISTRO,,}-var-logs-data"; then logError "Failed to Mount @${DISTRO,,}-var-logs-data-Volume at /tmp/mnt/root/var/logs"; exit 1; fi;
     if ! mountItem /tmp/mnt/root/var/tmp "${PART_SYSTEM}" "@${DISTRO,,}-var-tmp-data"; then logError "Failed to Mount @${DISTRO,,}-var-tmp-data-Volume at /tmp/mnt/root/var/tmp"; exit 1; fi;
     
-    
     # Install base system
-    logLine "Installing Base-System (${DISTRO^^})...";
-    source "${BASH_SOURCE%/*/*/*}/scripts/strap.sh";
+    if [[ ! -d /tmp/mnt/root/etc ]]; then
+        logLine "Skipping strap, there is a system already";
+    else
+        logLine "Installing Base-System (${DISTRO^^})...";
+        source "${BASH_SOURCE%/*/*/*}/scripts/strap.sh";
+    fi;
+    
+    
+    echo "Done";
     
     echo "Todo";
     printHelp;
