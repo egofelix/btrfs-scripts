@@ -107,8 +107,6 @@ function run {
     
     # Mount Subvolumes
     logLine "Mounting...";
-    
-    
     function mountItem() {
         mkdir -p ${1};
         
@@ -167,6 +165,10 @@ function run {
     if ! mountItem /tmp/mnt/root/var/logs "${PART_SYSTEM}" "@${DISTRO,,}-var-logs-data"; then logError "Failed to Mount @${DISTRO,,}-var-logs-data-Volume at /tmp/mnt/root/var/logs"; exit 1; fi;
     if ! mountItem /tmp/mnt/root/var/tmp "${PART_SYSTEM}" "@${DISTRO,,}-var-tmp-data"; then logError "Failed to Mount @${DISTRO,,}-var-tmp-data-Volume at /tmp/mnt/root/var/tmp"; exit 1; fi;
     
+    
+    # Install base system
+    logLine "Installing Base-System (${DISTRO^^})...";
+    source "${BASH_SOURCE%/*/*/*}/scripts/strap.sh";
     
     echo "Todo";
     printHelp;
