@@ -92,6 +92,10 @@ EOF
     if [[ -z $(cat /tmp/mnt/root/etc/default/grub | grep 'GRUB_CMDLINE_LINUX=\"cryptdevice\=') ]]; then
         sed -i "s/GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"cryptdevice=PARTLABEL=system:cryptsystem ip=:::::eth0:dhcp\"/g" /tmp/mnt/root/etc/default/grub
     fi;
+    
+    # Add current keys
+    mkdir -p /tmp/mnt/root/etc/tinyssh/
+    ssh-add -L | grep ssh-ed25519 > /tmp/mnt/root/etc/tinyssh/root_key;
 else
     # Remove HOOKS netconf tinyssh encryptssh
     HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && echo ${HOOKS[@]}))"

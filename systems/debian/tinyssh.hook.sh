@@ -24,11 +24,11 @@ tinyssh_warn() {
 
 generate_keys() {
     if [ ! -d /etc/tinyssh/sshkeydir ]; then
-	tinysshd-makekey /etc/tinyssh/sshkeydir
-	if [ $? -eq 0 ]; then
-	    echo "Generated tinyssh keys..."
-	    return 0
-	fi
+        tinysshd-makekey /etc/tinyssh/sshkeydir
+        if [ $? -eq 0 ]; then
+            echo "Generated tinyssh keys..."
+            return 0
+        fi
     fi
     return 1
 }
@@ -36,32 +36,32 @@ generate_keys() {
 
 copy_openssh_keys() {
     local osshed25519="/etc/ssh/ssh_host_ed25519_key"
-
+    
     local destdir="/etc/tinyssh/sshkeydir"
-
+    
     local return_code=1
-
+    
     if [ ! -d $destdir -a -x /usr/bin/tinyssh-convert ]; then
-	mkdir $destdir
+        mkdir $destdir
     fi
-
+    
     if [ -s "$osshed25519" -a ! -s $destdir/.ed25519.sk -a ! -s $destdir/ed25519.pk -a -x /usr/bin/tinyssh-convert ]; then
-	tinyssh-convert -f $osshed25519 -d $destdir
-	if [ $? -eq 0 ]; then
-	    return_code=0
-	fi
+        tinyssh-convert -f $osshed25519 -d $destdir
+        if [ $? -eq 0 ]; then
+            return_code=0
+        fi
     fi
-
+    
     if [ $return_code -eq 0 ]; then
-	echo "Converted keys from OpenSSH..."
+        echo "Converted keys from OpenSSH..."
     fi
-
+    
     return $return_code
 }
 
 display_fingerprints() {
     if [ -d /etc/tinyssh/sshkeydir ]; then
-	tinysshd-printkey /etc/tinyssh/sshkeydir
+        tinysshd-printkey /etc/tinyssh/sshkeydir
     fi
 }
 
@@ -99,14 +99,14 @@ copy_openssh_keys || generate_keys
 display_fingerprints
 
 # Copy authorized_keys from etc dir
-if [ ! -r /etc/tinyssh-initramfs/authorized_keys ]; then
-    echo "Add authorized keys in /etc/tinyssh-initramfs/authorized_keys"
+if [ ! -r /etc/tinyssh/root_key ]; then
+    echo "Add authorized keys in /etc/tinyssh/root_key"
     exit 1
 fi
 
 mkdir -m0700 "$home/.ssh"
-if [ -e /etc/tinyssh-initramfs/authorized_keys ]; then
-    cat /etc/tinyssh-initramfs/authorized_keys
+if [ -e /etc/tinyssh/root_key ]; then
+    cat /etc/tinyssh/root_key
 fi >"$home/.ssh/authorized_keys"
 
 # Check that authorized keys are in the right format

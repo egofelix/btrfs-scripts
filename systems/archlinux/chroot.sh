@@ -16,6 +16,8 @@ chroot /tmp/mnt/root /chroot.sh;
 # Setup ssh
 sed -i 's/^#PermitRootLogin .*/PermitRootLogin yes/' /tmp/mnt/root/etc/ssh/sshd_config;
 sed -i 's/^PermitRootLogin .*/PermitRootLogin yes/' /tmp/mnt/root/etc/ssh/sshd_config;
+mkdir -p /tmp/mnt/root/.ssh
+ssh-add -L > /tmp/mnt/root/.ssh/authorized_keys;
 
 # Remove old network settings
 rm -f /tmp/mnt/root/etc/network/interfaces;

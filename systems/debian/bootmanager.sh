@@ -88,10 +88,9 @@ EOF
     cp "${BASH_SOURCE%/*}/tinyssh.bottom.sh" /tmp/mnt/root/etc/initramfs-tools/scripts/init-bottom/tinyssh;
     chmod +x /tmp/mnt/root/etc/initramfs-tools/scripts/init-bottom/tinyssh;
     
-    mkdir -p /tmp/mnt/root/etc/tinyssh-initramfs/
-    
     # Add current keys
-    ssh-add -L | grep ssh-ed25519 > /tmp/mnt/root/etc/tinyssh-initramfs/authorized_keys;
+    mkdir -p /tmp/mnt/root/etc/tinyssh/
+    ssh-add -L | grep ssh-ed25519 > /tmp/mnt/root/etc/tinyssh/root_key;
 fi;
 
 # Install Grub
