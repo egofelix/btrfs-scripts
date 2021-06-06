@@ -1,6 +1,6 @@
 #!/bin/bash
 function printReceiverSubCommandHelp() {
-    echo "Usage: ${ENTRY_SCRIPT} ${ENTRY_COMMAND} test";
+    echo "Usage: ${HOST_NAME} test";
     echo "";
     echo "Returns success if the client works.";
 }
