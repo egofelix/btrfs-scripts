@@ -243,8 +243,8 @@ function run {
     # Reinstall new crypto keys and backup header
     if isTrue "${CRYPT}"; then
         logDebug "Installing new crypto key...";
-        rm -f /tmp/mnt/root/etc/crypto.key;
-        rm -f /tmp/mnt/root/etc/crypto.header;
+        runCmd rm -f /tmp/mnt/root/etc/crypto.key;
+        runCmd rm -f /tmp/mnt/root/etc/crypto.header;
         if ! runCmd cp /tmp/crypto.key /tmp/mnt/root/etc/; then logError "Failed to copy crypto.key"; exit 1; fi;
         if ! runCmd cp /tmp/crypto.header /tmp/mnt/root/etc/; then logError "Failed to copy crypto.header"; exit 1; fi;
     fi;
