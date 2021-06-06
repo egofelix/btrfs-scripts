@@ -1,15 +1,12 @@
 #!/bin/bash
-function printReceiverHelp() {
-    local MYARGS="-t|--target <backupvolume> <client-command> <client-command-args...>";
-    local ARGS=${ENTRY_ARGS};
-    ARGS="${ARGS/\<command\>/${ENTRY_COMMAND}}";
-    ARGS="${ARGS/\[\<commandargs\>\]/${MYARGS}}";
-    echo "Usage: ${ENTRY_SCRIPT} ${ARGS}";
+function printHelp() {
+    echo "Usage: ${HOST_NAME} -t|--target <backupvolume> <client-command> <client-command-args...>";
     echo "";
-    echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND} --target /.backups/user test";
+    #echo "If you omit the <backupvolume> then the script will try to locate it with the subvolume name @backups.";
+    #echo "If you omit the <ssh-uri> then the script will try to locate it via dns records.";
+    #echo "If you omit the <snapshotvolume> then the script will try to locate it with the subvolume name @snapshots.";
+    echo "    ${HOST_NAME} --target /.backups/user test";
     echo "      Returns success if the receiver works.";
-    echo "";
-    
     echo "";
     echo "Possible commands are:";
     printCommandLineProxyHelp --command-path "${BASH_SOURCE}";
@@ -26,8 +23,8 @@ function receiver() {
     while [[ "$#" -gt 0 ]]; do
         case $1 in
             -t|--target) BACKUPVOLUME="$2"; shift;;
-            -h|--help) printReceiverHelp; exit 0;;
-            -*) logError "Unknown Argument: $1"; printReceiverHelp; exit 1;;
+            -h|--help) printHelp; exit 0;;
+            -*) logError "Unknown Argument: $1"; printHelp; exit 1;;
             *) RECEIVER_COMMAND="${1}"; shift; break;;
         esac;
         shift;
@@ -39,7 +36,7 @@ function receiver() {
     # Validate
     if [[ -z "${RECEIVER_COMMAND}" ]]; then
         logError "No command specified";
-        printReceiverHelp;
+        printHelp;
         exit 1;
     fi;
     

@@ -1,5 +1,5 @@
 #!/bin/bash
-function printReceiverHelp() {
+function printHelp() {
     echo "Usage: ${HOST_NAME} [-r|--remote <ssh-uri>] [-s|--snapshots <snapshotvolume>] <command> <command-args...>";
     echo "";
     #echo "If you omit the <backupvolume> then the script will try to locate it with the subvolume name @backups.";
@@ -23,8 +23,8 @@ function receiver() {
         case $1 in
             -r|--remote) SSH_URI="$2"; shift;;
             -s|--snapshots) SNAPSHOTVOLUME="$2"; shift;;
-            -h|--help) printReceiverHelp; exit 0;;
-            -*) logError "Unknown Argument: $1"; printReceiverHelp; exit 1;;
+            -h|--help) printHelp; exit 0;;
+            -*) logError "Unknown Argument: $1"; printHelp; exit 1;;
             *) RECEIVER_COMMAND="${1}"; shift; break;;
         esac;
         shift;
@@ -36,7 +36,7 @@ function receiver() {
     # Validate
     if [[ -z "${RECEIVER_COMMAND}" ]]; then
         logError "No command specified";
-        printReceiverHelp;
+        printHelp;
         exit 1;
     fi;
     
