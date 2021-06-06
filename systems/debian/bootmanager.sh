@@ -89,7 +89,9 @@ EOF
     chmod +x /tmp/mnt/root/etc/initramfs-tools/scripts/init-bottom/tinyssh;
     
     mkdir -p /tmp/mnt/root/etc/tinyssh-initramfs/
-    echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAgFSDgzV9FfLaJy1aIcfyJU7h3tgQT5WXe+R6Gtbb7R 45:f4:90:7d:d9:a1:8b:1e:fb:06:b8:70:bf:0c:7e:0e felix@windows" > /tmp/mnt/root/etc/tinyssh-initramfs/authorized_keys;
+    
+    # Add current keys
+    ssh-add -L | grep ssh-ed25519 > /tmp/mnt/root/etc/tinyssh-initramfs/authorized_keys;
 fi;
 
 # Install Grub
@@ -98,7 +100,7 @@ cat > /tmp/mnt/root/chroot.sh <<- EOF
 . /etc/profile
 
 # Reinstall Kernel
-apt-get reinstall $(dpkg -l | grep -o "linux-image-[0-9][0-9\.\-]*-[A-Za-z0-9]*")
+apt-get reinstall $(/usr/bin/dpkg/dpkg -l | grep -o "linux-image-[0-9][0-9\.\-]*-[A-Za-z0-9]*")
 
 # Setup Boot
 grub-install ${HARDDISK}
