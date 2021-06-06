@@ -113,7 +113,7 @@ function sendSnapshot {
         local HOSTKEY="";
         if [[ -f /etc/ssh/ssh_host_ed25519_key.pub ]]; then HOSTKEY=$(cat /etc/ssh/ssh_host_ed25519_key.pub); fi;
         if ! isEmpty "${HOSTKEY}"; then
-            if ! runCmd ${SSH_CALL} add-hostkey --key "${HOSTKEY}"; then
+            if ! runCmd ${SSH_CALL} add-hostkey ${HOSTKEY}; then
                 logWarn "Failed to local public key to remote: ${RUNCMD_CONTENT} ${HOSTKEY}";
             fi;
         fi;

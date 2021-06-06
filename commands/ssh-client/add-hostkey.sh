@@ -11,9 +11,8 @@ function _main() {
     local KEY="";
     while [[ "$#" -gt 0 ]]; do
         case $1 in
-            --key) KEY="$2"; shift;;
             -h|--help) printHelp; exit 0;;
-            *) logError "Unknown Argument: $1"; printHelp; exit 1;;
+            *) KEY="${KEY} $1";
         esac;
         shift;
     done;
@@ -30,7 +29,7 @@ function _main() {
     fi;
     
     # all fine
-    logLine "failed";
+    logLine "failed: Key ${KEY}";
     exit 1;
 }
 
