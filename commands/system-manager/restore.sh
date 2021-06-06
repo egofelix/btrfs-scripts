@@ -226,6 +226,21 @@ function run {
             logWarn "Skipping unknown mount ${LINEMOUNT}.";
         fi;
     done;
+    
+    # Reinstall new crypto keys and backup header
+    if isTrue "${CRYPT}"; then
+        logDebug "Installing new crypto key...";
+        if ! runCmd cp /tmp/crypto.key /tmp/mnt/root/etc/; then logError "Failed to copy crypto.key"; exit 1; fi;
+        if ! runCmd cp /tmp/crypto.header /tmp/mnt/root/etc/; then logError "Failed to copy crypto.header"; exit 1; fi;
+    fi;
+    
+    # Fix fstab if we restored a crypted to uncrypted or vice versa
+    if isTrue "${CRYPT}"; then
+        sed -i "s#LABEL=system#/dev/mapper/cryptsystem#g" ${FSTABPATH};
+    else
+        sed -i "s#/dev/mapper/cryptsystem#LABEL=system#g" ${FSTABPATH};
+    fi;
+    
 }
 
 run $@;
