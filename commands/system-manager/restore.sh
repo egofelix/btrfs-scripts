@@ -41,8 +41,10 @@ function run {
     logFunction "restore#expandedArguments${NOCRYPT_FLAG} --target \`${HARDDISK}\`";
     
     # query volumes
-    VOLUMES=$(${SSH_CALL} "list-volumes");
-    if [[ $? -ne 0 ]]; then logError "Unable to query volumes: ${VOLUMES}."; exit 1; fi;
+    if ! runCmd ${SSH_CALL} "list-volumes"; then logError "SSH-Command \`$@\` failed: ${RUNCMD_CONTENT}."; exit 1; fi;
+    local VOLUMES=$RUNCMD_CONTENT;
+    echo "${VOLUMES}";
+    
     
     # Test if we are running a live iso
     local IS_LIVE="false";
