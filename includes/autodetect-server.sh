@@ -140,6 +140,7 @@ function autodetect-server {
         return 1;
     fi;
     
+    export SSH_URI="${URI}";
     logSuccess "Discovered Server: ${SSH_USERNAME}@${SSH_HOSTNAME}:${SSH_PORT}";
     return 0;
 }

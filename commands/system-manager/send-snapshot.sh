@@ -115,11 +115,6 @@ function sendSnapshot {
         if ! isEmpty "${HOSTKEY}"; then
             if ! runCmd ${SSH_CALL} add-hostkey ${HOSTKEY}; then
                 logWarn "Failed to local public key to remote: ${RUNCMD_CONTENT} ${HOSTKEY}";
-            else
-                if ! autodetect-server; then
-                    logError "snapshotCommand#Failed to detect server, please specify one with --remote <uri>";
-                    exit 1;
-                fi;
             fi;
         fi;
     fi;
