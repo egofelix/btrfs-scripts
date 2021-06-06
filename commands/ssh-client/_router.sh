@@ -62,5 +62,5 @@ function receiver() {
     if ! commandLineProxy --command-name "client-command" --command-value "${RECEIVER_COMMAND:-}" --command-path "${BASH_SOURCE}" $@; then printHelp; exit 1; fi;
 }
 
-receiver $@;
+receiver "$@";
 exit 0;

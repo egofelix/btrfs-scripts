@@ -52,5 +52,5 @@ function receiver() {
     exit 0;
 }
 
-receiver $@;
+receiver "$@";
 exit 0;
