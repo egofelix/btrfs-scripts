@@ -1,15 +1,14 @@
 #!/bin/bash
 function printHelp() {
-    echo "Usage: ${HOST_NAME} -t|--target <backupvolume> <client-command> <client-command-args...>";
-    echo "";
-    #echo "If you omit the <backupvolume> then the script will try to locate it with the subvolume name @backups.";
-    #echo "If you omit the <ssh-uri> then the script will try to locate it via dns records.";
-    #echo "If you omit the <snapshotvolume> then the script will try to locate it with the subvolume name @snapshots.";
-    echo "    ${HOST_NAME} --target /.backups/user test";
-    echo "      Returns success if the receiver works.";
+    #echo "";
+    #logWarn "ssh-client is not intended to be called by yourself.";
+    #echo "";
+    
+    echo "Usage: ${HOST_NAME} -t|--target <backupvolume> <command> <command-args...>";
     echo "";
     echo "Possible commands are:";
     printCommandLineProxyHelp --command-path "${BASH_SOURCE}";
+    echo "";
 }
 
 # ssh-client -t|--target <backupvolume> <client-command> <client-command-args...>
@@ -27,7 +26,7 @@ function receiver() {
             --managed) MANAGED="true";;
             --key-manager) KEY_MANAGER="true";;
             -t|--target) BACKUPVOLUME="$2"; shift;;
-            -h|--help) printHelp; exit 0;;
+            -h|--help) ;;
             -*) logError "Unknown Argument: $1"; printHelp; exit 1;;
             *) RECEIVER_COMMAND="${1}"; shift; break;;
         esac;
@@ -35,7 +34,13 @@ function receiver() {
     done;
     
     if ! isTrue "${MANAGED}"; then
-        logWarn "\`${ENTRY_SCRIPT} ssh-client\` should not be called by user direct, instead reference it in authorized_keys.";
+        logWarn "\`${HOST_NAME}\` should not be called by user direct, instead reference it in authorized_keys.";
+    fi;
+    
+    if isTrue "${HOST_HELP}"; then
+        if [[ -z "${RECEIVER_COMMAND:-}" ]]; then printHelp; exit 1; fi;
+        if ! commandLineProxy --command-name "command" --command-value "${RECEIVER_COMMAND:-}" --command-path "${BASH_SOURCE}"${HOST_HELP_FLAG} $@; then printHelp; exit 1; fi;
+        exit 0;
     fi;
     
     # Debug Variables
@@ -59,7 +64,7 @@ function receiver() {
     #if containsIllegalCharacter "${USERNAME}"; then logError "Illegal character detected in <username> \"${USERNAME}\"."; return 1; fi;
     
     # Proxy
-    if ! commandLineProxy --command-name "client-command" --command-value "${RECEIVER_COMMAND:-}" --command-path "${BASH_SOURCE}" $@; then printHelp; exit 1; fi;
+    if ! commandLineProxy --command-name "command" --command-value "${RECEIVER_COMMAND:-}" --command-path "${BASH_SOURCE}" $@; then printHelp; exit 1; fi;
 }
 
 receiver $@;

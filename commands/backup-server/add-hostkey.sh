@@ -37,7 +37,7 @@ function _main() {
     
     echo "" >> "${BACKUPVOLUME}/.ssh/authorized_keys";
     echo "# HostKey" >> "${BACKUPVOLUME}/.ssh/authorized_keys";
-    echo "command=\"/usr/bin/sudo -n ${ENTRY_PATH}/sbin/ssh-client --managed --target \\\"${BACKUPVOLUME}\\\" \${SSH_ORIGINAL_COMMAND}\" ${KEY}" >> "${BACKUPVOLUME}/.ssh/authorized_keys";
+    echo "command=\"/usr/bin/sudo -n ${ENTRY_PATH}/sbin/backup-server --managed --target \\\"${BACKUPVOLUME}\\\" \${SSH_ORIGINAL_COMMAND}\" ${KEY}" >> "${BACKUPVOLUME}/.ssh/authorized_keys";
     
     logLine "Added key";
     exit 0;

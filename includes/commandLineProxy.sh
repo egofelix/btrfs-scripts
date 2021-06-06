@@ -65,7 +65,7 @@ function printCommandLineProxyHelp {
     done;
     
     # Debug Variables
-    logFunction "printCommandLineProxyHelp#arguments --command-path \"${COMMAND_PATH}\" $@";
+    logFunction "printCommandLineProxyHelp#arguments --command-path \"${COMMAND_PATH}\"";
     
     # Validate Variables
     if isEmpty "${COMMAND_PATH}"; then logError "<command-path> must be provided."; exit 1; fi;
@@ -74,24 +74,19 @@ function printCommandLineProxyHelp {
     if [ -f "${COMMAND_PATH}" ]; then
         # via router
         local ROUTER=$(basename $COMMAND_PATH);
-        local ROUTERNAME="${ROUTER%.*}";
-        local ROUTERNAMELEN=${#ROUTERNAME};
         local F="";
         for F in $(LC_ALL=C ls "${COMMAND_PATH%/*}" | sort); do
-            if [[ "${F}" == "${ROUTERNAME}.sh" ]]; then continue; fi;
-            if [[ "${F}" == "${ROUTERNAME}."* ]]; then
-                F=${F%.*};
-                F=${F:${ROUTERNAMELEN}};
-                F=${F:1};
-                echo "- ${F}";
-            fi;
+            if [[ "${F}" == "${ROUTER}" ]]; then continue; fi;
+            
+            F=${F%.*};
+            echo " - ${F}";
         done;
     else
         # via entry
         local F="";
         for F in $(LC_ALL=C ls "${COMMAND_PATH%.*}" | sort); do
             if containsIllegalCharacter "${F%.*}"; then continue; fi;
-            echo "- ${F%.*}";
+            echo " - ${F%.*}";
         done;
     fi;
     

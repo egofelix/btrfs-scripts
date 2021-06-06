@@ -1,5 +1,5 @@
 #!/bin/bash
-MY_COMMAND="ssh-client";
+MY_COMMAND="backup-server";
 SCRIPT_SOURCE=$(readlink -f ${BASH_SOURCE});
 if [[ "${1:-}" == "--quiet" ]];
 then

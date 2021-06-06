@@ -1,9 +1,7 @@
 #!/bin/bash
 # Command create-user [-u|--username] <username>
-function printCreateUserHelp {
-    local MYARGS="";
-    
-    echo "Usage: ${HOST_NAME} ${COMMAND_VALUE} [-u|--username] <username>";
+function printHelp {
+    echo "Usage: ${HOST_NAME}${HOST_ARGS} ${COMMAND_VALUE} [-u|--username] <username>";
     echo "";
     echo "    ${HOST_NAME} ${COMMAND_VALUE} test";
     echo "      Create a local user test for backup usage.";
@@ -19,7 +17,7 @@ function createUser {
         case $1 in
             -u|--username) USERNAME="$2"; shift;;
             -b|--backupvolume) BACKUPVOLUME="$2"; shift;;
-            -h|--help) printCreateUserHelp; exit 0;;
+            -h|--help) printHelp; exit 0;;
             *)
                 if [[ -z "${USERNAME}" ]]; then
                     USERNAME="${1}";
@@ -98,13 +96,13 @@ function createUser {
     # Create template authorized_keys
     mkdir -p "${BACKUPVOLUME}/${USERNAME}/.ssh";
     echo "#" > "${BACKUPVOLUME}/${USERNAME}/.ssh/authorized_keys";
-    echo "# Template: command=\"/usr/bin/sudo -n ${ENTRY_PATH}/sbin/ssh-client --managed --target \\\"${BACKUPVOLUME}/${USERNAME}\\\" \${SSH_ORIGINAL_COMMAND}\" SSHKEYHERE" >> "${BACKUPVOLUME}/${USERNAME}/.ssh/authorized_keys";
+    echo "# Template: command=\"/usr/bin/sudo -n ${ENTRY_PATH}/sbin/backup-server --managed --target \\\"${BACKUPVOLUME}/${USERNAME}\\\" \${SSH_ORIGINAL_COMMAND}\" SSHKEYHERE" >> "${BACKUPVOLUME}/${USERNAME}/.ssh/authorized_keys";
     echo "#" >> "${BACKUPVOLUME}/${USERNAME}/.ssh/authorized_keys";
     local LINE="";
     ssh-add -L | while read LINE; do
         echo "" >> "${BACKUPVOLUME}/${USERNAME}/.ssh/authorized_keys";
         echo "# $(echo "${LINE}" | grep -o '[^ ]\+$')" >> "${BACKUPVOLUME}/${USERNAME}/.ssh/authorized_keys";
-        echo "command=\"/usr/bin/sudo -n ${ENTRY_PATH}/sbin/ssh-client --managed --key-manager --target \\\"${BACKUPVOLUME}/${USERNAME}\\\" \${SSH_ORIGINAL_COMMAND}\" ${LINE}" >> "${BACKUPVOLUME}/${USERNAME}/.ssh/authorized_keys";
+        echo "command=\"/usr/bin/sudo -n ${ENTRY_PATH}/sbin/backup-server --managed --key-manager --target \\\"${BACKUPVOLUME}/${USERNAME}\\\" \${SSH_ORIGINAL_COMMAND}\" ${LINE}" >> "${BACKUPVOLUME}/${USERNAME}/.ssh/authorized_keys";
     done;
     
     chown -R "${USERNAME}:" "${BACKUPVOLUME}/${USERNAME}/.ssh";

@@ -1,11 +1,14 @@
 #!/bin/bash
 # Command remove-user [-b|--backupvolume <backupvolume>] [-u|--username] <username>
-function printRemoveUserHelp {
+function printHelp {
     echo "Usage: ${HOST_NAME}${HOST_ARGS} ${COMMAND_VALUE} [-u|--username] <username>";
     echo "";
     echo "    ${HOST_NAME} ${COMMAND_VALUE} test";
-    echo "      Remove a local user backup user test.";
+    echo "      Remove a local user test for backup usage.";
     echo "";
+    echo "If you omit the <backupvolume> then the script will try to locate it with the subvolume name @backups.";
+    echo "";
+    
 }
 function removeUser {
     # Scan Arguments
@@ -15,7 +18,7 @@ function removeUser {
         case $1 in
             -u|--username) USERNAME="$2"; shift;;
             -b|--backupvolume) BACKUPVOLUME="$2"; shift;;
-            -h|--help) printRemoveUserHelp; exit 0;;
+            -h|--help) printHelp; exit 0;;
             *) if [[ -z "${USERNAME}" ]]; then
                     USERNAME="${1}";
                     if [[ -z "${USERNAME}" ]]; then

@@ -1,14 +1,14 @@
 #!/bin/bash
-function printCreateSnapshotHelp {
+function printHelp {
     echo "Usage: ${HOST_NAME}${HOST_ARGS} ${COMMAND_VALUE} [-v|--volume] <volume> [... <volume>]";
     echo "";
     echo "    ${HOST_NAME} ${COMMAND_VALUE}";
     echo "      Create snapshots of every mounted volume.";
     echo "";
-    echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND} root-data usr-data";
+    echo "    ${HOST_NAME} ${COMMAND_VALUE} root-data usr-data";
     echo "      Create a snapshot of volumes root-data and usr-data.";
     echo "";
-    echo "    ${ENTRY_SCRIPT} ${ENTRY_COMMAND} -v root-data --volume usr-data";
+    echo "    ${HOST_NAME} ${COMMAND_VALUE} -v root-data --volume usr-data";
     echo "      Create a snapshot of volumes root-data and usr-data.";
     echo "";
     echo "If you omit the <snapshotvolume> then the script will try to locate it with the subvolume name @snapshots.";
@@ -22,7 +22,7 @@ function createSnapshot {
     while [[ "$#" -gt 0 ]]; do
         case $1 in
             -v|--volume) if [[ -z ${VOLUMES} ]]; then VOLUMES="$2"; else VOLUMES="${VOLUMES} $2"; fi; shift ;;
-            -h|--help) printCreateSnapshotHelp; exit 0;;
+            -h|--help) printHelp; exit 0;;
             *)
                 if [[ -z ${VOLUMES} ]]; then
                     VOLUMES="$1";

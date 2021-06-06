@@ -1,5 +1,5 @@
 #!/bin/bash
-MY_COMMAND="system-manager";
+MY_COMMAND="backup-client";
 SCRIPT_SOURCE=$(readlink -f ${BASH_SOURCE});
 if [[ "${1:-}" == "--quiet" ]];
 then

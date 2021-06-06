@@ -1,6 +1,15 @@
 #!/bin/bash
 function printHelp {
-    echo "Usage: ${HOST_NAME} ${COMMAND_VALUE} [-c|--clean-disk] [-nc|--nocrypt] [-t|--target <harddisk>] [-d|--distro <distro>] [--use-subvolume <volume> ...]";
+    echo "Usage: ${HOST_NAME} ${COMMAND_VALUE} [-c|--clean-disk] [-nc|--nocrypt] [-t|--target <harddisk>] [-d|--distro <distro>]";
+    echo "";
+    echo "    ${HOST_NAME} ${COMMAND_VALUE} --distro debian";
+    echo "      Will install debian to first harddisk";
+    echo "";
+    echo "    ${HOST_NAME} ${COMMAND_VALUE} --distro archlinux --target /dev/sdb";
+    echo "      Will install archlinux to /dev/sdb";
+    echo "";
+    echo "If you omit the <harddisk> then the script will try to locate the first harddisk automatically.";
+    echo "";
 }
 
 function run {
