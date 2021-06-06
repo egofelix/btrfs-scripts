@@ -96,13 +96,6 @@ function sendSnapshot {
         exit 1;
     fi;
     
-    # Try to check if hostkey works otherwise try add it
-    if ! isTrue ${SSH_IS_HOSTKEY}; then
-        logError "TODO: Add Hostkey remotely";
-        exit 1;
-    fi;
-    
-    
     # Debug
     logFunction "createSnapshot#expandedArguments --target \`${SNAPSHOTVOLUME}\` --volume \`$(echo ${VOLUMES})\`";
     
@@ -112,6 +105,12 @@ function sendSnapshot {
     # Create Lockfile (Only one simultan instance per SNAPSHOTSPATH is allowed)
     if ! createLockFile --lockfile "${SNAPSHOTVOLUME}/.$(basename $ENTRY_SCRIPT).lock"; then
         logError "Failed to lock lockfile \"${SNAPSHOTVOLUME}/.$(basename $ENTRY_SCRIPT).lock\". Maybe another action is running already?";
+        exit 1;
+    fi;
+    
+    # Try to check if hostkey works otherwise try add it
+    if ! isTrue ${SSH_IS_HOSTKEY}; then
+        logError "TODO: Add Hostkey remotely";
         exit 1;
     fi;
     
