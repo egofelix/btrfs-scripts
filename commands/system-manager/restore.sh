@@ -100,6 +100,8 @@ function run {
         fi;
     elif ! runCmd mount ${PART_SYSTEM} /tmp/mnt/disks/system; then logError "Failed to mount SYSTEM-Partition"; exit 1; fi;
     
+    # TODO
+    #Restore
 }
 
 run $@;

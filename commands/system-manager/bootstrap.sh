@@ -61,7 +61,10 @@ function run {
     fi;
     
     # Detect current system & Check Dependencies and Install them if live system, otherwise error out
-    # TODO
+    if isTrue ${IS_LIVE}; then
+        logDebug "Checking Dependencies...";
+        source "${BASH_SOURCE%/*/*/*}/scripts/dependencies.sh";
+    fi;
     
     # Unmount old
     $(umount -R /tmp/mnt/root || true);
