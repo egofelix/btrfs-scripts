@@ -128,13 +128,13 @@ function run {
     # Restore volumes
     for VOLUME in $(echo "${VOLUMES}" | sort)
     do
-        logLine "Receiving snapshot for \"${VOLUME}\"...";
         if [[ ! -d /tmp/mnt/disks/system/@snapshots/${VOLUME} ]]; then
             if ! runCmd mkdir /tmp/mnt/disks/system/@snapshots/${VOLUME}; then logError "Failed to create snapshot directory for volume \"${VOLUME}\"."; exit 1; fi;
         fi;
         
         if [[ ! -d /tmp/mnt/disks/system/@snapshots/${VOLUME}/${TARGETSNAPSHOT} ]]; then
             # Receive Snapshot
+            logLine "Receiving snapshot for \"${VOLUME}\"...";
             logDebug ${SSH_CALL} "download-snapshot" "${VOLUME}" "${TARGETSNAPSHOT}";
             ${SSH_CALL} "download-snapshot" --volume "${VOLUME}" --snapshot "${TARGETSNAPSHOT}" | btrfs receive /tmp/mnt/disks/system/@snapshots/${VOLUME};
             if [[ $? -ne 0 ]]; then logError "Failed to receive the snapshot for volume \"${VOLUME}\"."; exit 1; fi;
