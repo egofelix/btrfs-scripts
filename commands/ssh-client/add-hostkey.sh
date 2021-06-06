@@ -12,7 +12,7 @@ function _main() {
     while [[ "$#" -gt 0 ]]; do
         case $1 in
             -h|--help) printHelp; exit 0;;
-            *) if isEmpty "${KEY}"; KEY="$1"; else KEY="${KEY} $1"; fi;;
+            *) if isEmpty "${KEY}"; then KEY="$1"; else KEY="${KEY} $1"; fi;;
         esac;
         shift;
     done;
@@ -39,10 +39,8 @@ function _main() {
     echo "# HostKey" >> "${BACKUPVOLUME}/.ssh/authorized_keys";
     echo "command=\"/usr/bin/sudo -n ${ENTRY_PATH}/sbin/ssh-client --managed --key-manager --target \\\"${BACKUPVOLUME}\\\" \${SSH_ORIGINAL_COMMAND}\" ${KEY}" >> "${BACKUPVOLUME}/.ssh/authorized_keys";
     
-    #if ! runCmd ls -1d ${BACKUPVOLUME}/*/; then
-    
-    logLine "failed: Key ${KEY}";
-    exit 1;
+    logLine "Added key";
+    exit 0;
 }
 
 _main "$@";
