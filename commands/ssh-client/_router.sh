@@ -43,7 +43,7 @@ function receiver() {
     # Validate
     if isEmpty ${BACKUPVOLUME}; then
         logError "<backupvolume> cannot be empty";
-        printReceiverHelp
+        printHelp;
         exit 1;
     fi;
     if ! autodetect-backupvolume --backupvolume "${BACKUPVOLUME}"; then logError "<backupvolume> cannot be empty"; exit 1; fi;
@@ -51,7 +51,7 @@ function receiver() {
     #if containsIllegalCharacter "${USERNAME}"; then logError "Illegal character detected in <username> \"${USERNAME}\"."; return 1; fi;
     
     # Proxy
-    if ! commandLineProxy --command-name "client-command" --command-value "${RECEIVER_COMMAND:-}" --command-path "${BASH_SOURCE}" $@; then printReceiverHelp; exit 1; fi;
+    if ! commandLineProxy --command-name "client-command" --command-value "${RECEIVER_COMMAND:-}" --command-path "${BASH_SOURCE}" $@; then printHelp; exit 1; fi;
 }
 
 receiver $@;
