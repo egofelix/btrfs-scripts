@@ -100,7 +100,7 @@ cat > /tmp/mnt/root/chroot.sh <<- EOF
 . /etc/profile
 
 # Reinstall Kernel
-apt-get reinstall $(/usr/bin/dpkg/dpkg -l | grep -o "linux-image-[0-9][0-9\.\-]*-[A-Za-z0-9]*")
+apt-get reinstall \$(dpkg -l | grep -o "linux-image-[0-9][0-9\.\-]*-[A-Za-z0-9]*")
 
 # Setup Boot
 grub-install ${HARDDISK}
