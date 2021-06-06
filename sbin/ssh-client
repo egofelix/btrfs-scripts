@@ -14,5 +14,5 @@ then
     shift;
     . "${SCRIPT_SOURCE%/*/*}/_router.sh" --verbose --host-script "${BASH_SOURCE}" "${MY_COMMAND}" $@;
 else
-    . "${SCRIPT_SOURCE%/*/*}/_router.sh" --debug --host-script "${BASH_SOURCE}" "${MY_COMMAND}" $@;
+    . "${SCRIPT_SOURCE%/*/*}/_router.sh" --host-script "${BASH_SOURCE}" "${MY_COMMAND}" $@;
 fi;
