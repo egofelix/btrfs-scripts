@@ -43,8 +43,6 @@ function run {
     # query volumes
     if ! runCmd ${SSH_CALL} "list-volumes"; then logError "SSH-Command \`$@\` failed: ${RUNCMD_CONTENT}."; exit 1; fi;
     local VOLUMES=$RUNCMD_CONTENT;
-    echo "VOLUMES ARE: ${VOLUMES}";
-    
     
     # Test if we are running a live iso
     local IS_LIVE="false";
@@ -112,8 +110,31 @@ function run {
         fi;
     elif ! runCmd mount ${PART_SYSTEM} /tmp/mnt/disks/system; then logError "Failed to mount SYSTEM-Partition"; exit 1; fi;
     
-    # TODO
-    #Restore
+    # Create Subvolumes
+    local VOLUME_PREFIX="";
+    logLine "Checking BTRFS-Subvolumes on SYSTEM-Partition...";
+    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@snapshots && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@snapshots; then logError "Failed to create btrfs @SNAPSHOTS-Volume"; exit 1; fi;
+    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@${VOLUME_PREFIX}swap && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@${VOLUME_PREFIX}swap; then logError "Failed to create btrfs @${VOLUME_PREFIX}swap-Volume"; exit 1; fi;
+    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@${VOLUME_PREFIX}var-logs-data && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@${VOLUME_PREFIX}var-logs-data; then logError "Failed to create btrfs @${VOLUME_PREFIX}var-logs-data-Volume"; exit 1; fi;
+    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@${VOLUME_PREFIX}var-tmp-data && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@${VOLUME_PREFIX}var-tmp-data; then logError "Failed to create btrfs @${VOLUME_PREFIX}var-tmp-data-Volume"; exit 1; fi;
+    
+    # Restore volumes
+    for VOLUME in $(echo "${VOLUMES}" | sort)
+    do
+        logLine "Receiving snapshot for \"${VOLUME}\"...";
+        if ! runCmd mkdir /tmp/mnt/disks/system/@snapshots/${VOLUME}; then logError "Failed to create snapshot directory for volume \"${VOLUME}\"."; exit 1; fi;
+        
+        logDebug ${SSH_CALL} "download-snapshot" "${VOLUME}" "${TARGETSNAPSHOT}";
+        logDebug btrfs receive /tmp/mnt/disks/system/@snapshots/${VOLUME};
+        
+        # Receive Snapshot
+        ${SSH_CALL} "download-snapshot" "${VOLUME}" "${TARGETSNAPSHOT}" | btrfs receive /tmp/mnt/disks/system/@snapshots/${VOLUME};
+        if [[ $? -ne 0 ]]; then logError "Failed to receive the snapshot for volume \"${VOLUME}\"."; exit 1; fi;
+        
+        # Restore ROOTVOLUME
+        RESTORERESULT=$(btrfs subvol snapshot /tmp/mnt/disks/system/@snapshots/${VOLUME}/${TARGETSNAPSHOT} /tmp/mnt/disks/system/${VOLUME} 2>&1);
+        if [[ $? -ne 0 ]]; then logError "Failed to restore the snapshot for volume \"${VOLUME}\": ${RESTORERESULT}."; exit 1; fi;
+    done;
 }
 
 run $@;
