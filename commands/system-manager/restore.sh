@@ -275,7 +275,7 @@ function run {
     
     # Restore resolve
     logDebug "Restoring resolv.conf...";
-    source "${BASH_SOURCE%/*/*/*}/scripts/restoreresolv.sh";
+    #source "${BASH_SOURCE%/*/*/*}/scripts/restoreresolv.sh";
     
     # Question for reboot
     read -p "Do you want to reboot into the system now? [Yn]: " -n 1 -r;
