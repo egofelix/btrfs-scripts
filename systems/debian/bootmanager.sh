@@ -11,13 +11,13 @@ else
         if system-is-efi; then
       cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
-source /etc/profile
+. /etc/profile
 DEBIAN_FRONTEND=noninteractive apt-get -yq install linux-image-amd64 grub-efi efibootmgr
 EOF
         else
       cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
-source /etc/profile
+. /etc/profile
 DEBIAN_FRONTEND=noninteractive apt-get -yq install linux-image-amd64 grub-pc
 EOF
         fi;
@@ -34,7 +34,7 @@ if isTrue "${CRYPT}"; then
     # dropbear-initramfs
   cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
-source /etc/profile
+. /etc/profile
 DEBIAN_FRONTEND=noninteractive apt-get -yq install cryptsetup
 EOF
     chroot /tmp/mnt/root /chroot.sh;
@@ -66,7 +66,7 @@ EOF
     # Install TinySSH
   cat > /tmp/mnt/root/chroot.sh <<- EOF
 !/bin/bash
-source /etc/profile
+. /etc/profile
 DEBIAN_FRONTEND=noninteractive apt-get -yq remove dropbear-initramfs
 DEBIAN_FRONTEND=noninteractive apt-get -yq install tinysshd ipsvd
 systemctl disable tinysshd.socket
@@ -95,7 +95,7 @@ fi;
 # Install Grub
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
-source /etc/profile
+. /etc/profile
 grub-install ${HARDDISK}
 update-grub
 update-initramfs -u -k all
