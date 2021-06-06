@@ -6,7 +6,7 @@ SYSTEMID=$(cat /tmp/mnt/root/etc/os-release | grep "^ID=");
 if [[ "${SYSTEMID^^}" = *"DEBIAN"* ]];
 then
     source "${BASH_SOURCE%/*}/../systems/debian/bootmanager.sh";
-elif [[ "${SYSTEMID^^}" = *"ARCHLINUX"* ]];
+elif [[ "${SYSTEMID^^}" = *"ARCH"* ]];
 then
     source "${BASH_SOURCE%/*}/../systems/archlinux/bootmanager.sh";
 else
