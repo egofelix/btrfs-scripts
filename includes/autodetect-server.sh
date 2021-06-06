@@ -8,6 +8,8 @@ function autodetect-server {
         return 0;
     fi;
     
+    export SSH_CALL="";
+    
     # Scan Arguments
     logFunction "serverDetect#Scanning Arguments";
     local URI="";
@@ -114,25 +116,26 @@ function autodetect-server {
     logDebug "Testing ssh access: ${SSH_USERNAME}@${SSH_HOSTNAME}:${SSH_PORT}...";
     
     # Try with local key
-    export SSH_CALL="ssh -o IdentityFile=/etc/ssh/ssh_host_ed25519_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}";
-    if ! runCmd ${SSH_CALL} "test"; then
-        # Test ssh without key (User auth)
-        #if isTrue ${SSH_INSECURE}; then
-        #export SSH_CALL="ssh -o IdentityFile=/etc/ssh/ssh_host_ed25519_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+    local SSH_TEST="ssh -o IdentityFile=/etc/ssh/ssh_host_ed25519_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+    if runCmd ${SSH_TEST} "test"; then
+        export SSH_CALL="ssh -o IdentityFile=/etc/ssh/ssh_host_ed25519_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}";
+    fi;
+    
+    # Try with AGENT
+    local SSH_TEST="ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
+    if isEmpty ${SSH_CALL} && runCmd ${SSH_TEST}; then
         export SSH_CALL="ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
-        #else
-        #    export SSH_CALL="ssh -o PasswordAuthentication=no -o VerifyHostKeyDNS=yes -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
-        #fi;
-        if ! runCmd ${SSH_CALL} "test"; then
-            if [[ -z "${RUNCMD_CONTENT}" ]]; then
-                logWarn "Cannot connect to ${URI}";
-            else
-                logWarn "Cannot connect to ${URI}: ${RUNCMD_CONTENT}";
-            fi;
-            
-            export SSH_CALL="";
-            return 1;
+    fi;
+    
+    # Evaluate
+    if isEmpty ${SSH_CALL}; then
+        if [[ -z "${RUNCMD_CONTENT}" ]]; then
+            logWarn "Cannot connect to ${URI}";
+        else
+            logWarn "Cannot connect to ${URI}: ${RUNCMD_CONTENT}";
         fi;
+        
+        return 1;
     fi;
     
     logSuccess "Discovered Server: ${SSH_USERNAME}@${SSH_HOSTNAME}:${SSH_PORT}";
