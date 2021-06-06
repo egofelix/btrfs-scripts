@@ -129,6 +129,8 @@ function autodetect-server {
             else
                 logWarn "Cannot connect to ${URI}: ${RUNCMD_CONTENT}";
             fi;
+            
+            export SSH_CALL="";
             return 1;
         fi;
     fi;
