@@ -1,6 +1,6 @@
 #!/bin/bash
 function runCmd {
-    logDebug "Executing" $@;
+    logDebug "Executing" "$@";
     
     export RUNCMD_CONTENT=""
     export RUNCMD_RETURNCODE=1
