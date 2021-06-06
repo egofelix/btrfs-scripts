@@ -104,7 +104,7 @@ function createUser {
     ssh-add -L | while read LINE; do
         echo "" >> "${BACKUPVOLUME}/${USERNAME}/.ssh/authorized_keys";
         echo "# $(echo "${LINE}" | grep -o '[^ ]\+$')" >> "${BACKUPVOLUME}/${USERNAME}/.ssh/authorized_keys";
-        echo "command=\"/usr/bin/sudo -n ${ENTRY_PATH}/sbin/ssh-client --managed --target \\\"${BACKUPVOLUME}/${USERNAME}\\\" \\\"\${SSH_ORIGINAL_COMMAND}\\\"\" ${LINE}" >> "${BACKUPVOLUME}/${USERNAME}/.ssh/authorized_keys";
+        echo "command=\"/usr/bin/sudo -n ${ENTRY_PATH}/sbin/ssh-client --managed --key-manager --target \\\"${BACKUPVOLUME}/${USERNAME}\\\" \\\"\${SSH_ORIGINAL_COMMAND}\\\"\" ${LINE}" >> "${BACKUPVOLUME}/${USERNAME}/.ssh/authorized_keys";
     done;
     
     chown -R "${USERNAME}:" "${BACKUPVOLUME}/${USERNAME}/.ssh";

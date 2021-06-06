@@ -21,9 +21,11 @@ function receiver() {
     local BACKUPVOLUME="";
     local RECEIVER_COMMAND="";
     local MANAGED="false";
+    local KEY_MANAGER="false";
     while [[ "$#" -gt 0 ]]; do
         case $1 in
             --managed) MANAGED="true";;
+            --key-manager) KEY_MANAGER="true";;
             -t|--target) BACKUPVOLUME="$2"; shift;;
             -h|--help) printHelp; exit 0;;
             -*) logError "Unknown Argument: $1"; printHelp; exit 1;;
