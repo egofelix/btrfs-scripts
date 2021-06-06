@@ -110,8 +110,13 @@ function sendSnapshot {
     
     # Try to check if hostkey works otherwise try add it
     if ! isTrue ${SSH_IS_HOSTKEY}; then
-        logError "TODO: Add Hostkey remotely";
-        exit 1;
+        local HOSTKEY="";
+        if [[ -f /etc/ssh/ssh_host_ed25519_key.pub ]]; then HOSTKEY=$(cat /etc/ssh/ssh_host_ed25519_key.pub); fi;
+        if ! isEmpty "${HOSTKEY}"; then
+            if ! runCmd ${SSH_CALL} add-key --key "${HOSTKEY}"; then
+                logWarn "Failed to local public key to remote: ${HOSTKEY}";
+            fi;
+        fi;
     fi;
     
     logLine "Sending snapshots to ${SSH_HOSTNAME}";
