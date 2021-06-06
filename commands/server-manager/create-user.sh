@@ -97,7 +97,16 @@ function createUser {
     
     # Create template authorized_keys
     mkdir -p "${BACKUPVOLUME}/${USERNAME}/.ssh";
-    echo "command=\"/usr/bin/sudo -n ${ENTRY_PATH}/sbin/ssh-client --target \\\"${BACKUPVOLUME}/${USERNAME}\\\" \\\"\${SSH_ORIGINAL_COMMAND}\\\"\" SSHKEYHERE" > "${BACKUPVOLUME}/${USERNAME}/.ssh/authorized_keys";
+    echo "#" > "${BACKUPVOLUME}/${USERNAME}/.ssh/authorized_keys";
+    echo "# Template: command=\"/usr/bin/sudo -n ${ENTRY_PATH}/sbin/ssh-client --managed --target \\\"${BACKUPVOLUME}/${USERNAME}\\\" \\\"\${SSH_ORIGINAL_COMMAND}\\\"\" SSHKEYHERE" >> "${BACKUPVOLUME}/${USERNAME}/.ssh/authorized_keys";
+    echo "#" >> "${BACKUPVOLUME}/${USERNAME}/.ssh/authorized_keys";
+    local LINE="";
+    ssh-add -L | while read LINE; do
+        echo "" >> "${BACKUPVOLUME}/${USERNAME}/.ssh/authorized_keys";
+        echo "# $(echo "${LINE}" | grep -o '[^ ]\+$')" >> "${BACKUPVOLUME}/${USERNAME}/.ssh/authorized_keys";
+        echo "command=\"/usr/bin/sudo -n ${ENTRY_PATH}/sbin/ssh-client --managed --target \\\"${BACKUPVOLUME}/${USERNAME}\\\" \\\"\${SSH_ORIGINAL_COMMAND}\\\"\" ${LINE}" >> "${BACKUPVOLUME}/${USERNAME}/.ssh/authorized_keys";
+    done;
+    
     chown -R "${USERNAME}:" "${BACKUPVOLUME}/${USERNAME}/.ssh";
     
     # Done
