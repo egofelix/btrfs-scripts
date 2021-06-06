@@ -48,7 +48,6 @@ function dnsResolveSrv {
             
             DNS_PORT=$(echo ${SERVICE}  | awk '{print $4}')
             DNS_HOSTNAME=$(echo ${SERVICE}  | awk '{print $5}')
-            DNS_HOSTNAME="${DNS_HOSTNAME::-1}";
             return 0;
         fi;
     fi;
