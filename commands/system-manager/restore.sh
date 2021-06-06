@@ -129,7 +129,9 @@ function run {
     for VOLUME in $(echo "${VOLUMES}" | sort)
     do
         logLine "Receiving snapshot for \"${VOLUME}\"...";
-        if ! runCmd mkdir /tmp/mnt/disks/system/@snapshots/${VOLUME}; then logError "Failed to create snapshot directory for volume \"${VOLUME}\"."; exit 1; fi;
+        if [[ ! -d /tmp/mnt/disks/system/@snapshots/${VOLUME} ]]; then
+            if ! runCmd mkdir /tmp/mnt/disks/system/@snapshots/${VOLUME}; then logError "Failed to create snapshot directory for volume \"${VOLUME}\"."; exit 1; fi;
+        fi;
         
         logDebug ${SSH_CALL} "download-snapshot" "${VOLUME}" "${TARGETSNAPSHOT}";
         logDebug btrfs receive /tmp/mnt/disks/system/@snapshots/${VOLUME};
