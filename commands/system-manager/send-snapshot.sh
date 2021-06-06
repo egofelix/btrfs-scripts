@@ -96,6 +96,13 @@ function sendSnapshot {
         exit 1;
     fi;
     
+    # Try to check if hostkey works otherwise try add it
+    if ! isTrue ${SSH_IS_HOSTKEY}; then
+        logError "TODO: Add Hostkey remotely";
+        exit 1;
+    fi;
+    
+    
     # Debug
     logFunction "createSnapshot#expandedArguments --target \`${SNAPSHOTVOLUME}\` --volume \`$(echo ${VOLUMES})\`";
     

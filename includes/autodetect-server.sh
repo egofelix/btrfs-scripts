@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # serverDetect [--hostname "<hostname>"] [--uri "<uri>"]
-# Sets: SSH_CALL, SSH_USERNAME, SSH_HOSTNAME, SSH_PORT
+# Sets: SSH_CALL, SSH_USERNAME, SSH_HOSTNAME, SSH_PORT, SSH_IS_HOSTKEY
 function autodetect-server {
     if [[ ! -z "${SSH_CALL:-}" ]]; then
         logDebug "Skipping serverDetect, using Cache...";
@@ -118,12 +118,14 @@ function autodetect-server {
     # Try with local key
     local SSH_TEST="ssh -o IdentityFile=/etc/ssh/ssh_host_ed25519_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME} test"
     if runCmd ${SSH_TEST} "test"; then
+        export SSH_IS_HOSTKEY="true";
         export SSH_CALL="ssh -o IdentityFile=/etc/ssh/ssh_host_ed25519_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}";
     fi;
     
     # Try with AGENT
     local SSH_TEST="ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME} test"
     if isEmpty ${SSH_CALL} && runCmd ${SSH_TEST}; then
+        export SSH_IS_HOSTKEY="false";
         export SSH_CALL="ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME}"
     fi;
     
