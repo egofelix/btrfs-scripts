@@ -13,7 +13,7 @@ chroot /tmp/mnt/root /chroot.sh;
 cat > /tmp/mnt/root/etc/locale.gen <<- EOF
 de_DE ISO-8859-1
 de_DE.UTF-8 UTF-8
-de_DE@euro ISO-8859-15"
+de_DE@euro ISO-8859-15
 en_US ISO-8859-1
 en_US.ISO-8859-15 ISO-8859-15
 en_US.UTF-8 UTF-8
