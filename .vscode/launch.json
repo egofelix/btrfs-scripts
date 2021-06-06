@@ -123,6 +123,21 @@
                 "debian"
             ],
             "terminalKind": "integrated"
+        },
+        {
+            "type": "bashdb",
+            "request": "launch",
+            "name": "ssh-client --help",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/_router.sh",
+            "args": [
+                "--debug",
+                "--host-script",
+                "${workspaceFolder}/sbin/ssh-client",
+                "ssh-client",
+                "--help"
+            ],
+            "terminalKind": "integrated"
         }
     ]
 }
