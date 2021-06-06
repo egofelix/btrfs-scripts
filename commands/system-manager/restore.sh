@@ -31,8 +31,18 @@ function run {
     # Validate HARDDISK
     if ! autodetect-harddisk --harddisk "${HARDDISK}"; then logError "Could not detect <harddisk>"; exit 1; fi;
     
+    # Detect Server
+    if ! autodetect-server; then
+        logError "restore#Failed to detect server, please specify one with --remote <uri>";
+        exit 1;
+    fi;
+    
     #Debug
     logFunction "restore#expandedArguments${NOCRYPT_FLAG} --target \`${HARDDISK}\`";
+    
+    # query volumes
+    VOLUMES=$(${SSH_CALL} "list-volumes");
+    if [[ $? -ne 0 ]]; then logError "Unable to query volumes: ${VOLUMES}."; exit 1; fi;
     
     # Test if we are running a live iso
     local IS_LIVE="false";
