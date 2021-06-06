@@ -20,27 +20,45 @@ function system-model {
 
 function system-name {
     local SYSNAME=$(uname -a)
-    if [[ "${SYSNAME^^}" = *"ARCH"* ]]; then
-        echo -n "ARCHLINUX";
-        elif [ -f "/etc/arch-release" ]; then
+    local ID=""
+    if [[ "${SYSNAME^^}" = *"ARCH"* ]];
+    then
+        ID="ARCHLINUX";
+    elif [ -f "/etc/arch-release" ];
+    then
         # Fallback detection
-        echo -n "ARCHLINUX";
-        elif [[ "${SYSNAME^^}" = *"DEBIAN"* ]]; then
-        echo -n "DEBIAN";
-        elif [[ "${SYSNAME^^}" = *"ALPINE"* ]]; then
-        echo -n "ALPINE";
+        ID="ARCHLINUX";
+    elif [[ "${SYSNAME^^}" = *"DEBIAN"* ]];
+    then
+        ID="DEBIAN";
+    elif [[ "${SYSNAME^^}" = *"ALPINE"* ]];
+    then
+        ID="ALPINE";
     else
         local SYSNAME=$(cat /etc/os-release)
         
         if [[ "${SYSNAME^^}" = *"ARCH"* ]]; then
-            echo -n "ARCHLINUX";
-            elif [[ "${SYSNAME^^}" = *"DEBIAN"* ]]; then
-            echo -n "DEBIAN";
-            elif [[ "${SYSNAME^^}" = *"ALPINE"* ]]; then
-            echo -n "ALPINE";
+            ID="ARCHLINUX";
+        elif [[ "${SYSNAME^^}" = *"DEBIAN"* ]];
+        then
+            ID="DEBIAN";
+        elif [[ "${SYSNAME^^}" = *"ALPINE"* ]];
+        then
+            ID="ALPINE";
         else
-            echo -n "UNKNOWN";
+            ID="UNKNOWN";
         fi;
+    fi;
+    
+    if [[ -z "${1:-}" ]]; then
+        echo -n "${ID}";
+        return 0;
+    fi;
+    
+    if [[ "${1^^}" == "${ID}" ]]; then
+        return 0;
+    else
+        return 1;
     fi;
 }
 
