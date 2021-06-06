@@ -209,12 +209,17 @@ function run {
             MOUNTRESULT=$(mount -o "subvol=${LINESUBVOL}" "${PART_SYSTEM}" "/tmp/mnt/root${LINEMOUNT}" 2>&1);
             if [[ $? -ne 0 ]]; then logLine "Failed to mount. Command \"mount -o \"subvol=${LINESUBVOL}\" \"${PART_SYSTEM}\" \"/tmp/mnt/root${LINEMOUNT}\"\", Result \"${MOUNTRESULT}\"."; exit 1; fi;
             elif [[ "${LINEMOUNT}" == "/boot" ]]; then
+            
             # Mount boot partition
             MOUNTRESULT=$(mount ${PART_BOOT} "/tmp/mnt/root${LINEMOUNT}" 2>&1);
             if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
             elif [[ "${LINEMOUNT}" == "/boot/efi" ]]; then
+            
             # Mount efi partition
-            if ! runCmd mkdir /tmp/mnt/root${LINEMOUNT}; then logError "Failed to create efi directory."; exit 1; fi;
+            if [[ ! -d /tmp/mnt/root${LINEMOUNT} ]]; then
+                if ! runCmd mkdir /tmp/mnt/root${LINEMOUNT}; then logError "Failed to create /tmp/mnt/root${LINEMOUNT} directory."; exit 1; fi;
+            fi;
+            
             MOUNTRESULT=$(mount ${PART_EFI} "/tmp/mnt/root${LINEMOUNT}" 2>&1);
             if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
             elif [[ "${LINEMOUNT,,}" == "none" ]] && [[ "${LINEFS,,}" == "swap" ]]; then
