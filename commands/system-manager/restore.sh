@@ -33,7 +33,11 @@ function run {
     
     # Detect Server
     if ! autodetect-server; then
-        logError "restore#Failed to detect server, please specify one with --remote <uri>";
+        if [[ -z "${SSH_HOSTNAME}"]]; then
+            logError "restore#Please specify a remote server with --remote";
+        else
+            logError "restore#Could not connect to remote server.";
+        fi;
         exit 1;
     fi;
     
