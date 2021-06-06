@@ -47,18 +47,9 @@ function run {
     local VOLUMES=${RUNCMD_CONTENT};
     
     # loop through volumes and list snapshots to check if which is the latest snapshot
-    logDebug Detected volumes: $(removeTrailingChar $(echo "${VOLUMES}" | tr '\n' ',') ',');
-    if [[ -z "${TARGETSNAPSHOT:-}" ]]; then
-        logDebug "autodetecting latest snapshot...";
-        for VOLUME in $(echo "${VOLUMES}" | sort)
-        do
-            if ! runCmd ${SSH_CALL} "list-snapshots" --volume "${VOLUME}"; then logError "Failed to list snapshots for volume \"${VOLUME}\""; exit 1; fi;
-            
-            local LASTSNAPSHOT=$(echo "${RUNCMD_CONTENT}" | sort | tail -1);
-            
-            logDebug "Latest Snapshot for volume \"${VOLUME}\" is: \"${LASTSNAPSHOT}\"";
-            TARGETSNAPSHOT=$(echo -e "${LASTSNAPSHOT}\n${TARGETSNAPSHOT:-}" | sort | tail -1);
-        done;
+    if [[ -z "${TARGETSNAPSHOT}" ]]; then
+        if ! runCmd ${SSH_CALL} "detect-latest"; then logError "SSH-Command \`$@\` failed: ${RUNCMD_CONTENT}."; exit 1; fi;
+        local TARGETSNAPSHOT=${RUNCMD_CONTENT};
     fi;
     
     # Test if we are running a live iso
