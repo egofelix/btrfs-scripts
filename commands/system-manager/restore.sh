@@ -9,6 +9,7 @@ function run {
     local CLEAN_DISK="false"; local CLEAN_DISK_FLAG="";
     local HARDDISK="";
     local CRYPT_PASSWORD="test1234";
+    local TARGETSNAPSHOT="";
     while [[ "$#" -gt 0 ]]; do
         case $1 in
             -t|--target) HARDDISK="$2"; shift ;;
@@ -42,7 +43,22 @@ function run {
     
     # query volumes
     if ! runCmd ${SSH_CALL} "list-volumes"; then logError "SSH-Command \`$@\` failed: ${RUNCMD_CONTENT}."; exit 1; fi;
-    local VOLUMES=$RUNCMD_CONTENT;
+    local VOLUMES=${RUNCMD_CONTENT};
+    
+    # loop through volumes and list snapshots to check if which is the latest snapshot
+    logDebug Detected volumes: $(removeTrailingChar $(echo "${VOLUMES}" | tr '\n' ',') ',');
+    if [[ -z "${TARGETSNAPSHOT:-}" ]]; then
+        logDebug "autodetecting latest snapshot...";
+        for VOLUME in $(echo "${VOLUMES}" | sort)
+        do
+            if ! runCmd ${SSH_CALL} "list-snapshots" "${VOLUME}"; then logError "Failed to list snapshots for volume \"${VOLUME}\""; exit 1; fi;
+            
+            local LASTSNAPSHOT=$(echo "${RUNCMD_CONTENT}" | sort | tail -1);
+            
+            logDebug "Latest Snapshot for volume \"${VOLUME}\" is: \"${LASTSNAPSHOT}\"";
+            TARGETSNAPSHOT=$(echo -e "${LASTSNAPSHOT}\n${TARGETSNAPSHOT:-}" | sort | tail -1);
+        done;
+    fi;
     
     # Test if we are running a live iso
     local IS_LIVE="false";
