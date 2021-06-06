@@ -256,6 +256,40 @@ function run {
         sed -i "s#/dev/mapper/cryptsystem#LABEL=system#g" ${FSTABPATH};
     fi;
     
+    # Prepare ChRoot
+    source "${BASH_SOURCE%/*/*/*}/scripts/chroot_prepare.sh";
+    
+    # Run installer
+    logLine "Setting up system...";
+    source "${BASH_SOURCE%/*/*/*}/scripts/bootmanager.sh";
+    
+    # Question for CHROOT
+    sync;
+    read -p "Your system has been installed. Do you want to chroot into the system now and make changes? [yN]: " -n 1 -r;
+    echo    # (optional) move to a new line
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        logLine "Entering chroot...";
+        chroot /tmp/mnt/root /bin/bash;
+        sync;
+    fi
+    
+    # Restore resolve
+    logDebug "Restoring resolv.conf...";
+    source "${BASH_SOURCE%/*/*/*}/scripts/restoreresolv.sh";
+    
+    # Question for reboot
+    read -p "Do you want to reboot into the system now? [Yn]: " -n 1 -r;
+    if [[ $REPLY =~ ^[Yy]$ ]] || [[ $REPLY =~ ^$ ]]; then
+        sync;
+        source "${BASH_SOURCE%/*/*/*}/scripts/unmount.sh";
+        logLine "Rebooting...";
+        reboot now;
+        exit 0;
+    fi
+    
+    # Finish
+    sync;
+    logLine "Your system is ready! Type reboot to boot it.";
 }
 
 run $@;
