@@ -133,16 +133,19 @@ function run {
             if ! runCmd mkdir /tmp/mnt/disks/system/@snapshots/${VOLUME}; then logError "Failed to create snapshot directory for volume \"${VOLUME}\"."; exit 1; fi;
         fi;
         
-        logDebug ${SSH_CALL} "download-snapshot" "${VOLUME}" "${TARGETSNAPSHOT}";
-        logDebug btrfs receive /tmp/mnt/disks/system/@snapshots/${VOLUME};
-        
-        # Receive Snapshot
-        ${SSH_CALL} "download-snapshot" --volume "${VOLUME}" --snapshot "${TARGETSNAPSHOT}" | btrfs receive /tmp/mnt/disks/system/@snapshots/${VOLUME};
-        if [[ $? -ne 0 ]]; then logError "Failed to receive the snapshot for volume \"${VOLUME}\"."; exit 1; fi;
+        if [[ ! -d /tmp/mnt/disks/system/@snapshots/${VOLUME}/${TARGETSNAPSHOT} ]]; then
+            # Receive Snapshot
+            logDebug ${SSH_CALL} "download-snapshot" "${VOLUME}" "${TARGETSNAPSHOT}";
+            ${SSH_CALL} "download-snapshot" --volume "${VOLUME}" --snapshot "${TARGETSNAPSHOT}" | btrfs receive /tmp/mnt/disks/system/@snapshots/${VOLUME};
+            if [[ $? -ne 0 ]]; then logError "Failed to receive the snapshot for volume \"${VOLUME}\"."; exit 1; fi;
+        fi;
         
         # Restore ROOTVOLUME
-        RESTORERESULT=$(btrfs subvol snapshot /tmp/mnt/disks/system/@snapshots/${VOLUME}/${TARGETSNAPSHOT} /tmp/mnt/disks/system/${VOLUME} 2>&1);
-        if [[ $? -ne 0 ]]; then logError "Failed to restore the snapshot for volume \"${VOLUME}\": ${RESTORERESULT}."; exit 1; fi;
+        if [[ -d /tmp/mnt/disks/system/${VOLUME} ]]; then
+            if ! runCmd btrfs subvol del /tmp/mnt/disks/system/${VOLUME}; then logError "Could not delete volume ${VOLUME}"; exit 1; fi;
+        fi;
+        
+        if ! runCmd btrfs subvol snapshot /tmp/mnt/disks/system/@snapshots/${VOLUME}/${TARGETSNAPSHOT} /tmp/mnt/disks/system/${VOLUME}; then logError "Failed to restore the snapshot for volume \"${VOLUME}\": ${RESTORERESULT}."; exit 1; fi;
     done;
     
     # Scan for fstab
