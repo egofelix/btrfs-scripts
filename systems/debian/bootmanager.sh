@@ -99,7 +99,7 @@ cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 . /etc/profile
 
-# Reinstall Kernel
+# Reinstall Kernel in /boot
 apt-get reinstall \$(dpkg -l | grep -o "linux-image-[0-9][0-9\.\-]*-[A-Za-z0-9]*")
 
 # Setup Boot
