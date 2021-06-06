@@ -43,7 +43,7 @@ function run {
     # query volumes
     if ! runCmd ${SSH_CALL} "list-volumes"; then logError "SSH-Command \`$@\` failed: ${RUNCMD_CONTENT}."; exit 1; fi;
     local VOLUMES=$RUNCMD_CONTENT;
-    echo "${VOLUMES}";
+    echo "VOLUMES ARE: ${VOLUMES}";
     
     
     # Test if we are running a live iso
