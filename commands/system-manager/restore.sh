@@ -10,6 +10,7 @@ function run {
     local HARDDISK="";
     local CRYPT_PASSWORD="test1234";
     local TARGETSNAPSHOT="";
+    local VOLUME_PREFIX="";
     while [[ "$#" -gt 0 ]]; do
         case $1 in
             -t|--target) HARDDISK="$2"; shift ;;
@@ -51,7 +52,7 @@ function run {
         logDebug "autodetecting latest snapshot...";
         for VOLUME in $(echo "${VOLUMES}" | sort)
         do
-            if ! runCmd ${SSH_CALL} "list-snapshots" "${VOLUME}"; then logError "Failed to list snapshots for volume \"${VOLUME}\""; exit 1; fi;
+            if ! runCmd ${SSH_CALL} "list-snapshots" --volume "${VOLUME}"; then logError "Failed to list snapshots for volume \"${VOLUME}\""; exit 1; fi;
             
             local LASTSNAPSHOT=$(echo "${RUNCMD_CONTENT}" | sort | tail -1);
             
@@ -127,7 +128,6 @@ function run {
     elif ! runCmd mount ${PART_SYSTEM} /tmp/mnt/disks/system; then logError "Failed to mount SYSTEM-Partition"; exit 1; fi;
     
     # Create Subvolumes
-    local VOLUME_PREFIX="";
     logLine "Checking BTRFS-Subvolumes on SYSTEM-Partition...";
     if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@snapshots && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@snapshots; then logError "Failed to create btrfs @SNAPSHOTS-Volume"; exit 1; fi;
     if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@${VOLUME_PREFIX}swap && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@${VOLUME_PREFIX}swap; then logError "Failed to create btrfs @${VOLUME_PREFIX}swap-Volume"; exit 1; fi;
