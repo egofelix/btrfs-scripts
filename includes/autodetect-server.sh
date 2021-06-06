@@ -122,9 +122,9 @@ function autodetect-server {
     fi;
     
     # Try with AGENT
-    local SSH_TEST="ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME} --managed test"
+    local SSH_TEST="ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME} '--managed' test"
     if isEmpty ${SSH_CALL} && runCmd ${SSH_TEST}; then
-        export SSH_CALL="ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME} --managed"
+        export SSH_CALL="ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=accept-new -o ConnectTimeout=8 -o LogLevel=QUIET -p ${SSH_PORT} ${SSH_USERNAME}@${SSH_HOSTNAME} '--managed'"
     fi;
     
     # Evaluate
