@@ -142,6 +142,90 @@ function run {
         RESTORERESULT=$(btrfs subvol snapshot /tmp/mnt/disks/system/@snapshots/${VOLUME}/${TARGETSNAPSHOT} /tmp/mnt/disks/system/${VOLUME} 2>&1);
         if [[ $? -ne 0 ]]; then logError "Failed to restore the snapshot for volume \"${VOLUME}\": ${RESTORERESULT}."; exit 1; fi;
     done;
+    
+    # Scan for fstab
+    FSTABPATH="";
+    logDebug "Searching for /etc/fstab...";
+    for VOLUME in $(echo "${VOLUMES}" | sort)
+    do
+        logDebug "Searching in volume \"${VOLUME}\"...";
+        
+        if [[ -f "/tmp/mnt/disks/system/${VOLUME}/etc/fstab" ]]; then
+            if [[ ! -z "${FSTABPATH}" ]]; then
+                logError "Multiple fstab files found. Aborting.";
+                exit 1;
+            fi;
+            
+            FSTABPATH="/tmp/mnt/disks/system/${VOLUME}/etc/fstab";
+        fi;
+    done;
+    if [[ -z "${FSTABPATH}" ]]; then logError "Could not locate /etc/fstab"; exit 1; fi;
+    logDebug "FSTABPATH: ${FSTABPATH}";
+    
+    # Create @volumes
+    ATVOLUMES=$(cat "${FSTABPATH}" | grep -o -P 'subvol=[\/]{0,1}@[^\s\,\)]*' | awk -F'=' '{print $2}');
+    for VOLUME in $(echo "${ATVOLUMES}" | sort)
+    do
+        # Skip @snapshots as we have created it before restore
+        if [[ "${VOLUME}" == "@snapshots" ]]; then continue; fi;
+        
+        # Fix for broken fstab (mount is there multiple times)
+        if [[ -d "/tmp/mnt/disks/system/${VOLUME}" ]]; then continue; fi;
+        
+        logDebug "Creating ${VOLUME}...";
+        CREATERESULT=$(btrfs subvol create /tmp/mnt/disks/system/${VOLUME} 2>&1);
+        if [[ $? -ne 0 ]]; then logLine "Failed to create volume \"${VOLUME}\": ${CREATERESULT}."; exit 1; fi;
+    done;
+    
+    
+    # Mount
+    if ! runCmd mkdir -p /tmp/mnt/root; then logError "Failed to create root mountpoint"; exit 1; fi;
+    cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$' | while read LINE; do
+        logDebug "Handling fstab line: ${LINE}";
+        LINEDEV=$(echo "$LINE" | awk '{print $1}');
+        LINEMOUNT=$(echo "$LINE" | awk '{print $2}');
+        LINEFS=$(echo "$LINE" | awk '{print $3}');
+        LINESUBVOL=$(echo "$LINE" | awk '{print $4}' | grep -o -P 'subvol\=[^\s\,\)]*' | awk -F'=' '{print $2}');
+        
+        # Fix for broken fstab (mount is there multiple times, so we check if this is mounted already here)
+        LINEDEVREGEX=$(echo "${LINEDEV}" | sed -e 's/[\.&]/\\&/g');
+        LINEMOUNTREGEX=$(echo "/tmp/mnt/root${LINEMOUNT}" | sed -e 's/[\.&]/\\&/g');
+        LINESUBVOLREGEX=$(echo "${LINESUBVOL}" | sed -e 's/[\.&]/\\&/g');
+        MOUNTTEST=$(LANG=C mount | grep -P "${LINEDEVREGEX}[\s]+on[\s]+${LINEMOUNTREGEX}\s.*subvol\=[/]{0,1}${LINESUBVOLREGEX}");
+        if ! isEmpty "${MOUNTTEST}"; then
+            logDebug "Skipping line, as it is mounted already (Double check)";
+            continue;
+        fi;
+        #end
+        
+        if [[ "${LINEDEV}" == "/dev/mapper/cryptsystem" ]] || [[ "${LINEDEV}" == "LABEL=system" ]]; then
+            # Mount simple volume
+            logDebug "Mounting ${LINESUBVOL} at ${LINEMOUNT}...";
+            MOUNTRESULT=$(mount -o "subvol=${LINESUBVOL}" "${PART_SYSTEM}" "/tmp/mnt/root${LINEMOUNT}" 2>&1);
+            if [[ $? -ne 0 ]]; then logLine "Failed to mount. Command \"mount -o \"subvol=${LINESUBVOL}\" \"${PART_SYSTEM}\" \"/tmp/mnt/root${LINEMOUNT}\"\", Result \"${MOUNTRESULT}\"."; exit 1; fi;
+            elif [[ "${LINEMOUNT}" == "/boot" ]]; then
+            # Mount boot partition
+            MOUNTRESULT=$(mount ${PART_BOOT} "/tmp/mnt/root${LINEMOUNT}" 2>&1);
+            if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
+            elif [[ "${LINEMOUNT}" == "/boot/efi" ]]; then
+            # Mount efi partition
+            if ! runCmd mkdir /tmp/mnt/root${LINEMOUNT}; then logError "Failed to create efi directory."; exit 1; fi;
+            MOUNTRESULT=$(mount ${PART_EFI} "/tmp/mnt/root${LINEMOUNT}" 2>&1);
+            if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
+            elif [[ "${LINEMOUNT,,}" == "none" ]] && [[ "${LINEFS,,}" == "swap" ]]; then
+            # Create swapfile
+            logDebug "Creating new swapfile...";
+            if ! runCmd truncate -s 0 /tmp/mnt/root${LINEDEV}; then logError "Failed to truncate Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
+            if ! runCmd chattr +C /tmp/mnt/root${LINEDEV}; then logError "Failed to chattr Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
+            if ! runCmd chmod 600 /tmp/mnt/root${LINEDEV}; then logError "Failed to chmod Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
+            if ! runCmd btrfs property set /tmp/mnt/root${LINEDEV} compression none; then logError "Failed to disable compression for Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
+            if ! runCmd fallocate /tmp/mnt/root${LINEDEV} -l2g; then logError "Failed to fallocate 2G Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
+            if ! runCmd mkswap /tmp/mnt/root${LINEDEV}; then logError "Failed to mkswap for Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
+        else
+            # unknown, we skip it here
+            logWarn "Skipping unknown mount ${LINEMOUNT}.";
+        fi;
+    done;
 }
 
 run $@;
