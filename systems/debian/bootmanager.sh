@@ -13,14 +13,12 @@ else
 #!/bin/bash
 . /etc/profile
 DEBIAN_FRONTEND=noninteractive apt-get -yq install linux-image-amd64 grub-efi efibootmgr
-apt-get reinstall $(dpkg -l | grep "linux-image-[0-9][0-9\.\-]*-[A-Za-z0-9]*")
 EOF
         else
       cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 . /etc/profile
 DEBIAN_FRONTEND=noninteractive apt-get -yq install linux-image-amd64 grub-pc
-apt-get reinstall $(dpkg -l | grep "linux-image-[0-9][0-9\.\-]*-[A-Za-z0-9]*")
 EOF
         fi;
     else
@@ -98,6 +96,11 @@ fi;
 cat > /tmp/mnt/root/chroot.sh <<- EOF
 #!/bin/bash
 . /etc/profile
+
+# Reinstall Kernel
+apt-get reinstall $(dpkg -l | grep -o "linux-image-[0-9][0-9\.\-]*-[A-Za-z0-9]*")
+
+# Setup Boot
 grub-install ${HARDDISK}
 update-grub
 update-initramfs -u -k all
