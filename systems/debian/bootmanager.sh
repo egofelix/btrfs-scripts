@@ -65,7 +65,7 @@ EOF
     
     # Install TinySSH
   cat > /tmp/mnt/root/chroot.sh <<- EOF
-!/bin/bash
+#!/bin/bash
 . /etc/profile
 DEBIAN_FRONTEND=noninteractive apt-get -yq remove dropbear-initramfs
 DEBIAN_FRONTEND=noninteractive apt-get -yq install tinysshd ipsvd
