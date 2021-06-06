@@ -135,7 +135,7 @@ function run {
         logDebug btrfs receive /tmp/mnt/disks/system/@snapshots/${VOLUME};
         
         # Receive Snapshot
-        ${SSH_CALL} "download-snapshot" "${VOLUME}" "${TARGETSNAPSHOT}" | btrfs receive /tmp/mnt/disks/system/@snapshots/${VOLUME};
+        ${SSH_CALL} "download-snapshot" --volume "${VOLUME}" --snapshot "${TARGETSNAPSHOT}" | btrfs receive /tmp/mnt/disks/system/@snapshots/${VOLUME};
         if [[ $? -ne 0 ]]; then logError "Failed to receive the snapshot for volume \"${VOLUME}\"."; exit 1; fi;
         
         # Restore ROOTVOLUME
