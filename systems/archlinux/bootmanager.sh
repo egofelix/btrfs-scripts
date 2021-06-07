@@ -73,9 +73,6 @@ EOF
             echo cryptsystem PARTLABEL=system none luks > /tmp/mnt/root/etc/crypttab
         fi;
         
-        cp /tmp/mnt/root/etc/fstab /tmp/mnt/root/etc/mkinitcpio-systemd-tool/config/fstab;
-        cp /tmp/mnt/root/etc/crypttab /tmp/mnt/root/etc/mkinitcpio-systemd-tool/config/crypttab;
-        
         cat > /tmp/mnt/root/chroot.sh <<- EOF
 cp /etc/crypttab /etc/mkinitcpio-systemd-tool/config/crypttab
 systemctl enable initrd-cryptsetup.path
