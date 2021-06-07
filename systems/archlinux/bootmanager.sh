@@ -61,17 +61,22 @@ then
     # Install systemd-tools and configure
     cat > /tmp/mnt/root/chroot.sh <<- EOF
 pacman -S --noconfirm mkinitcpio-systemd-tool
-cp /etc/fstab /etc/mkinitcpio-systemd-tool/config/fstab
 systemctl enable initrd-debug-progs.service
 systemctl enable initrd-sysroot-mount.service
 EOF
     chroot /tmp/mnt/root /chroot.sh;
+    cat /etc/mkinitcpio-systemd-tool/config/fstab <<- EOF
+${PART_SYSTEM}         /sysroot                btrfs           rw,relatime,space_cache,subvol=/root-data       0 0
+EOF
     
     if isTrue "${CRYPT}"; then
         # Append cryptsystem in crypttab
         if [[ -z $(cat /tmp/mnt/root/etc/crypttab | grep 'cryptsystem ') ]]; then
             echo cryptsystem PARTLABEL=system none luks > /tmp/mnt/root/etc/crypttab
         fi;
+        
+        # Overwrite /etc/mkinitcpio-systemd-tool/config/fstab
+        
         
         cat > /tmp/mnt/root/chroot.sh <<- EOF
 cp /etc/crypttab /etc/mkinitcpio-systemd-tool/config/crypttab
