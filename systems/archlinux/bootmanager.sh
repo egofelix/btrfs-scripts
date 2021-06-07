@@ -60,7 +60,7 @@ then
     
     # Install systemd-tools and configure
     cat > /tmp/mnt/root/chroot.sh <<- EOF
-pacman -S --noconfirm mkinitcpio-systemd-tools
+pacman -S --noconfirm mkinitcpio-systemd-tool
 cp /etc/fstab /etc/mkinitcpio-systemd-tool/config/fstab
 cp /etc/crypttab /etc/mkinitcpio-systemd-tool/config/crypttab
 systemctl enable initrd-debug-progs.service
