@@ -50,7 +50,23 @@ EOF
     chroot /tmp/mnt/root /chroot.sh;
 fi;
 
-if isTrue "${CRYPT}"; then
+USE_SYSTEMD_INIT="true";
+
+if isTrue ${USE_SYSTEMD_INIT};
+then
+    # Setup systemd hooks
+    HOOKS="(base autodetect modconf block filesystems keyboard fsck systemd systemd-tool)";
+    sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf;
+    
+    # Install systemd-tools and configure
+    cat > /tmp/mnt/root/chroot.sh <<- EOF
+pacman -S --noconfirm mkinitcpio-systemd-tools
+systemctl enable initrd-debug-progs.service
+systemctl enable initrd-sysroot-mount.service
+EOF
+    chroot /tmp/mnt/root /chroot.sh;
+elif isTrue "${CRYPT}";
+then
     # Install crypt tools
   cat > /tmp/mnt/root/chroot.sh <<- EOF
 pacman -S --noconfirm cryptsetup mkinitcpio-netconf mkinitcpio-tinyssh mkinitcpio-utils
