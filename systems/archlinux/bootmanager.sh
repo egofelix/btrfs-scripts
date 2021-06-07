@@ -65,7 +65,7 @@ systemctl enable initrd-debug-progs.service
 systemctl enable initrd-sysroot-mount.service
 EOF
     chroot /tmp/mnt/root /chroot.sh;
-    cat /etc/mkinitcpio-systemd-tool/config/fstab <<- EOF
+    cat /tmp/mnt/root/etc/mkinitcpio-systemd-tool/config/fstab <<- EOF
 ${PART_SYSTEM}         /sysroot                btrfs           rw,relatime,space_cache,subvol=/root-data       0 0
 EOF
     
