@@ -1,7 +1,12 @@
 #!/bin/bash
 function containsIllegalCharacter {
-    [[ "${1}" =~ ^[A-Za-z0-9\- _]+$ ]] && return 0;
-    return 1;
+    if [[ "${1}" =~ ^[A-Za-z0-9\- _]+$ ]];
+    then
+        # Validated
+        return 0;
+    else
+        return 1;
+    fi;
 }
 
 function removeTrailingChar {
