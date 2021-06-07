@@ -62,7 +62,6 @@ then
     cat > /tmp/mnt/root/chroot.sh <<- EOF
 pacman -S --noconfirm mkinitcpio-systemd-tool
 cp /etc/fstab /etc/mkinitcpio-systemd-tool/config/fstab
-cp /etc/crypttab /etc/mkinitcpio-systemd-tool/config/crypttab
 systemctl enable initrd-debug-progs.service
 systemctl enable initrd-sysroot-mount.service
 EOF
@@ -78,6 +77,7 @@ EOF
         cp /tmp/mnt/root/etc/crypttab /tmp/mnt/root/etc/mkinitcpio-systemd-tool/config/crypttab;
         
         cat > /tmp/mnt/root/chroot.sh <<- EOF
+cp /etc/crypttab /etc/mkinitcpio-systemd-tool/config/crypttab
 systemctl enable initrd-cryptsetup.path
 EOF
         chroot /tmp/mnt/root /chroot.sh;
