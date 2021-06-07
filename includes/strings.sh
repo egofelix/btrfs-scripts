@@ -1,6 +1,6 @@
 #!/bin/bash
 function containsIllegalCharacter {
-    if [[ "${1}" =~ ^[A-Za-z0-9\- _]+$ ]];
+    if [[ "${1}" =~ ^[A-Za-z0-9\- \_]+$ ]];
     then
         # Validated
         return 0;
