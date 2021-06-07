@@ -1,11 +1,7 @@
 #!/bin/bash
 function containsIllegalCharacter {
-  local ILLEGALCHARACTERS=("." "$" "&" "(" ")" "{" "}" "[" "]" ";" "<" ">" "\`" "|" "*" "?" "\"" "'" "*" "\\" "/" "+")
-  for CHAR in "${ILLEGALCHARACTERS[@]}"
-  do
-    if [[ "$1" == *"${CHAR}"* ]]; then return 0; fi;
-  done;
-  return 1;
+    [[ "${1}" =~ ^[A-Za-z0-9\- _]+$ ]] && return 0;
+    return 1;
 }
 
 function removeTrailingChar {
