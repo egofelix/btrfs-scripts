@@ -114,6 +114,12 @@ EOF
     # Add current keys
     mkdir -p /tmp/mnt/root/etc/tinyssh/
     ssh-add -L | grep ssh-ed25519 > /tmp/mnt/root/etc/tinyssh/root_key;
+    
+    # Add usr hook to mkinitcpio.conf if usr is on a subvolume
+    if [[ ! -z $(LANG=C mount | grep ' /tmp/mnt/root/usr type ') ]]; then
+        HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && if [[ ${HOOKS[@]} != *"usr"* ]]; then HOOKS+=(usr); fi && echo ${HOOKS[@]} | xargs echo -n))"
+        sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
+    fi;
 else
     # Remove HOOKS netconf tinyssh encryptssh
     HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && echo ${HOOKS[@]}))"
@@ -121,12 +127,12 @@ else
     HOOKS=${HOOKS/tinyssh/}
     HOOKS=${HOOKS/encryptssh/}
     sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
-fi;
-
-# Add usr hook to mkinitcpio.conf if usr is on a subvolume
-if [[ ! -z $(LANG=C mount | grep ' /tmp/mnt/root/usr type ') ]]; then
-    HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && if [[ ${HOOKS[@]} != *"usr"* ]]; then HOOKS+=(usr); fi && echo ${HOOKS[@]} | xargs echo -n))"
-    sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
+    
+    # Add usr hook to mkinitcpio.conf if usr is on a subvolume
+    if [[ ! -z $(LANG=C mount | grep ' /tmp/mnt/root/usr type ') ]]; then
+        HOOKS="HOOKS=($(source /tmp/mnt/root/etc/mkinitcpio.conf && if [[ ${HOOKS[@]} != *"usr"* ]]; then HOOKS+=(usr); fi && echo ${HOOKS[@]} | xargs echo -n))"
+        sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
+    fi;
 fi;
 
 # Install Grub
