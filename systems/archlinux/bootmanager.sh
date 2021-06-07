@@ -55,8 +55,8 @@ USE_SYSTEMD_INIT="true";
 if isTrue ${USE_SYSTEMD_INIT};
 then
     # Setup systemd hooks
-    HOOKS="(base autodetect modconf block filesystems keyboard fsck systemd systemd-tool)";
-    sed -i "s/HOOKS=.*/HOOKS=${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf;
+    HOOKS="HOOKS=(base autodetect modconf block filesystems keyboard fsck systemd systemd-tool)"
+    sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
     
     # Install systemd-tools and configure
     cat > /tmp/mnt/root/chroot.sh <<- EOF
