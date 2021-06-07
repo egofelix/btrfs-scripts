@@ -10,10 +10,14 @@ btrfs-scripts is a set of bash-scripts that helps you setting up and backing up 
  - ssh_backup.sh
  - ssh_restore.sh
 
+#### Quickstart for Restore
+if [[ ! -d ~/btrfs-scripts ]]; then git clone https://github.com/egofelix/btrfs-scripts.git ~/btrfs-scripts; else git -C ~/btrfs-scripts pull; fi;
+~/btrfs-scripts/sbin/backup-client --remote ssh://myuser@myserver restore
+
 #### How to install a base system
 To install a base-system you have to boot the live iso of arch-linux.
 From there you will install git and clone this repository.
-After that you can call installer.sh and it will guide you through the installation.
+After that you can call backup-client and it will guide you through the installation.
 This repository will be automatically cloned into /opt/btrfs-scripts/ on your new system.
 
 In short:
@@ -22,7 +26,11 @@ In short:
 
 `git clone https://github.com/egofelix/btrfs-scripts.git`
 
-`btrfs-scripts/installer.sh`
+For restore
+`btrfs-scripts/sbin/backup-client --remote ssh://myuser@myserver restore`
+
+For fresh install:
+`btrfs-scripts/sbin/backup-client bootstrap`
 
 #### How do I create a snapshot of my system?
 To create snapshots of all btrfs-volumes simply run `/opt/btrfs-scripts/snapshot.sh` as root.

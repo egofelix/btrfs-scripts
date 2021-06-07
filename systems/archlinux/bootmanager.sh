@@ -59,7 +59,6 @@ then
     sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
     
     # Install systemd-tools and configure
-    echo "Installing SYSTEMD TOOLasdasdasdsasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasa";
     cat > /tmp/mnt/root/chroot.sh <<- EOF
 pacman -S --noconfirm mkinitcpio-systemd-tool
 cp /etc/fstab /etc/mkinitcpio-systemd-tool/config/fstab
@@ -68,6 +67,17 @@ systemctl enable initrd-debug-progs.service
 systemctl enable initrd-sysroot-mount.service
 EOF
     chroot /tmp/mnt/root /chroot.sh;
+    
+    if isTrue "${CRYPT}"; then
+        cp /tmp/mnt/root/etc/fstab /tmp/mnt/root/etc/mkinitcpio-systemd-tool/config/fstab;
+        cp /tmp/mnt/root/etc/crypttab /tmp/mnt/root/etc/mkinitcpio-systemd-tool/config/crypttab;
+        
+        cat > /tmp/mnt/root/chroot.sh <<- EOF
+systemctl enable initrd-cryptsetup.path
+EOF
+        chroot /tmp/mnt/root /chroot.sh;
+        
+    fi;
 elif isTrue "${CRYPT}";
 then
     # Install crypt tools
