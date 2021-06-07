@@ -1,11 +1,11 @@
 #!/bin/bash
 function containsIllegalCharacter {
-    if [[ "${1}" =~ ^[A-Za-z0-9\- \_]+$ ]];
-    then
+    $(echo "${1}" | grep -P '^[A-Za-z0-9 \-\_]+$');
+    if [ $? -ne 0 ]; then
+        return 1;
+    else
         # Validated
         return 0;
-    else
-        return 1;
     fi;
 }
 
