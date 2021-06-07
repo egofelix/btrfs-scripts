@@ -59,6 +59,7 @@ then
     sed -i "s/HOOKS=.*/${HOOKS}/g" /tmp/mnt/root/etc/mkinitcpio.conf
     
     # Install systemd-tools and configure
+    echo "Installing SYSTEMD TOOLasdasdasdsasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasa";
     cat > /tmp/mnt/root/chroot.sh <<- EOF
 pacman -S --noconfirm mkinitcpio-systemd-tool
 cp /etc/fstab /etc/mkinitcpio-systemd-tool/config/fstab
