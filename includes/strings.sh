@@ -1,6 +1,6 @@
 #!/bin/bash
 function containsIllegalCharacter {
-    $(echo "${1}" | grep -P '^[A-Za-z0-9 \-\_]+$');
+    echo "${1}" | grep -P '^[A-Za-z0-9 \-\_]+$' > /dev/null;
     if [ $? -ne 0 ]; then
         return 1;
     else
