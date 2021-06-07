@@ -65,7 +65,9 @@ systemctl enable initrd-debug-progs.service
 systemctl enable initrd-sysroot-mount.service
 EOF
     chroot /tmp/mnt/root /chroot.sh;
-    cat /tmp/mnt/root/etc/mkinitcpio-systemd-tool/config/fstab <<- EOF
+    
+    # give systemd hint for /sysroot
+    cat > /tmp/mnt/root/etc/mkinitcpio-systemd-tool/config/fstab <<- EOF
 ${PART_SYSTEM}         /sysroot                btrfs           rw,relatime,space_cache,subvol=/root-data       0 0
 EOF
     
@@ -75,14 +77,13 @@ EOF
             echo cryptsystem PARTLABEL=system none luks > /tmp/mnt/root/etc/crypttab
         fi;
         
+        # Copy crypttab
         cp /tmp/mnt/root/etc/crypttab /tmp/mnt/root/etc/mkinitcpio-systemd-tool/config/crypttab;
         
         cat > /tmp/mnt/root/chroot.sh <<- EOF
-cp /etc/crypttab /etc/mkinitcpio-systemd-tool/config/crypttab
 systemctl enable initrd-cryptsetup.path
 EOF
         chroot /tmp/mnt/root /chroot.sh;
-        
     fi;
 elif isTrue "${CRYPT}";
 then
