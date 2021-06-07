@@ -69,6 +69,11 @@ EOF
     chroot /tmp/mnt/root /chroot.sh;
     
     if isTrue "${CRYPT}"; then
+        # Append cryptsystem in crypttab
+        if [[ -z $(cat /tmp/mnt/root/etc/crypttab | grep 'cryptsystem ') ]]; then
+            echo cryptsystem PARTLABEL=system none luks > /tmp/mnt/root/etc/crypttab
+        fi;
+        
         cp /tmp/mnt/root/etc/fstab /tmp/mnt/root/etc/mkinitcpio-systemd-tool/config/fstab;
         cp /tmp/mnt/root/etc/crypttab /tmp/mnt/root/etc/mkinitcpio-systemd-tool/config/crypttab;
         
