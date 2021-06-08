@@ -6,6 +6,7 @@ function printReceiverSubCommandHelp() {
 # receive-snapshot -v|--volume <volume> -s|--snapshot <snapshot>
 function receiverSubCommand() {
     # Scan Arguments
+    export LOGFILE="/tmp/test.log";
     local VOLUME="";
     local SNAPSHOT="";
     while [[ "$#" -gt 0 ]]; do
