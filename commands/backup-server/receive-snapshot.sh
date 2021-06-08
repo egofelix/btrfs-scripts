@@ -80,7 +80,7 @@ function receiverSubCommand() {
         export RECEIVERERROR="true";
     fi;
     
-    logLine "Receive done?";
+    logDeubg "Receive done????????????";
     export RECEIVERESULT=${RUNCMD_CONTENT};
     _checkSnapshot;
     
