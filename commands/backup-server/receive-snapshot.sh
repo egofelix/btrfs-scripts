@@ -34,6 +34,7 @@ function receiverSubCommand() {
     if [[ -d "${BACKUPVOLUME}/${VOLUME}/${SNAPSHOT}" ]]; then logError "already exists"; exit 1; fi;
     
     # Trap for aborted receives (cleanup)
+    export TEMP_TRAP_VOLUME="${BACKUPVOLUME}/${VOLUME}/${SNAPSHOT}"
     _failedReceive() {
         logDebug "In failed Trap";
         if [[ -z "${RECEIVERESULT:-}" ]]; then
@@ -42,11 +43,11 @@ function receiverSubCommand() {
         
         logLine "Failed to receive snapshot: ${RECEIVERESULT}";
         # Remove broken subvolume
-        SUBVOLCHECK=$(echo "${RECEIVERESULT}" | grep -P 'At (subvol|snapshot) ' | awk '{print $3}');
+        local SUBVOLCHECK=$(echo "${RECEIVERESULT}" | grep -P 'At (subvol|snapshot) ' | awk '{print $3}');
         if [[ ! -z "${SUBVOLCHECK}" ]]; then
-            logDebug "Removing ${BACKUPVOLUME}/${VOLUME}/${SNAPSHOT}";
-            if ! runCmd btrfs subvol del ${BACKUPVOLUME}/${VOLUME}/${SNAPSHOT}; then
-                logError "Failed to Remove ${BACKUPVOLUME}/${VOLUME}/${SNAPSHOT}";
+            logDebug "Removing ${TEMP_TRAP_VOLUME}";
+            if ! runCmd btrfs subvol del ${TEMP_TRAP_VOLUME}; then
+                logError "Failed to Remove ${TEMP_TRAP_VOLUME}";
             fi;
         fi;
         
