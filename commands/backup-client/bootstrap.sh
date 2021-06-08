@@ -42,7 +42,7 @@ function run {
     for f in ${SCRIPT_SOURCE%/*/*/*}/includes/bootstrap/*.sh; do source $f; done;
     
     # Defaults
-    if [[ -z "${SUBVOLUMES}" ]]; then SUBVOLUMES="home var srv usr opt"; fi;
+    if [[ -z "${SUBVOLUMES}" ]]; then SUBVOLUMES="home srv"; fi;
     
     # Validate HARDDISK
     if ! autodetect-harddisk --harddisk "${HARDDISK}"; then logError "Could not detect <harddisk>"; exit 1; fi;
