@@ -30,7 +30,7 @@ For restore
 `btrfs-scripts/sbin/backup-client --remote ssh://myuser@myserver restore`
 
 For fresh install:
-`btrfs-scripts/sbin/backup-client bootstrap`
+`btrfs-scripts/sbin/backup-client bootstrap --distro debian`
 
 #### How do I create a snapshot of my system?
 To create snapshots of all btrfs-volumes simply run `/opt/btrfs-scripts/snapshot.sh` as root.
