@@ -6,7 +6,7 @@ function printReceiverSubCommandHelp() {
 # receive-snapshot -v|--volume <volume> -s|--snapshot <snapshot>
 function receiverSubCommand() {
     # Scan Arguments
-    export LOGFILE="/tmp/test.log";
+    #export LOGFILE="/tmp/test.log";
     local VOLUME="";
     local SNAPSHOT="";
     while [[ "$#" -gt 0 ]]; do
@@ -38,12 +38,16 @@ function receiverSubCommand() {
     _checkSnapshot() {
         logDebug "Checking snapshot received: ReceiverError: ${RECEIVERERROR} Path: ${TEMP_TRAP_VOLUME}/${TEMP_TRAP_SNAPSHOT}";
         
+        if [[ -z "${RECEIVERESULT:-}" ]]; then
+            local RECEIVERESULT=${RUNCMD_CONTENT:-};
+        fi;
+        
         # Get name of received subvolume
         local SUBVOLCHECK=$(echo "${RECEIVERESULT}" | grep -P 'At (subvol|snapshot) ' | awk '{print $3}');
         if [[ -z "${SUBVOLCHECK}" ]]; then
             # Return error
             logError "failed to detect subvolume: \"${SUBVOLCHECK}\" in \"${RECEIVERESULT}\".";
-            return;
+            exit 1;
         fi;
         
         if isTrue ${RECEIVERERROR} || [[ "${SUBVOLCHECK}" != "${TEMP_TRAP_SNAPSHOT}" ]];
@@ -53,23 +57,16 @@ function receiverSubCommand() {
             if ! runCmd btrfs subvol del ${BACKUPVOLUME}/${VOLUME}/${SUBVOLCHECK}; then
                 logError "Failed to Remove ${SUBVOLCHECK}";
             fi;
+            
+            logError "Receive failed.";
+            exit 1;
         fi;
     }
     
     # Trap for aborted receives (cleanup)
     export TEMP_TRAP_VOLUME="${BACKUPVOLUME}/${VOLUME}";
     export TEMP_TRAP_SNAPSHOT="${SNAPSHOT}";
-    _failedReceive() {
-        if [[ -z "${RECEIVERESULT:-}" ]]; then
-            local RECEIVERESULT=${RUNCMD_CONTENT:-};
-        fi;
-        
-        _checkSnapshot;
-        
-        # Exit
-        logError "Receive failed."; exit 1;
-    }
-    trap _failedReceive EXIT SIGHUP SIGKILL SIGTERM SIGINT;
+    trap _checkSnapshot EXIT SIGHUP SIGKILL SIGTERM SIGINT;
     
     # Receive
     export RECEIVERERROR="true";
@@ -77,8 +74,6 @@ function receiverSubCommand() {
     if runCmd btrfs receive ${BACKUPVOLUME}/${VOLUME} < /dev/stdin; then
         export RECEIVERERROR="false";
     fi;
-    
-    logDeubg "Receive done????????????";
     export RECEIVERESULT=${RUNCMD_CONTENT};
     _checkSnapshot;
     
