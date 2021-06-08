@@ -33,12 +33,12 @@ For fresh install:
 `btrfs-scripts/sbin/backup-client bootstrap --distro debian`
 
 #### How do I create a snapshot of my system?
-To create snapshots of all btrfs-volumes simply run `/opt/btrfs-scripts/snapshot.sh` as root.
+To create snapshots of all btrfs-volumes simply run `/opt/btrfs-scripts/sbin/backup-client create-snapshot` as root.
 Volumes starting with `@` will be ignored from this script.
 The snapshots will be created at the `@snapshots` volume (Defaults to `/.snapshots`)
 
 #### How do i send snapshots to a different server?
-You can send backups to a specific server by running `/opt/btrfs-scripts/ssh_backup.sh --target ssh://user@server:port/`
+You can send backups to a specific server by running `/opt/btrfs-scripts/sbin/backup-client --remote ssh://user@server:port/ send-snapshots`
 
 #### How to setup a backup-server?
 Btrfs supports sending incremental backups to other destinations. To make use of this you can call the setup a system which will receive these.

@@ -231,7 +231,7 @@ function run {
                 if ! runCmd chattr +C /tmp/mnt/root${LINEDEV}; then logError "Failed to chattr Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
                 if ! runCmd chmod 600 /tmp/mnt/root${LINEDEV}; then logError "Failed to chmod Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
                 if ! runCmd btrfs property set /tmp/mnt/root${LINEDEV} compression none; then logError "Failed to disable compression for Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
-                if ! runCmd fallocate /tmp/mnt/root${LINEDEV} -l2g; then logError "Failed to fallocate 2G Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
+                if ! runCmd dd if=/dev/zero of=/tmp/mnt/root/.swap${LINEDEV} bs=1M count=2048 status=progress; then logError "Failed to fallocate 2G Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
                 if ! runCmd mkswap /tmp/mnt/root${LINEDEV}; then logError "Failed to mkswap for Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
             fi;
         else
