@@ -72,12 +72,10 @@ function receiverSubCommand() {
     trap _failedReceive EXIT SIGHUP SIGKILL SIGTERM SIGINT;
     
     # Receive
-    export RECEIVERERROR="false";
+    export RECEIVERERROR="true";
     logLine "Starting Receive..";
-    if ! runCmd btrfs receive ${BACKUPVOLUME}/${VOLUME} < /dev/stdin; then
-        logDebug "Receive error detected!";
-        export RECEIVERESULT=${RUNCMD_CONTENT};
-        export RECEIVERERROR="true";
+    if runCmd btrfs receive ${BACKUPVOLUME}/${VOLUME} < /dev/stdin; then
+        export RECEIVERERROR="false";
     fi;
     
     logDeubg "Receive done????????????";
