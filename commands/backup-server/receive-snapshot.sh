@@ -64,9 +64,11 @@ function receiverSubCommand() {
         logLine "Receive error!";
         exit 1;
     fi;
+    
+    logLine "Receive done?";
     export RECEIVERESULT=${RUNCMD_CONTENT};
     # Get name of received subvolume
-    SUBVOLCHECK=$(echo "${RUNCMD_CONTENT}" | grep -P 'At (subvol|snapshot) ' | awk '{print $3}');
+    local SUBVOLCHECK=$(echo "${RUNCMD_CONTENT}" | grep -P 'At (subvol|snapshot) ' | awk '{print $3}');
     if [[ -z "${SUBVOLCHECK}" ]]; then
         # Return error
         logError "failed to detect subvolume: \"${SUBVOLCHECK}\" in \"${RECEIVERESULT}\"."; exit 1;
