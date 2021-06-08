@@ -176,7 +176,7 @@ function run {
         if ! runCmd chattr +C /tmp/mnt/root/.swap/swapfile; then logError "Failed to chattr Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
         if ! runCmd chmod 600 /tmp/mnt/root/.swap/swapfile; then logError "Failed to chmod Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
         if ! runCmd btrfs property set /tmp/mnt/root/.swap/swapfile compression none; then logError "Failed to disable compression for Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
-        if ! runCmd dd if=/dev/zero of=/tmp/mnt/root/.swap/swapfile bs=1M count=2048; then logError "Failed to fallocate 2G Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
+        if ! runCmd fallocate -l 2G /tmp/mnt/root/.swap/swapfile; then logError "Failed to fallocate 2G Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
         if ! runCmd mkswap /tmp/mnt/root/.swap/swapfile; then logError "Failed to mkswap for Swap-File at /tmp/mnt/root/.swap/swapfile"; exit 1; fi;
     fi;
     
@@ -186,9 +186,11 @@ function run {
         if ! mountItem /tmp/mnt/root/${subvolName,,} "${PART_SYSTEM}" "${VOLUME_PREFIX}${subvolName,,}-data"; then logError "Failed to Mount ${VOLUME_PREFIX}${subvolName,,}-data-Volume at /tmp/mnt/root/${subvolName,,}"; exit 1; fi;
     done;
     
-    # Mount /var/logs
-    if ! mountItem /tmp/mnt/root/var/logs "${PART_SYSTEM}" "@${VOLUME_PREFIX}var-logs-data"; then logError "Failed to Mount @${VOLUME_PREFIX}var-logs-data-Volume at /tmp/mnt/root/var/logs"; exit 1; fi;
-    if ! mountItem /tmp/mnt/root/var/tmp "${PART_SYSTEM}" "@${VOLUME_PREFIX}var-tmp-data"; then logError "Failed to Mount @${VOLUME_PREFIX}var-tmp-data-Volume at /tmp/mnt/root/var/tmp"; exit 1; fi;
+    # Create mounts for /var/logs and /var/tmp if /var is on a seperate partition
+    if [[ ! -z $(LANG=C mount | grep ' /tmp/mnt/root/var type ') ]]; then
+        if ! mountItem /tmp/mnt/root/var/logs "${PART_SYSTEM}" "@${VOLUME_PREFIX}var-logs-data"; then logError "Failed to Mount @${VOLUME_PREFIX}var-logs-data-Volume at /tmp/mnt/root/var/logs"; exit 1; fi;
+        if ! mountItem /tmp/mnt/root/var/tmp "${PART_SYSTEM}" "@${VOLUME_PREFIX}var-tmp-data"; then logError "Failed to Mount @${VOLUME_PREFIX}var-tmp-data-Volume at /tmp/mnt/root/var/tmp"; exit 1; fi;
+    fi;
     
     # Install base system
     if [[ -d /tmp/mnt/root/etc ]]; then
