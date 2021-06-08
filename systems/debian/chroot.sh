@@ -45,12 +45,28 @@ EOF
 chroot /tmp/mnt/root /chroot.sh;
 
 # Setup ssh
-sed -i 's/^#PermitRootLogin .*/PermitRootLogin yes/' /tmp/mnt/root/etc/ssh/sshd_config;
-sed -i 's/^PermitRootLogin .*/PermitRootLogin yes/' /tmp/mnt/root/etc/ssh/sshd_config;
 mkdir -p /tmp/mnt/root/root/.ssh
 ssh-add -L > /tmp/mnt/root/root/.ssh/authorized_keys;
+if [[ -s /tmp/mnt/root/root/.ssh/authorized_keys ]]; then
+    # Root has keys
+    sed -i 's/^#PermitRootLogin .*/PermitRootLogin prohibit-password/' /tmp/mnt/root/etc/ssh/sshd_config;
+    sed -i 's/^PermitRootLogin .*/PermitRootLogin prohibit-password/' /tmp/mnt/root/etc/ssh/sshd_config;
+    
+    # Lock root password
+    cat > /tmp/mnt/root/chroot.sh <<- EOF
+passwd -l root
+EOF
+    chroot /tmp/mnt/root /chroot.sh;
+else
+    sed -i 's/^#PermitRootLogin .*/PermitRootLogin yes/' /tmp/mnt/root/etc/ssh/sshd_config;
+    sed -i 's/^PermitRootLogin .*/PermitRootLogin yes/' /tmp/mnt/root/etc/ssh/sshd_config;
+fi;
 
-# Remove old network settings
+# Disable old networking, we will use systemd-networkd
+cat > /tmp/mnt/root/chroot.sh <<- EOF
+systemctl disable networking
+EOF
+chroot /tmp/mnt/root /chroot.sh;
 rm -f /tmp/mnt/root/etc/network/interfaces;
 rm -f /tmp/mnt/root/etc/network/interfaces.d/*;
 
