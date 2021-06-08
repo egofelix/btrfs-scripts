@@ -50,7 +50,7 @@ EOF
     chroot /tmp/mnt/root /chroot.sh;
 fi;
 
-USE_SYSTEMD_INIT="true";
+USE_SYSTEMD_INIT="false";
 
 if isTrue ${USE_SYSTEMD_INIT};
 then
