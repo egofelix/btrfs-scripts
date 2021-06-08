@@ -64,7 +64,6 @@ function receiverSubCommand() {
         export RECEIVERESULT=${RUNCMD_CONTENT};
         logLine "Receive error!";
         HAS_RECEIVE_ERROR="true";
-        #exit 1;
     fi;
     
     logLine "Receive done?";
@@ -76,7 +75,14 @@ function receiverSubCommand() {
         logError "failed to detect subvolume: \"${SUBVOLCHECK}\" in \"${RECEIVERESULT}\"."; exit 1;
     fi;
     
-    if [[ "${SUBVOLCHECK}" != "${SNAPSHOT}" ]]; then
+    if isTrue ${HAS_RECEIVE_ERROR}; then
+        logLine "Removing ${SUBVOLCHECK}: Failed to receive";
+        if ! runCmd btrfs subvol del ${BACKUPVOLUME}/${VOLUME}/${SUBVOLCHECK}; then
+            logError "Failed to Remove ${TEMP_TRAP_VOLUME}";
+        fi;
+        
+    elif [[ "${SUBVOLCHECK}" != "${SNAPSHOT}" ]];
+    then
         # Return error and fire trap for removal
         logError "subvolume mismatch \"${SUBVOLCHECK}\" != \"${SNAPSHOT}\".";
         if ! runCmd btrfs subvol del ${BACKUPVOLUME}/${VOLUME}/${SUBVOLCHECK}; then
