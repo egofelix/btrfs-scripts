@@ -36,7 +36,7 @@ function receiverSubCommand() {
     
     
     _checkSnapshot() {
-        logDebug "Checking snapshot received? ${TEMP_TRAP_VOLUME}/${TEMP_TRAP_SNAPSHOT}";
+        logDebug "Checking snapshot received: ReceiverError: ${RECEIVERERROR} Path: ${TEMP_TRAP_VOLUME}/${TEMP_TRAP_SNAPSHOT}";
         
         # Get name of received subvolume
         local SUBVOLCHECK=$(echo "${RECEIVERESULT}" | grep -P 'At (subvol|snapshot) ' | awk '{print $3}');
