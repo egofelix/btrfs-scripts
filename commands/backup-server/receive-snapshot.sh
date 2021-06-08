@@ -60,7 +60,7 @@ function receiverSubCommand() {
     # Receive
     logLine "Starting Receive..";
     if ! runCmd btrfs receive ${BACKUPVOLUME}/${VOLUME} < /dev/stdin; then
-        RECEIVERESULT=${RUNCMD_CONTENT};
+        export RECEIVERESULT=${RUNCMD_CONTENT};
         exit 1;
     fi;
     export RECEIVERESULT=${RUNCMD_CONTENT};
