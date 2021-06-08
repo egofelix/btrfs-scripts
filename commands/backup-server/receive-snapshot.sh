@@ -58,11 +58,13 @@ function receiverSubCommand() {
     trap _failedReceive EXIT SIGHUP SIGKILL SIGTERM SIGINT;
     
     # Receive
+    local HAS_RECEIVE_ERROR="false";
     logLine "Starting Receive..";
     if ! runCmd btrfs receive ${BACKUPVOLUME}/${VOLUME} < /dev/stdin; then
         export RECEIVERESULT=${RUNCMD_CONTENT};
         logLine "Receive error!";
-        exit 1;
+        HAS_RECEIVE_ERROR="true";
+        #exit 1;
     fi;
     
     logLine "Receive done?";
@@ -76,12 +78,17 @@ function receiverSubCommand() {
     
     if [[ "${SUBVOLCHECK}" != "${SNAPSHOT}" ]]; then
         # Return error and fire trap for removal
-        logError "subvolume mismatch \"${SUBVOLCHECK}\" != \"${SNAPSHOT}\"."; exit 1;
+        logError "subvolume mismatch \"${SUBVOLCHECK}\" != \"${SNAPSHOT}\".";
+        if ! runCmd btrfs subvol del ${BACKUPVOLUME}/${VOLUME}/${SUBVOLCHECK}; then
+            logError "Failed to Remove ${TEMP_TRAP_VOLUME}";
+        fi;
+        exit 1;
     fi;
     
     # Restore Trap
     trap - EXIT SIGHUP SIGKILL SIGTERM SIGINT;
     trap _no_more_locking EXIT;
+    
     
     # Snapshot received
     logDebug "Received --volume \"${VOLUME}\" --snapshot \"${SNAPSHOT}\"";
