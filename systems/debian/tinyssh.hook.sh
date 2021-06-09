@@ -71,10 +71,21 @@ display_fingerprints() {
 ## Only install tinyssh if we have an encrypted partition
 [ -r /etc/crypttab ] || exit 0
 
-
+# Add Binarys
 copy_exec /usr/sbin/tinysshd /sbin
-copy_exec /usr/bin/tcpsvd /bin
 LIBC_DIR=$(ldd /usr/sbin/tinysshd | sed -nr 's#.* => (/lib.*)/libc\.so\.[0-9.-]+ \(0x[[:xdigit:]]+\)$#\1#p')
+find -L "$LIBC_DIR" -maxdepth 1 -name 'libnss_files.*' -type f | while read so; do
+    copy_exec "$so"
+done
+
+copy_exec /usr/bin/tcpsvd /bin
+LIBC_DIR=$(ldd /usr/bin/tcpsvd | sed -nr 's#.* => (/lib.*)/libc\.so\.[0-9.-]+ \(0x[[:xdigit:]]+\)$#\1#p')
+find -L "$LIBC_DIR" -maxdepth 1 -name 'libnss_files.*' -type f | while read so; do
+    copy_exec "$so"
+done
+
+copy_exec /usr/sbin/cryptsetup /bin
+LIBC_DIR=$(ldd /usr/sbin/cryptsetup | sed -nr 's#.* => (/lib.*)/libc\.so\.[0-9.-]+ \(0x[[:xdigit:]]+\)$#\1#p')
 find -L "$LIBC_DIR" -maxdepth 1 -name 'libnss_files.*' -type f | while read so; do
     copy_exec "$so"
 done
@@ -83,7 +94,7 @@ done
 home=$(mktemp -d "$DESTDIR/root-XXXXXX")
 chmod 0700 "$home"
 for x in passwd group; do echo "$x: files"; done >"$DESTDIR/etc/nsswitch.conf"
-echo "root:*:0:0::${home#$DESTDIR}:/bin/sh" >"$DESTDIR/etc/passwd"
+echo "root:*:0:0::${home#$DESTDIR}:/bin/cryptroot-unlock" >"$DESTDIR/etc/passwd"
 echo "root:!:0:" >"$DESTDIR/etc/group"
 
 # Copy config
