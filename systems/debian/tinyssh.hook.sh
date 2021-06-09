@@ -84,12 +84,6 @@ find -L "$LIBC_DIR" -maxdepth 1 -name 'libnss_files.*' -type f | while read so; 
     copy_exec "$so"
 done
 
-copy_exec /usr/sbin/cryptsetup /bin
-LIBC_DIR=$(ldd /usr/sbin/cryptsetup | sed -nr 's#.* => (/lib.*)/libc\.so\.[0-9.-]+ \(0x[[:xdigit:]]+\)$#\1#p')
-find -L "$LIBC_DIR" -maxdepth 1 -name 'libnss_files.*' -type f | while read so; do
-    copy_exec "$so"
-done
-
 # Create root dir
 home=$(mktemp -d "$DESTDIR/root-XXXXXX")
 chmod 0700 "$home"
