@@ -61,16 +61,6 @@ function run {
         *) IS_LIVE="false";;
     esac;
     
-    # Warn user if we didnt detected a live system
-    if ! isTrue ${IS_LIVE}; then
-        read -p "You are not running a live system, bootstrap to a running system will fail, continue? [yN]: " -n 1 -r
-        echo    # (optional) move to a new line
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            logError "Script canceled by user";
-            exit 1;
-        fi
-    fi;
-    
     # Detect current system & Check Dependencies and Install them if live system, otherwise error out
     if isTrue ${IS_LIVE}; then
         logDebug "Checking Dependencies...";
@@ -102,190 +92,24 @@ function run {
     # Setup variables
     local PART_EFI="${HARDDISK}2"
     local PART_BOOT="${HARDDISK}3"
-    local PART_SYSTEM="${HARDDISK}4"
+    local PART_SYSTEM="${HARDDISK}5"
     if isTrue "${CRYPT}"; then PART_SYSTEM="/dev/mapper/cryptsystem"; fi;
     
     # Mount system
-    logLine "Mounting SYSTEM-Partition at /tmp/mnt/disks/system"
-    mkdir -p /tmp/mnt/disks/system
+    logLine "Mounting BTRFS-ROOT at /.btrfs-root"
+    mkdir -p /.btrfs-root
+    if ! runCmd mount ${PART_SYSTEM} /.btrfs-root; then logError "Failed to mount SYSTEM-Partition"; exit 1; fi;
+
+    # Ensure Snapshots exist
+    if ! runCmd btrfs subvolume list /.btrfs-root/@snapshots && ! runCmd btrfs subvolume create /.btrfs-root/@snapshots; then logError "Failed to create btrfs @SNAPSHOTS-Volume"; exit 1; fi;
     
-    if runCmd findmnt -n -r /tmp/mnt/disks/system; then
-        local CURRENTLYMOUNTED=$(echo "${RUNCMD_CONTENT}" | cut -d' ' -f 2);
-        
-        if [[ "${CURRENTLYMOUNTED}" != "${PART_SYSTEM}" ]]; then
-            logError "There seems to be another drive mounted at /tmp/mnt/disks/system";
-            exit 1;
-        fi;
-    elif ! runCmd mount ${PART_SYSTEM} /tmp/mnt/disks/system; then logError "Failed to mount SYSTEM-Partition"; exit 1; fi;
-    
-    # Create Subvolumes
-    logLine "Checking BTRFS-Subvolumes on SYSTEM-Partition...";
-    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@snapshots && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@snapshots; then logError "Failed to create btrfs @SNAPSHOTS-Volume"; exit 1; fi;
-    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@${VOLUME_PREFIX}swap && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@${VOLUME_PREFIX}swap; then logError "Failed to create btrfs @${VOLUME_PREFIX}swap-Volume"; exit 1; fi;
-    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@${VOLUME_PREFIX}var-logs-data && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@${VOLUME_PREFIX}var-logs-data; then logError "Failed to create btrfs @${VOLUME_PREFIX}var-logs-data-Volume"; exit 1; fi;
-    if ! runCmd btrfs subvolume list /tmp/mnt/disks/system/@${VOLUME_PREFIX}var-tmp-data && ! runCmd btrfs subvolume create /tmp/mnt/disks/system/@${VOLUME_PREFIX}var-tmp-data; then logError "Failed to create btrfs @${VOLUME_PREFIX}var-tmp-data-Volume"; exit 1; fi;
-    
-    # Restore volumes
-    for VOLUME in $(echo "${VOLUMES}" | sort)
-    do
-        if [[ ! -d /tmp/mnt/disks/system/@snapshots/${VOLUME} ]]; then
-            if ! runCmd mkdir /tmp/mnt/disks/system/@snapshots/${VOLUME}; then logError "Failed to create snapshot directory for volume \"${VOLUME}\"."; exit 1; fi;
-        fi;
-        
-        if [[ ! -d /tmp/mnt/disks/system/@snapshots/${VOLUME}/${TARGETSNAPSHOT} ]]; then
-            # Receive Snapshot
-            logLine "Receiving snapshot for \"${VOLUME}\"...";
-            logDebug ${SSH_CALL} "download-snapshot" "${VOLUME}" "${TARGETSNAPSHOT}";
-            ${SSH_CALL} "download-snapshot" --volume "${VOLUME}" --snapshot "${TARGETSNAPSHOT}" | btrfs receive /tmp/mnt/disks/system/@snapshots/${VOLUME};
-            if [[ $? -ne 0 ]]; then logError "Failed to receive the snapshot for volume \"${VOLUME}\"."; exit 1; fi;
-        fi;
-        
-        # Restore ROOTVOLUME
-        if [[ -d /tmp/mnt/disks/system/${VOLUME} ]]; then
-            if ! runCmd btrfs subvol del /tmp/mnt/disks/system/${VOLUME}; then logError "Could not delete volume ${VOLUME}"; exit 1; fi;
-        fi;
-        
-        if ! runCmd btrfs subvol snapshot /tmp/mnt/disks/system/@snapshots/${VOLUME}/${TARGETSNAPSHOT} /tmp/mnt/disks/system/${VOLUME}; then logError "Failed to restore the snapshot for volume \"${VOLUME}\": ${RESTORERESULT}."; exit 1; fi;
-    done;
-    
-    # Scan for fstab
-    FSTABPATH="";
-    logDebug "Searching for /etc/fstab...";
-    for VOLUME in $(echo "${VOLUMES}" | sort)
-    do
-        logDebug "Searching in volume \"${VOLUME}\"...";
-        
-        if [[ -f "/tmp/mnt/disks/system/${VOLUME}/etc/fstab" ]]; then
-            if [[ ! -z "${FSTABPATH}" ]]; then
-                logError "Multiple fstab files found. Aborting.";
-                exit 1;
-            fi;
-            
-            FSTABPATH="/tmp/mnt/disks/system/${VOLUME}/etc/fstab";
-        fi;
-    done;
-    if [[ -z "${FSTABPATH}" ]]; then logError "Could not locate /etc/fstab"; exit 1; fi;
-    logDebug "FSTABPATH: ${FSTABPATH}";
-    
-    # Create @volumes
-    ATVOLUMES=$(cat "${FSTABPATH}" | grep -o -P 'subvol=[\/]{0,1}@[^\s\,\)]*' | awk -F'=' '{print $2}');
-    for VOLUME in $(echo "${ATVOLUMES}" | sort)
-    do
-        # Skip @snapshots as we have created it before restore
-        if [[ "${VOLUME}" == "@snapshots" ]]; then continue; fi;
-        
-        # Fix for broken fstab (mount is there multiple times)
-        if [[ -d "/tmp/mnt/disks/system/${VOLUME}" ]]; then continue; fi;
-        
-        logDebug "Creating ${VOLUME}...";
-        CREATERESULT=$(btrfs subvol create /tmp/mnt/disks/system/${VOLUME} 2>&1);
-        if [[ $? -ne 0 ]]; then logLine "Failed to create volume \"${VOLUME}\": ${CREATERESULT}."; exit 1; fi;
-    done;
-    
-    
-    # Mount
-    if ! runCmd mkdir -p /tmp/mnt/root; then logError "Failed to create root mountpoint"; exit 1; fi;
-    cat "${FSTABPATH}" | grep -v -P '^[\s]*#' | grep -v -P '^[\s]*$' | while read LINE; do
-        logDebug "Handling fstab line: ${LINE}";
-        LINEDEV=$(echo "$LINE" | awk '{print $1}');
-        LINEMOUNT=$(echo "$LINE" | awk '{print $2}');
-        LINEFS=$(echo "$LINE" | awk '{print $3}');
-        LINESUBVOL=$(echo "$LINE" | awk '{print $4}' | grep -o -P 'subvol\=[^\s\,\)]*' | awk -F'=' '{print $2}');
-        
-        # Fix for broken fstab (mount is there multiple times, so we check if this is mounted already here)
-        LINEDEVREGEX=$(echo "${LINEDEV}" | sed -e 's/[\.&]/\\&/g');
-        LINEMOUNTREGEX=$(echo "/tmp/mnt/root${LINEMOUNT}" | sed -e 's/[\.&]/\\&/g');
-        LINESUBVOLREGEX=$(echo "${LINESUBVOL}" | sed -e 's/[\.&]/\\&/g');
-        MOUNTTEST=$(LANG=C mount | grep -P "${LINEDEVREGEX}[\s]+on[\s]+${LINEMOUNTREGEX}\s.*subvol\=[/]{0,1}${LINESUBVOLREGEX}");
-        if ! isEmpty "${MOUNTTEST}"; then
-            logDebug "Skipping line, as it is mounted already (Double check)";
-            continue;
-        fi;
-        #end
-        
-        if [[ "${LINEDEV}" == "/dev/mapper/cryptsystem" ]] || [[ "${LINEDEV}" == "LABEL=system" ]]; then
-            # Mount simple volume
-            logDebug "Mounting ${LINESUBVOL} at ${LINEMOUNT}...";
-            MOUNTRESULT=$(mount -o "subvol=${LINESUBVOL}" "${PART_SYSTEM}" "/tmp/mnt/root${LINEMOUNT}" 2>&1);
-            if [[ $? -ne 0 ]]; then logLine "Failed to mount. Command \"mount -o \"subvol=${LINESUBVOL}\" \"${PART_SYSTEM}\" \"/tmp/mnt/root${LINEMOUNT}\"\", Result \"${MOUNTRESULT}\"."; exit 1; fi;
-            elif [[ "${LINEMOUNT}" == "/boot" ]]; then
-            
-            # Mount boot partition
-            MOUNTRESULT=$(mount ${PART_BOOT} "/tmp/mnt/root${LINEMOUNT}" 2>&1);
-            if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
-            elif [[ "${LINEMOUNT}" == "/boot/efi" ]]; then
-            
-            # Mount efi partition
-            if [[ ! -d /tmp/mnt/root${LINEMOUNT} ]]; then
-                if ! runCmd mkdir /tmp/mnt/root${LINEMOUNT}; then logError "Failed to create /tmp/mnt/root${LINEMOUNT} directory."; exit 1; fi;
-            fi;
-            
-            MOUNTRESULT=$(mount ${PART_EFI} "/tmp/mnt/root${LINEMOUNT}" 2>&1);
-            if [[ $? -ne 0 ]]; then logLine "Failed to mount: ${MOUNTRESULT}."; exit 1; fi;
-            elif [[ "${LINEMOUNT,,}" == "none" ]] && [[ "${LINEFS,,}" == "swap" ]]; then
-            
-            # Create swapfile
-            if [[ ! -f /tmp/mnt/root/.swap/swapfile ]]; then
-                logDebug "Creating new swapfile...";
-                if ! runCmd truncate -s 0 /tmp/mnt/root${LINEDEV}; then logError "Failed to truncate Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
-                if ! runCmd chattr +C /tmp/mnt/root${LINEDEV}; then logError "Failed to chattr Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
-                if ! runCmd chmod 600 /tmp/mnt/root${LINEDEV}; then logError "Failed to chmod Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
-                if ! runCmd btrfs property set /tmp/mnt/root${LINEDEV} compression none; then logError "Failed to disable compression for Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
-                if ! runCmd fallocate -l 2G /tmp/mnt/root${LINEDEV}; then logError "Failed to fallocate 2G Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
-                if ! runCmd mkswap /tmp/mnt/root${LINEDEV}; then logError "Failed to mkswap for Swap-File at /tmp/mnt/root${LINEDEV}"; exit 1; fi;
-            fi;
-        else
-            # unknown, we skip it here
-            logWarn "Skipping unknown mount ${LINEMOUNT}.";
-        fi;
-    done;
-    
-    # Reinstall new crypto keys and backup header
-    if isTrue "${CRYPT}"; then
-        logDebug "Installing new crypto key...";
-        runCmd rm -f /tmp/mnt/root/etc/crypto.key;
-        runCmd rm -f /tmp/mnt/root/etc/crypto.header;
-        if ! runCmd cp /tmp/crypto.key /tmp/mnt/root/etc/; then logError "Failed to copy crypto.key"; exit 1; fi;
-        if ! runCmd cp /tmp/crypto.header /tmp/mnt/root/etc/; then logError "Failed to copy crypto.header"; exit 1; fi;
+    # Validate
+    if ! autodetect-snapshotvolume --backupvolume "${SNAPSHOTVOLUME}"; then logError "Could not detect <snapshotvolume>"; exit 1; fi;
+
+    if ! runCmd ${SSH_CALL} list-volumes; then
+        logError "Failed to list volumes \"${VOLUME}\".";
+        exit 1;
     fi;
-    
-    # Fix fstab if we restored a crypted to uncrypted or vice versa
-    if isTrue "${CRYPT}"; then
-        sed -i "s#LABEL=system#/dev/mapper/cryptsystem#g" ${FSTABPATH};
-    else
-        sed -i "s#/dev/mapper/cryptsystem#LABEL=system#g" ${FSTABPATH};
-    fi;
-    
-    # Prepare ChRoot
-    source "${BASH_SOURCE%/*/*/*}/scripts/chroot_prepare.sh";
-    
-    # Run installer
-    logLine "Setting up system...";
-    source "${BASH_SOURCE%/*/*/*}/scripts/bootmanager.sh";
-    
-    # Question for CHROOT
-    sync;
-    read -p "Your system has been installed. Do you want to chroot into the system now and make changes? [yN]: " -n 1 -r;
-    echo    # (optional) move to a new line
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        logLine "Entering chroot...";
-        chroot /tmp/mnt/root /bin/bash;
-        sync;
-    fi
-    
-    # Restore resolve
-    logDebug "Restoring resolv.conf...";
-    #source "${BASH_SOURCE%/*/*/*}/scripts/restoreresolv.sh";
-    
-    # Question for reboot
-    read -p "Do you want to reboot into the system now? [Yn]: " -n 1 -r;
-    if [[ $REPLY =~ ^[Yy]$ ]] || [[ $REPLY =~ ^$ ]]; then
-        sync;
-        source "${BASH_SOURCE%/*/*/*}/scripts/unmount.sh";
-        logLine "Rebooting...";
-        reboot now;
-        exit 0;
-    fi
     
     # Finish
     sync;
